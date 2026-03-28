@@ -89,10 +89,10 @@ export async function readFromSheet(sheetName = EDIT_SHEET): Promise<string[][]>
   return data.values ?? []
 }
 
-export async function clearSheetData(sheetName = EDIT_SHEET): Promise<void> {
+export async function clearSheetData(sheetName = EDIT_SHEET, startRow = 2): Promise<void> {
   const token = await getAccessToken()
   await ensureSheetExists(token, sheetName)
-  const range = encodeURIComponent(`${sheetName}!A2:Z1000`)
+  const range = encodeURIComponent(`${sheetName}!A${startRow}:Z1000`)
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}:clear`,
     {

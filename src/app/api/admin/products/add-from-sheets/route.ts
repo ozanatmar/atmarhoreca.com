@@ -37,11 +37,12 @@ export async function POST() {
     return NextResponse.json({ error: (e as Error).message }, { status: 502 })
   }
 
-  if (rows.length <= 1) {
+  if (rows.length <= 2) {
     return NextResponse.json({ count: 0 })
   }
 
-  const [header, ...dataRows] = rows
+  const header = rows[0]
+  const dataRows = rows.slice(2) // row 1 = header, row 2 = instructions, data starts at row 3
   const col = (name: string) => header.indexOf(name)
 
   // Fetch all suppliers for name→id lookup
@@ -51,7 +52,7 @@ export async function POST() {
   // Validate all rows before inserting anything
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i]
-    const rowNum = i + 2 // 1-based, +1 for header
+    const rowNum = i + 3 // 1-based: row 1 = header, row 2 = instructions, data starts at row 3
 
     const get = (name: string) => row[col(name)]?.trim() ?? ''
 
@@ -149,7 +150,7 @@ export async function POST() {
   }
 
   try {
-    await clearSheetData(ADD_SHEET)
+    await clearSheetData(ADD_SHEET, 3)
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 502 })
   }
