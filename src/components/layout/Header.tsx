@@ -28,7 +28,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
-              src="http://atmar.bg/atmarhoreca/images/atmar_horeca_logo_no_bg.png"
+              src="http://atmar.bg/atmarhoreca/images/atmar_horeca_white_logo.png"
               alt="Atmar Horeca"
               width={140}
               height={40}

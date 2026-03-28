@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
           <div>
             <Image
-              src="https://atmar.bg/Atmar_Horeca_Logo_-_White.png"
+              src="http://atmar.bg/atmarhoreca/images/atmar_horeca_white_logo.png"
               alt="Atmar Horeca"
               width={140}
               height={40}
