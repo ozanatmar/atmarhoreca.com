@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     )
 
     const text = await response.text()
-    const valid = text.includes('<valid>true</valid>')
+    const valid = text.includes('valid>true</') && text.includes('valid>')
 
     return NextResponse.json({ valid })
   } catch {
