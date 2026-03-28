@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Badge from '@/components/ui/Badge'
 import type { StockStatus } from '@/types'
 
@@ -32,9 +34,24 @@ function getSupplierName(supplier: Product['supplier']): string {
 }
 
 export default function ProductsTable({ products }: { products: Product[] }) {
+  const router = useRouter()
   const [filter, setFilter] = useState('')
   const [sortCol, setSortCol] = useState<SortCol | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  async function handleDelete(id: string, name: string) {
+    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
+    setDeletingId(id)
+    const supabase = createClient()
+    const { error } = await supabase.from('products').delete().eq('id', id)
+    setDeletingId(null)
+    if (error) {
+      alert(`Delete failed: ${error.message}`)
+    } else {
+      router.refresh()
+    }
+  }
 
   function handleSort(col: SortCol) {
     if (sortCol !== col) {
@@ -117,6 +134,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               <Th col="weight_kg" className="text-right">Weight</Th>
               <Th col="stock_status" className="text-left">Stock</Th>
               <Th col="active" className="text-left">Active</Th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -141,12 +159,21 @@ export default function ProductsTable({ products }: { products: Product[] }) {
                       {p.active ? 'Active' : 'Hidden'}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => handleDelete(p.id, p.name)}
+                      disabled={deletingId === p.id}
+                      className="text-xs text-[#C0392B] hover:underline disabled:opacity-40"
+                    >
+                      {deletingId === p.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </td>
                 </tr>
               )
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
               </tr>
             )}
           </tbody>
