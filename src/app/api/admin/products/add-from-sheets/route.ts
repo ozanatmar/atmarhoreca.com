@@ -4,7 +4,7 @@ import { readFromSheet, clearSheetData, ADD_SHEET } from '@/lib/google-sheets'
 import { slugify } from '@/lib/utils'
 
 const VALID_STOCK = ['in_stock', 'out_of_stock', 'unknown']
-const VALID_BOOL = ['true', 'false']
+const VALID_BOOL = ['true', 'false', 'TRUE', 'FALSE']
 
 function colLetter(index: number): string {
   return String.fromCharCode(65 + index)
@@ -146,9 +146,9 @@ export async function POST() {
       images: imagesRaw ? imagesRaw.split('|').map((u) => u.trim()).filter(Boolean) : [],
       meta_title: get('meta_title') || null,
       meta_description: get('meta_description') || null,
-      requires_confirmation: get('requires_confirmation') === 'true',
-      shipping_inefficient: get('shipping_inefficient') === 'true',
-      active: get('active') === 'true',
+      requires_confirmation: get('requires_confirmation').toLowerCase() === 'true',
+      shipping_inefficient: get('shipping_inefficient').toLowerCase() === 'true',
+      active: get('active').toLowerCase() === 'true',
     }
   })
 
