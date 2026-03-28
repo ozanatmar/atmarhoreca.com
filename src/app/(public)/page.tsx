@@ -1,13 +1,7 @@
-import { redirect } from 'next/navigation'
-import { Search, Globe, FileText, Package } from 'lucide-react'
+import { Globe, FileText, Package, Search } from 'lucide-react'
+import SearchForm from './SearchForm'
 
 export default function LandingPage() {
-  async function handleSearch(formData: FormData) {
-    'use server'
-    const q = formData.get('q')?.toString().trim()
-    if (q) redirect(`/search?q=${encodeURIComponent(q)}`)
-  }
-
   return (
     <div>
       {/* Hero / Search */}
@@ -19,24 +13,7 @@ export default function LandingPage() {
           <p className="text-lg text-gray-600 mb-10">
             Top European brands, delivered across the EU. B2B invoicing, no minimums.
           </p>
-          <form action={handleSearch} className="flex items-center gap-2 max-w-lg mx-auto">
-            <div className="relative flex-1">
-              <input
-                type="search"
-                name="q"
-                placeholder="Search for equipment, tools, molds..."
-                required
-                className="w-full py-3 pl-5 pr-12 rounded-xl border border-gray-300 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-[#6B3D8F] shadow-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-[#7AB648] hover:bg-[#669e3e] text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center gap-2 shadow-sm"
-            >
-              <Search className="w-4 h-4" />
-              Search
-            </button>
-          </form>
+          <SearchForm />
         </div>
       </section>
 

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, User, Search, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { useCartStore } from '@/lib/cart-store'
@@ -14,6 +14,9 @@ export default function Header() {
   const [searching, setSearching] = useState(false)
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.qty, 0))
   const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => { setSearching(false) }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
