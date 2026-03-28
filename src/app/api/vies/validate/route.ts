@@ -4,7 +4,6 @@ export async function GET(request: NextRequest) {
   const vat = request.nextUrl.searchParams.get('vat')?.trim()
   if (!vat) return NextResponse.json({ valid: false, error: 'No VAT number provided' })
 
-  // EU VAT format: 2-letter country code + digits
   const match = vat.match(/^([A-Z]{2})(.+)$/i)
   if (!match) return NextResponse.json({ valid: false, error: 'Invalid format' })
 
@@ -12,35 +11,18 @@ export async function GET(request: NextRequest) {
   const vatNumber = match[2]
 
   try {
-    // EU VIES SOAP API
-    const soapBody = `
-      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:ec.europa.eu:taxud:vies:services:checkVat:types">
-        <soapenv:Header/>
-        <soapenv:Body>
-          <urn:checkVat>
-            <urn:countryCode>${countryCode}</urn:countryCode>
-            <urn:vatNumber>${vatNumber}</urn:vatNumber>
-          </urn:checkVat>
-        </soapenv:Body>
-      </soapenv:Envelope>
-    `
-
     const response = await fetch(
-      'https://ec.europa.eu/taxation_customs/vies/services/checkVatService',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/xml; charset=utf-8' },
-        body: soapBody,
-        signal: AbortSignal.timeout(8000),
-      }
+      `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/${countryCode}/vat/${vatNumber}`,
+      { signal: AbortSignal.timeout(8000) }
     )
 
-    const text = await response.text()
-    const valid = text.includes('valid>true</') && text.includes('valid>')
+    if (!response.ok) {
+      return NextResponse.json({ valid: false, error: 'Validation service unavailable' })
+    }
 
-    return NextResponse.json({ valid })
+    const data = await response.json()
+    return NextResponse.json({ valid: data.isValid === true })
   } catch {
-    // If VIES API fails, treat as invalid (standard VAT applies)
     return NextResponse.json({ valid: false, error: 'Validation service unavailable' })
   }
 }
