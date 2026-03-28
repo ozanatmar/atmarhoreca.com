@@ -24,6 +24,7 @@ export interface Product {
   supplier_id: string
   name: string
   slug: string
+  sku: string | null
   description: string | null
   price: number
   weight_kg: number

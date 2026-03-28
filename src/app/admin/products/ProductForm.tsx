@@ -24,6 +24,7 @@ export default function ProductForm({ product, suppliers }: Props) {
   const router = useRouter()
   const [name, setName] = useState(product?.name ?? '')
   const [slug, setSlug] = useState(product?.slug ?? '')
+  const [sku, setSku] = useState(product?.sku ?? '')
   const [supplierId, setSupplierId] = useState(product?.supplier_id ?? suppliers[0]?.id ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
   const [price, setPrice] = useState(String(product?.price ?? ''))
@@ -54,6 +55,7 @@ export default function ProductForm({ product, suppliers }: Props) {
       supplier_id: supplierId,
       name,
       slug,
+      sku: sku || null,
       description: description || null,
       price: parseFloat(price),
       weight_kg: parseFloat(weightKg),
@@ -90,8 +92,15 @@ export default function ProductForm({ product, suppliers }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-4">
+      {product && (
+        <div>
+          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">ID</label>
+          <p className="text-sm text-gray-500 font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 select-all">{product.id}</p>
+        </div>
+      )}
       <Input label="Product Name" value={name} onChange={(e) => handleNameChange(e.target.value)} required />
       <Input label="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} required hint="Used in the URL: /products/[slug]" />
+      <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} hint="Internal or supplier SKU" />
 
       <Select
         label="Supplier"
