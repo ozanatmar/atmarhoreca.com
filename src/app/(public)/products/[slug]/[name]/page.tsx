@@ -8,8 +8,9 @@ import AddToCartButton from '@/components/product/AddToCartButton'
 import ImageGallery from '@/components/product/ImageGallery'
 import type { Product } from '@/types'
 
+// [slug] = SKU, [name] = product name slug
 interface Props {
-  params: Promise<{ sku: string; name: string }>
+  params: Promise<{ slug: string; name: string }>
 }
 
 async function getProduct(sku: string, name: string): Promise<Product | null> {
@@ -33,14 +34,14 @@ export async function generateStaticParams() {
       .select('sku, slug')
       .eq('active', true)
       .not('sku', 'is', null)
-    return (data ?? []).map((p) => ({ sku: encodeURIComponent(p.sku!), name: p.slug }))
+    return (data ?? []).map((p) => ({ slug: encodeURIComponent(p.sku!), name: p.slug }))
   } catch {
     return []
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { sku, name } = await params
+  const { slug: sku, name } = await params
   const product = await getProduct(sku, name)
   if (!product) return {}
 
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const revalidate = 3600
 
 export default async function ProductPage({ params }: Props) {
-  const { sku, name } = await params
+  const { slug: sku, name } = await params
   const product = await getProduct(sku, name)
   if (!product) notFound()
 

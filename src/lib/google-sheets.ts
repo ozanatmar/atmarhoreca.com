@@ -1,3 +1,4 @@
+import 'server-only'
 import crypto from 'crypto'
 
 const SHEET_ID = '1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8'
