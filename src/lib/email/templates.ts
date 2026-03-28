@@ -125,8 +125,6 @@ export function proformaInvoiceEmail(orderId: string, data: {
   total: number
   stripe_payment_link_url: string
 }) {
-  const vatLabel = data.vat_rate === 0 ? 'VAT not applicable — reverse charge' : `VAT (${(data.vat_rate * 100).toFixed(0)}%)`
-
   const content = `
     <h2 style="color:#1A1A5E;margin-top:0;">Proforma Invoice</h2>
     <p>Dear ${data.full_name},</p>
@@ -135,7 +133,7 @@ export function proformaInvoiceEmail(orderId: string, data: {
     <table width="100%" style="font-size:14px;">
       <tr><td style="padding:4px 0;color:#555;">Subtotal (excl. VAT)</td><td style="text-align:right;">€${data.subtotal.toFixed(2)}</td></tr>
       <tr><td style="padding:4px 0;color:#555;">Shipping</td><td style="text-align:right;">€${data.shipping_cost.toFixed(2)}</td></tr>
-      <tr><td style="padding:4px 0;color:#555;">${vatLabel}</td><td style="text-align:right;">€${data.vat_amount.toFixed(2)}</td></tr>
+      ${data.vat_rate > 0 ? `<tr><td style="padding:4px 0;color:#555;">VAT (${(data.vat_rate * 100).toFixed(0)}%)</td><td style="text-align:right;">€${data.vat_amount.toFixed(2)}</td></tr>` : ''}
       <tr style="font-weight:bold;font-size:16px;border-top:2px solid #1A1A5E;">
         <td style="padding:8px 0;">Total</td>
         <td style="text-align:right;">€${data.total.toFixed(2)}</td>

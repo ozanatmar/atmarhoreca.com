@@ -65,7 +65,7 @@ export default function AccountForm({ customer, userId }: Props) {
           value={vatNumber}
           onChange={(e) => { setVatNumber(e.target.value); setVatStatus('idle') }}
           onBlur={validateVat}
-          hint="EU VAT number for reverse charge (e.g. DE123456789)"
+          hint="EU VAT number (e.g. DE123456789)"
         />
         {vatStatus === 'valid' && (
           <p className="text-xs text-[#7AB648] mt-1">Valid VAT number</p>

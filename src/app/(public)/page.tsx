@@ -33,7 +33,7 @@ export default function LandingPage() {
           <ValueCard
             icon={<FileText className="w-8 h-8 text-[#7AB648]" />}
             title="B2B Friendly"
-            description="Proper VAT invoicing for businesses, including EU reverse charge for registered companies."
+            description="Proper VAT invoicing for businesses across the EU, with VAT handled correctly based on your country and registration."
           />
           <ValueCard
             icon={<Search className="w-8 h-8 text-[#C0392B]" />}
