@@ -46,7 +46,11 @@ export default function StepAddress({
   }
 
   function update(field: keyof CheckoutAddress, value: string) {
-    if (field === 'country_code') setVatStatus('idle')
+    if (field === 'country_code' || field === 'vat_number') {
+      setVatStatus('idle')
+      setAddress({ ...address, [field]: value, vat_validated: false })
+      return
+    }
     setAddress({ ...address, [field]: value })
   }
 

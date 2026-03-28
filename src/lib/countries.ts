@@ -27,14 +27,6 @@ export const COUNTRY_OPTIONS = [
   { value: 'SI', label: 'Slovenia' },
   { value: 'ES', label: 'Spain' },
   { value: 'SE', label: 'Sweden' },
-  { value: 'GB', label: 'United Kingdom' },
-  { value: 'US', label: 'United States' },
-  { value: 'CA', label: 'Canada' },
-  { value: 'AU', label: 'Australia' },
-  { value: 'CH', label: 'Switzerland' },
-  { value: 'NO', label: 'Norway' },
-  { value: 'TR', label: 'Turkey' },
-  { value: 'AE', label: 'United Arab Emirates' },
 ]
 
 export const COUNTRY_NAMES: Record<string, string> = Object.fromEntries(
