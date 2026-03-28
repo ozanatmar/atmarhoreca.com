@@ -93,7 +93,6 @@ export default function StepAddress({
             value={address.vat_number ?? ''}
             onChange={(e) => { update('vat_number', e.target.value); setVatStatus('idle') }}
             onBlur={validateVat}
-            hint="EU VAT number for reverse charge — optional"
           />
           {validating && <p className="text-xs text-gray-500 mt-1">Validating...</p>}
           {vatStatus === 'valid' && <p className="text-xs text-[#7AB648] mt-1">Valid VAT number — reverse charge applies</p>}
