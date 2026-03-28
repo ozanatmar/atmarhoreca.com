@@ -2,15 +2,18 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, User, Search } from 'lucide-react'
+import { ShoppingCart, User, Search, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { useCartStore } from '@/lib/cart-store'
 
 export default function Header() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [searching, setSearching] = useState(false)
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.qty, 0))
+  const router = useRouter()
 
   useEffect(() => {
     const supabase = createClient()
@@ -38,20 +41,33 @@ export default function Header() {
           </Link>
 
           {/* Search bar */}
-          <form action="/search" className="hidden sm:flex flex-1 max-w-lg mx-6">
+          <form
+            className="hidden sm:flex flex-1 max-w-lg mx-6"
+            onSubmit={(e) => {
+              e.preventDefault()
+              const q = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value.trim()
+              if (!q) return
+              setSearching(true)
+              router.push(`/search?q=${encodeURIComponent(q)}`)
+            }}
+          >
             <div className="relative w-full">
               <input
                 type="search"
                 name="q"
                 placeholder="Search products..."
                 className="w-full py-2 pl-4 pr-10 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#F0A500]"
+                onChange={() => setSearching(false)}
               />
               <button
                 type="submit"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#6B3D8F]"
                 aria-label="Search"
               >
-                <Search className="w-4 h-4" />
+                {searching
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Search className="w-4 h-4" />
+                }
               </button>
             </div>
           </form>
