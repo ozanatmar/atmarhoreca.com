@@ -41,15 +41,15 @@ export async function POST() {
     return NextResponse.json({ count: 0 })
   }
 
-  const header = rows[0]
-  const dataRows = rows.slice(2) // row 1 = header, row 2 = instructions, data starts at row 3
+  const header = rows[1]  // row 1 = instructions, row 2 = headers
+  const dataRows = rows.slice(2) // data starts at row 3
   const col = (name: string) => header.indexOf(name)
 
   // Validate header columns
   const REQUIRED_COLS = ['name', 'sku', 'supplier', 'price', 'weight_kg', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
   for (const colName of REQUIRED_COLS) {
     if (col(colName) === -1) {
-      return NextResponse.json({ error: `Missing column "${colName}" in header row (row 1)` }, { status: 422 })
+      return NextResponse.json({ error: `Missing column "${colName}" in header row (row 2)` }, { status: 422 })
     }
   }
 
@@ -60,7 +60,7 @@ export async function POST() {
   // Validate all rows before inserting anything
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i]
-    const rowNum = i + 3 // 1-based: row 1 = header, row 2 = instructions, data starts at row 3
+    const rowNum = i + 3 // 1-based: row 1 = instructions, row 2 = headers, data starts at row 3
 
     const get = (name: string) => row[col(name)]?.trim() ?? ''
 
