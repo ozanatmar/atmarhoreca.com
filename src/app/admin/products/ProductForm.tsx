@@ -23,7 +23,6 @@ const STOCK_OPTIONS = [
 export default function ProductForm({ product, suppliers }: Props) {
   const router = useRouter()
   const [name, setName] = useState(product?.name ?? '')
-  const [slug, setSlug] = useState(product?.slug ?? '')
   const [sku, setSku] = useState(product?.sku ?? '')
   const [supplierId, setSupplierId] = useState(product?.supplier_id ?? suppliers[0]?.id ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
@@ -40,15 +39,12 @@ export default function ProductForm({ product, suppliers }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  function handleNameChange(val: string) {
-    setName(val)
-    if (!product) setSlug(slugify(val))
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError('')
+
+    const slug = slugify(name)
 
     const supabase = createClient()
 
@@ -57,7 +53,7 @@ export default function ProductForm({ product, suppliers }: Props) {
     if (product) query = query.neq('id', product.id)
     const { data: existing } = await query.maybeSingle()
     if (existing) {
-      setError('A product with this slug already exists. Change the name or slug.')
+      setError('A product with this name already exists (duplicate slug). Use a different name.')
       setSaving(false)
       return
     }
@@ -109,18 +105,11 @@ export default function ProductForm({ product, suppliers }: Props) {
           <p className="text-sm text-gray-500 font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 select-all">{product.id}</p>
         </div>
       )}
-      <Input label="Product Name" value={name} onChange={(e) => handleNameChange(e.target.value)} required />
-      <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} hint="Internal or supplier SKU" />
+      <Input label="Product Name" value={name} onChange={(e) => setName(e.target.value)} required />
       <div>
-        <Input
-          label="Slug"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          required
-          hint="Auto-generated from name. Edit only if needed."
-        />
+        <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required hint="Supplier or internal SKU — used in the product URL" />
         <p className="text-xs text-gray-400 mt-1 font-mono">
-          atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : ''}{slug || '…'}
+          atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : '[sku]/'}{name ? slugify(name) : '[product-name]'}
         </p>
       </div>
 
