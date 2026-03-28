@@ -17,12 +17,20 @@ export default function StepAddress({
   setShippingAddress,
   setStep,
 }: StepProps) {
-  const [vatStatus, setVatStatus] = useState<'idle' | 'valid' | 'invalid'>('idle')
+  const [vatStatus, setVatStatus] = useState<'idle' | 'valid' | 'invalid' | 'country_mismatch'>('idle')
   const [validating, setValidating] = useState(false)
 
   async function validateVat() {
     const vat = address.vat_number?.trim()
     if (!vat) return
+
+    const vatCountry = vat.slice(0, 2).toUpperCase()
+    if (address.country_code && vatCountry !== address.country_code.toUpperCase()) {
+      setVatStatus('country_mismatch')
+      setAddress({ ...address, vat_validated: false })
+      return
+    }
+
     setValidating(true)
     try {
       const res = await fetch(`/api/vies/validate?vat=${encodeURIComponent(vat)}`)
@@ -38,6 +46,7 @@ export default function StepAddress({
   }
 
   function update(field: keyof CheckoutAddress, value: string) {
+    if (field === 'country_code') setVatStatus('idle')
     setAddress({ ...address, [field]: value })
   }
 
@@ -85,6 +94,7 @@ export default function StepAddress({
           {validating && <p className="text-xs text-gray-500 mt-1">Validating...</p>}
           {vatStatus === 'valid' && <p className="text-xs text-[#7AB648] mt-1">Valid VAT number — reverse charge applies</p>}
           {vatStatus === 'invalid' && <p className="text-xs text-[#C0392B] mt-1">Could not validate — standard VAT will apply</p>}
+          {vatStatus === 'country_mismatch' && <p className="text-xs text-[#C0392B] mt-1">VAT number country does not match the selected billing country</p>}
         </div>
 
         {/* Same shipping */}
