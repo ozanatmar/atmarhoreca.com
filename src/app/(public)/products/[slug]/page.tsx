@@ -13,14 +13,20 @@ interface Props {
 }
 
 async function getProduct(slug: string): Promise<Product | null> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('products')
-    .select('*, supplier:suppliers(*)')
-    .eq('slug', slug)
-    .eq('active', true)
-    .single()
-  return data
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*, supplier:suppliers(*)')
+      .eq('slug', slug)
+      .eq('active', true)
+      .single()
+    if (error) console.error('[product page] supabase error:', error)
+    return data
+  } catch (err) {
+    console.error('[product page] createClient error:', err)
+    throw err
+  }
 }
 
 export async function generateStaticParams() {
