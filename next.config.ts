@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'atmar.bg',
       },
+      {
+        protocol: 'http',
+        hostname: 'atmar.bg',
+      },
     ],
   },
 }
