@@ -178,10 +178,25 @@ export default function ProductForm({ product, suppliers }: Props) {
       <Input label="Meta Description (SEO)" value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} />
 
       {/* Toggles */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
-        <Toggle label="Requires Confirmation (always Type B)" checked={requiresConfirmation} onChange={setRequiresConfirmation} />
-        <Toggle label="Shipping Inefficient" checked={shippingInefficient} onChange={setShippingInefficient} />
-        <Toggle label="Active (visible on site)" checked={active} onChange={setActive} />
+      <div className="flex flex-col gap-4 pt-2 border-t border-gray-100">
+        <Toggle
+          label="Requires Confirmation"
+          hint="Check this for made-to-order products, items with uncertain stock, or anything that needs manual review before the order is confirmed. Orders for this product will always be Type B (proforma invoice) — the customer pays only after you confirm availability and price."
+          checked={requiresConfirmation}
+          onChange={setRequiresConfirmation}
+        />
+        <Toggle
+          label="Shipping Inefficient"
+          hint="Check this for products that are oversized, very heavy, or require special freight (e.g. pallets, fragile large items). The shipping cost cannot be calculated automatically — it will be quoted manually in the proforma invoice. The product page will show a note about this."
+          checked={shippingInefficient}
+          onChange={setShippingInefficient}
+        />
+        <Toggle
+          label="Active (visible on site)"
+          hint="Uncheck to hide this product from search results and its product page, without deleting it. Useful for products that are temporarily unavailable or not yet ready to publish."
+          checked={active}
+          onChange={setActive}
+        />
       </div>
 
       {product?.last_scraped_at && (
@@ -200,11 +215,14 @@ export default function ProductForm({ product, suppliers }: Props) {
   )
 }
 
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="rounded" />
-      <span className="text-sm text-gray-700">{label}</span>
-    </label>
+    <div>
+      <label className="flex items-center gap-2 cursor-pointer mb-1">
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="rounded shrink-0" />
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+      </label>
+      <p className="text-xs text-gray-400 leading-relaxed ml-6">{hint}</p>
+    </div>
   )
 }

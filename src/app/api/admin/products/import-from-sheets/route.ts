@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { readFromSheet, clearSheetData } from '@/lib/google-sheets'
+import { slugify } from '@/lib/utils'
 
 export async function POST() {
   const supabase = await createClient()
@@ -25,22 +26,26 @@ export async function POST() {
 
   const updates = dataRows
     .filter((row) => row[col('id')]?.trim())
-    .map((row) => ({
-      id: row[col('id')].trim(),
-      sku: row[col('sku')] || null,
-      name: row[col('name')],
-      slug: row[col('slug')],
-      price: parseFloat(row[col('price')]),
-      weight_kg: parseFloat(row[col('weight_kg')]),
-      stock_status: (row[col('stock_status')] || 'unknown') as 'in_stock' | 'out_of_stock' | 'unknown',
-      requires_confirmation: row[col('requires_confirmation')] === 'true',
-      shipping_inefficient: row[col('shipping_inefficient')] === 'true',
-      active: row[col('active')] === 'true',
-      martellato_url: row[col('martellato_url')] || null,
-      meta_title: row[col('meta_title')] || null,
-      meta_description: row[col('meta_description')] || null,
-      images: row[col('images')] ? row[col('images')].split('|').filter(Boolean) : [],
-    }))
+    .map((row) => {
+      const name = row[col('name')] ?? ''
+      return {
+        id: row[col('id')].trim(),
+        name,
+        slug: slugify(name),
+        sku: row[col('sku')] || null,
+        description: row[col('description')] || null,
+        price: parseFloat(row[col('price')]),
+        weight_kg: parseFloat(row[col('weight_kg')]),
+        stock_status: (row[col('stock_status')] || 'unknown') as 'in_stock' | 'out_of_stock' | 'unknown',
+        martellato_url: row[col('martellato_url')] || null,
+        images: row[col('images')] ? row[col('images')].split('|').filter(Boolean) : [],
+        meta_title: row[col('meta_title')] || null,
+        meta_description: row[col('meta_description')] || null,
+        requires_confirmation: row[col('requires_confirmation')] === 'true',
+        shipping_inefficient: row[col('shipping_inefficient')] === 'true',
+        active: row[col('active')] === 'true',
+      }
+    })
 
   let updatedCount = 0
   for (const { id, ...payload } of updates) {

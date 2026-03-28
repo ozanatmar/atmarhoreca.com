@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { writeToSheet } from '@/lib/google-sheets'
 
 const HEADERS = [
-  'id', 'sku', 'name', 'slug', 'price', 'weight_kg', 'stock_status',
+  'id', 'name', 'sku', 'supplier', 'description', 'price', 'weight_kg', 'stock_status',
+  'martellato_url', 'images', 'meta_title', 'meta_description',
   'requires_confirmation', 'shipping_inefficient', 'active',
-  'martellato_url', 'meta_title', 'meta_description', 'images',
 ]
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, sku, name, slug, price, weight_kg, stock_status, requires_confirmation, shipping_inefficient, active, martellato_url, meta_title, meta_description, images')
+    .select('id, name, sku, supplier:suppliers(name), description, price, weight_kg, stock_status, martellato_url, images, meta_title, meta_description, requires_confirmation, shipping_inefficient, active')
     .eq('supplier_id', supplierId)
     .order('name')
 
@@ -29,22 +29,26 @@ export async function POST(request: NextRequest) {
 
   const rows = [
     HEADERS,
-    ...products.map((p) => [
-      p.id,
-      p.sku ?? '',
-      p.name,
-      p.slug,
-      String(p.price),
-      String(p.weight_kg),
-      p.stock_status,
-      String(p.requires_confirmation),
-      String(p.shipping_inefficient),
-      String(p.active),
-      p.martellato_url ?? '',
-      p.meta_title ?? '',
-      p.meta_description ?? '',
-      (p.images ?? []).join('|'),
-    ]),
+    ...products.map((p) => {
+      const supplier = Array.isArray(p.supplier) ? p.supplier[0] : p.supplier
+      return [
+        p.id,
+        p.name,
+        p.sku ?? '',
+        supplier?.name ?? '',
+        p.description ?? '',
+        String(p.price),
+        String(p.weight_kg),
+        p.stock_status,
+        p.martellato_url ?? '',
+        (p.images ?? []).join('|'),
+        p.meta_title ?? '',
+        p.meta_description ?? '',
+        String(p.requires_confirmation),
+        String(p.shipping_inefficient),
+        String(p.active),
+      ]
+    }),
   ]
 
   try {
