@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import type { ShippingRate } from '@/types'
@@ -11,38 +11,30 @@ interface Props {
 
 export default function ShippingRatesTable({ rates }: Props) {
   const router = useRouter()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [msg, setMsg] = useState('')
+  const [msgType, setMsgType] = useState<'success' | 'error'>('success')
+  const [sheetUrl, setSheetUrl] = useState('https://docs.google.com/spreadsheets/d/1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8/edit?gid=0#gid=0')
+  const [sheetName, setSheetName] = useState('Atmar Horeca Shipping Rates')
 
-  async function handleCsvUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
+  async function handleSync() {
+    setSyncing(true)
     setMsg('')
-
-    const text = await file.text()
-    const lines = text.trim().split('\n').slice(1) // skip header
-    const rows = lines.map((line) => {
-      const [origin, destination, weight, rate, transit] = line.split(',').map((s) => s.trim())
-      return {
-        origin_country_code: origin,
-        destination_country_code: destination,
-        weight_kg: parseInt(weight),
-        rate_eur: parseFloat(rate),
-        transit_days: parseInt(transit),
-      }
-    }).filter((r) => r.origin_country_code && r.destination_country_code && !isNaN(r.weight_kg))
-
-    const res = await fetch('/api/admin/shipping/import', {
+    const res = await fetch('/api/admin/shipping/sync-gsheets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rows }),
+      body: JSON.stringify({ url: sheetUrl, sheetName }),
     })
     const json = await res.json()
-    setMsg(res.ok ? `Imported ${json.count} rows` : json.error)
-    setUploading(false)
-    router.refresh()
+    if (res.ok) {
+      setMsg(`Synced ${json.count} rows successfully`)
+      setMsgType('success')
+      router.refresh()
+    } else {
+      setMsg(json.error || 'Sync failed')
+      setMsgType('error')
+    }
+    setSyncing(false)
   }
 
   // Group by origin+destination
@@ -55,14 +47,38 @@ export default function ShippingRatesTable({ rates }: Props) {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-          {uploading ? 'Importing...' : 'Import CSV'}
-        </Button>
-        <input ref={fileRef} type="file" accept=".csv" onChange={handleCsvUpload} className="hidden" />
-        <p className="text-xs text-gray-500">CSV format: origin_country_code, destination_country_code, weight_kg, rate_eur, transit_days</p>
+      <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">
+        <h3 className="text-sm font-semibold text-[#1A1A5E] mb-3">Sync from Google Sheets</h3>
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Google Sheets URL</label>
+            <input
+              type="url"
+              value={sheetUrl}
+              onChange={(e) => setSheetUrl(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Sheet Name</label>
+            <input
+              type="text"
+              value={sheetName}
+              onChange={(e) => setSheetName(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+              placeholder="Sheet1"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleSync} disabled={syncing || !sheetUrl || !sheetName}>
+              {syncing ? 'Syncing...' : 'Sync from Google Sheets'}
+            </Button>
+            <p className="text-xs text-gray-500">Sheet must be shared as "Anyone with the link can view"</p>
+          </div>
+        </div>
       </div>
-      {msg && <p className="text-sm text-[#7AB648] mb-4">{msg}</p>}
+      {msg && <p className={`text-sm mb-4 ${msgType === 'error' ? 'text-red-600' : 'text-[#7AB648]'}`}>{msg}</p>}
 
       {Object.entries(grouped).map(([route, routeRates]) => (
         <div key={route} className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
@@ -89,7 +105,7 @@ export default function ShippingRatesTable({ rates }: Props) {
       ))}
 
       {rates.length === 0 && (
-        <p className="text-gray-500 text-sm">No shipping rates configured yet. Import a CSV to get started.</p>
+        <p className="text-gray-500 text-sm">No shipping rates configured yet. Sync from Google Sheets to get started.</p>
       )}
     </div>
   )
