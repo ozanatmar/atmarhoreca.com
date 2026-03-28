@@ -65,18 +65,13 @@ export default function StepReview({
             </div>
           )}
 
-          <Row
-            label={`VAT (${(vatResult.rate * 100).toFixed(0)}%${vatResult.reverse_charge ? ' — reverse charge' : ''})`}
-            value={vatResult.reverse_charge ? 'N/A' : formatPrice(vatAmount)}
-          />
+          {vatResult.rate > 0 && (
+            <Row label={`VAT (${(vatResult.rate * 100).toFixed(0)}%)`} value={formatPrice(vatAmount)} />
+          )}
           <div className="border-t border-gray-200 pt-2 mt-1">
             <Row label="Total" value={formatPrice(total)} bold />
           </div>
         </div>
-
-        {vatResult.reverse_charge && (
-          <p className="text-xs text-gray-500 mt-2 italic">VAT not applicable — reverse charge</p>
-        )}
       </div>
 
       {/* Delivery estimate (Type A only) */}
