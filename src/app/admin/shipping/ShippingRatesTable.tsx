@@ -14,8 +14,8 @@ export default function ShippingRatesTable({ rates }: Props) {
   const [syncing, setSyncing] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState<'success' | 'error'>('success')
-  const [sheetUrl, setSheetUrl] = useState('https://docs.google.com/spreadsheets/d/1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8/edit?gid=0#gid=0')
-  const [sheetName, setSheetName] = useState('Atmar Horeca Shipping Rates')
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8/edit?gid=0#gid=0'
+  const sheetName = 'Atmar Horeca Shipping Rates'
 
   async function handleSync() {
     setSyncing(true)
@@ -47,36 +47,18 @@ export default function ShippingRatesTable({ rates }: Props) {
 
   return (
     <div>
-      <div className="bg-white rounded-2xl shadow-sm p-5 mb-6">
-        <h3 className="text-sm font-semibold text-[#1A1A5E] mb-3">Sync from Google Sheets</h3>
-        <div className="flex flex-col gap-3">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Google Sheets URL</label>
-            <input
-              type="url"
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Sheet Name</label>
-            <input
-              type="text"
-              value={sheetName}
-              onChange={(e) => setSheetName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-              placeholder="Sheet1"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <Button onClick={handleSync} disabled={syncing || !sheetUrl || !sheetName}>
-              {syncing ? 'Syncing...' : 'Sync from Google Sheets'}
-            </Button>
-            <p className="text-xs text-gray-500">Sheet must be shared as "Anyone with the link can view"</p>
-          </div>
-        </div>
+      <div className="flex items-center gap-3 mb-6">
+        <Button onClick={handleSync} disabled={syncing}>
+          {syncing ? 'Syncing...' : 'Sync from Google Sheets'}
+        </Button>
+        <a
+          href={sheetUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-[#6B3D8F] hover:underline"
+        >
+          Open Sheet ↗
+        </a>
       </div>
       {msg && <p className={`text-sm mb-4 ${msgType === 'error' ? 'text-red-600' : 'text-[#7AB648]'}`}>{msg}</p>}
 
