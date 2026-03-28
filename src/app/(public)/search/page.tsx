@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
 
 export const metadata: Metadata = {
@@ -22,6 +22,7 @@ export default async function SearchPage({ searchParams }: Props) {
     id: string
     name: string
     slug: string
+    sku: string | null
     price: number
     images: string[]
     stock_status: string
@@ -32,7 +33,7 @@ export default async function SearchPage({ searchParams }: Props) {
     const supabase = await createClient()
     const { data } = await supabase
       .from('products')
-      .select('id, name, slug, price, images, stock_status, requires_confirmation')
+      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation')
       .eq('active', true)
       .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(48)
@@ -62,7 +63,7 @@ export default async function SearchPage({ searchParams }: Props) {
         {products.map((p) => (
           <Link
             key={p.id}
-            href={`/products/${p.slug}`}
+            href={productUrl(p)}
             className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="relative aspect-square bg-gray-50">

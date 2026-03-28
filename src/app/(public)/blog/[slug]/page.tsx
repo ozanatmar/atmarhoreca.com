@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createStaticClient } from '@/lib/supabase/static'
+import { productUrl } from '@/lib/utils'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -61,11 +62,11 @@ export default async function BlogPostPage({ params }: Props) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
 
   // Fetch linked products
-  let linkedProducts: Array<{ id: string; name: string; slug: string }> = []
+  let linkedProducts: Array<{ id: string; name: string; slug: string; sku: string | null }> = []
   if (post.linked_product_ids?.length) {
     const { data } = await supabase
       .from('products')
-      .select('id, name, slug')
+      .select('id, name, slug, sku')
       .in('id', post.linked_product_ids)
       .eq('active', true)
     linkedProducts = data ?? []
@@ -109,7 +110,7 @@ export default async function BlogPostPage({ params }: Props) {
               {linkedProducts.map((p) => (
                 <li key={p.id}>
                   <Link
-                    href={`/products/${p.slug}`}
+                    href={productUrl(p)}
                     className="text-[#6B3D8F] hover:underline font-medium"
                   >
                     {p.name}

@@ -132,6 +132,7 @@ export interface CartItem {
   product_id: string
   name: string
   slug: string
+  sku: string | null
   price: number
   weight_kg: number
   qty: number

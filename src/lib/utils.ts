@@ -71,6 +71,11 @@ export function cartSubtotal(items: CartItem[]): number {
   return items.reduce((sum, item) => sum + item.price * item.qty, 0)
 }
 
+export function productUrl(p: { sku?: string | null; slug: string }): string {
+  if (p.sku) return `/products/${encodeURIComponent(p.sku)}/${p.slug}`
+  return `/products/${p.slug}`
+}
+
 // Format business days estimate
 export function businessDaysLabel(days: number): string {
   if (days === 1) return '1 business day'

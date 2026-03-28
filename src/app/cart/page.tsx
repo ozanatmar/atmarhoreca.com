@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { useCartStore } from '@/lib/cart-store'
-import { formatPrice, cartSubtotal } from '@/lib/utils'
+import { formatPrice, cartSubtotal, productUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 
 export default function CartPage() {
@@ -47,7 +47,7 @@ export default function CartPage() {
             {/* Name */}
             <div className="flex-1 min-w-0">
               <Link
-                href={`/products/${item.slug}`}
+                href={productUrl(item)}
                 className="text-sm font-semibold text-[#1A1A5E] hover:underline line-clamp-2"
               >
                 {item.name}

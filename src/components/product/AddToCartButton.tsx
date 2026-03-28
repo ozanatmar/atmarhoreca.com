@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import Button from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/cart-store'
+import { productUrl } from '@/lib/utils'
 import type { Product } from '@/types'
 
 interface Props {
@@ -27,13 +28,14 @@ export default function AddToCartButton({ product }: Props) {
 
   function handleClick() {
     if (!loggedIn) {
-      router.push(`/login?next=/products/${product.slug}`)
+      router.push(`/login?next=${productUrl(product)}`)
       return
     }
     addItem({
       product_id: product.id,
       name: product.name,
       slug: product.slug,
+      sku: product.sku ?? null,
       price: product.price,
       weight_kg: product.weight_kg,
       qty: 1,

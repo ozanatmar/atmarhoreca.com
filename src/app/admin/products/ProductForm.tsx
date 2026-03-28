@@ -51,6 +51,17 @@ export default function ProductForm({ product, suppliers }: Props) {
     setError('')
 
     const supabase = createClient()
+
+    // Duplicate slug check
+    let query = supabase.from('products').select('id').eq('slug', slug)
+    if (product) query = query.neq('id', product.id)
+    const { data: existing } = await query.maybeSingle()
+    if (existing) {
+      setError('A product with this slug already exists. Change the name or slug.')
+      setSaving(false)
+      return
+    }
+
     const payload = {
       supplier_id: supplierId,
       name,
@@ -99,8 +110,19 @@ export default function ProductForm({ product, suppliers }: Props) {
         </div>
       )}
       <Input label="Product Name" value={name} onChange={(e) => handleNameChange(e.target.value)} required />
-      <Input label="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} required hint="Used in the URL: /products/[slug]" />
       <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} hint="Internal or supplier SKU" />
+      <div>
+        <Input
+          label="Slug"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          required
+          hint="Auto-generated from name. Edit only if needed."
+        />
+        <p className="text-xs text-gray-400 mt-1 font-mono">
+          atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : ''}{slug || '…'}
+        </p>
+      </div>
 
       <Select
         label="Supplier"
