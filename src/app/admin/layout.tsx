@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import LogoutButton from './LogoutButton'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -25,10 +26,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <NavLink href="/admin/scraping">Scraping</NavLink>
           <NavLink href="/admin/blog">Blog</NavLink>
         </nav>
-        <div className="p-3 border-t border-purple-700">
+        <div className="p-3 border-t border-purple-700 flex flex-col gap-2">
           <Link href="/" className="text-xs text-purple-300 hover:text-white">
             View site
           </Link>
+          <LogoutButton />
         </div>
       </aside>
 
