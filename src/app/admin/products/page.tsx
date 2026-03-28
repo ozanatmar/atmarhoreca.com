@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import BulkSheetsActions from './BulkSheetsActions'
 import type { StockStatus } from '@/types'
 
 const STOCK_BADGE: Record<StockStatus, { label: string; variant: 'green' | 'red' | 'orange' }> = {
@@ -13,10 +14,16 @@ const STOCK_BADGE: Record<StockStatus, { label: string; variant: 'green' | 'red'
 
 export default async function AdminProductsPage() {
   const supabase = await createClient()
-  const { data: products } = await supabase
-    .from('products')
-    .select('id, name, price, weight_kg, stock_status, active, supplier:suppliers(name)')
-    .order('name')
+  const [{ data: products }, { data: suppliers }] = await Promise.all([
+    supabase
+      .from('products')
+      .select('id, name, price, weight_kg, stock_status, active, supplier:suppliers(name)')
+      .order('name'),
+    supabase
+      .from('suppliers')
+      .select('id, name')
+      .order('name'),
+  ])
 
   return (
     <div>
@@ -26,6 +33,8 @@ export default async function AdminProductsPage() {
           <Button>+ New Product</Button>
         </Link>
       </div>
+
+      <BulkSheetsActions suppliers={suppliers ?? []} />
 
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
