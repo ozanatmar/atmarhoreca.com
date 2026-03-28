@@ -45,6 +45,14 @@ export async function POST() {
   const dataRows = rows.slice(2) // row 1 = header, row 2 = instructions, data starts at row 3
   const col = (name: string) => header.indexOf(name)
 
+  // Validate header columns
+  const REQUIRED_COLS = ['name', 'sku', 'supplier', 'price', 'weight_kg', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
+  for (const colName of REQUIRED_COLS) {
+    if (col(colName) === -1) {
+      return NextResponse.json({ error: `Missing column "${colName}" in header row (row 1)` }, { status: 422 })
+    }
+  }
+
   // Fetch all suppliers for name→id lookup
   const { data: suppliers } = await supabase.from('suppliers').select('id, name')
   const supplierMap = new Map((suppliers ?? []).map((s) => [s.name.toLowerCase(), s.id]))
