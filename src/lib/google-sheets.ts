@@ -3,6 +3,7 @@ import crypto from 'crypto'
 
 const SHEET_ID = '1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8'
 export const EDIT_SHEET = 'Atmar Horeca Edit Products'
+export const ADD_SHEET = 'Atmar Horeca Add Products'
 
 function base64url(input: string | Buffer): string {
   const buf = typeof input === 'string' ? Buffer.from(input) : input
@@ -38,14 +39,14 @@ async function getAccessToken(): Promise<string> {
   return data.access_token
 }
 
-async function ensureSheetExists(token: string): Promise<void> {
+async function ensureSheetExists(token: string, sheetName: string): Promise<void> {
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`,
     { headers: { Authorization: `Bearer ${token}` } }
   )
   const data = await res.json()
   const exists = data.sheets?.some(
-    (s: { properties: { title: string } }) => s.properties.title === EDIT_SHEET
+    (s: { properties: { title: string } }) => s.properties.title === sheetName
   )
   if (!exists) {
     const r = await fetch(
@@ -53,17 +54,17 @@ async function ensureSheetExists(token: string): Promise<void> {
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requests: [{ addSheet: { properties: { title: EDIT_SHEET } } }] }),
+        body: JSON.stringify({ requests: [{ addSheet: { properties: { title: sheetName } } }] }),
       }
     )
     if (!r.ok) throw new Error(`Could not create sheet tab: ${await r.text()}`)
   }
 }
 
-export async function writeToSheet(rows: string[][]): Promise<void> {
+export async function writeToSheet(rows: string[][], sheetName = EDIT_SHEET): Promise<void> {
   const token = await getAccessToken()
-  await ensureSheetExists(token)
-  const range = encodeURIComponent(`${EDIT_SHEET}!A1`)
+  await ensureSheetExists(token, sheetName)
+  const range = encodeURIComponent(`${sheetName}!A1`)
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`,
     {
@@ -75,10 +76,10 @@ export async function writeToSheet(rows: string[][]): Promise<void> {
   if (!res.ok) throw new Error(`Sheets write failed: ${await res.text()}`)
 }
 
-export async function readFromSheet(): Promise<string[][]> {
+export async function readFromSheet(sheetName = EDIT_SHEET): Promise<string[][]> {
   const token = await getAccessToken()
-  await ensureSheetExists(token)
-  const range = encodeURIComponent(`${EDIT_SHEET}!A1:Z1000`)
+  await ensureSheetExists(token, sheetName)
+  const range = encodeURIComponent(`${sheetName}!A1:Z1000`)
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}`,
     { headers: { Authorization: `Bearer ${token}` } }
@@ -88,10 +89,10 @@ export async function readFromSheet(): Promise<string[][]> {
   return data.values ?? []
 }
 
-export async function clearSheetData(): Promise<void> {
+export async function clearSheetData(sheetName = EDIT_SHEET): Promise<void> {
   const token = await getAccessToken()
-  await ensureSheetExists(token)
-  const range = encodeURIComponent(`${EDIT_SHEET}!A2:Z1000`)
+  await ensureSheetExists(token, sheetName)
+  const range = encodeURIComponent(`${sheetName}!A2:Z1000`)
   const res = await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}:clear`,
     {
