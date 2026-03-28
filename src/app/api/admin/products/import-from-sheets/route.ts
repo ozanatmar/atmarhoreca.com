@@ -53,6 +53,10 @@ export async function POST() {
     if (!error) updatedCount++
   }
 
+  if (updatedCount === 0) {
+    return NextResponse.json({ count: 0 })
+  }
+
   try {
     await clearSheetData()
   } catch (e) {
