@@ -1,0 +1,161 @@
+// ============================================================
+// Database Types
+// ============================================================
+
+export type StockStatus = 'in_stock' | 'out_of_stock' | 'unknown'
+export type OrderType = 'A' | 'B'
+export type OrderStatus = 'pending_approval' | 'awaiting_payment' | 'paid' | 'fulfilled' | 'cancelled'
+export type ScrapeStatus = 'success' | 'failed'
+
+export interface Supplier {
+  id: string
+  name: string
+  country_code: string
+  lead_time_note: string | null
+  handling_days: number
+  default_requires_confirmation: boolean
+  contact_email: string | null
+  active: boolean
+  created_at: string
+}
+
+export interface Product {
+  id: string
+  supplier_id: string
+  name: string
+  slug: string
+  description: string | null
+  price: number
+  weight_kg: number
+  requires_confirmation: boolean
+  stock_status: StockStatus
+  last_scraped_at: string | null
+  martellato_url: string | null
+  images: string[]
+  meta_title: string | null
+  meta_description: string | null
+  shipping_inefficient: boolean
+  active: boolean
+  created_at: string
+  // joined
+  supplier?: Supplier
+}
+
+export interface Address {
+  street: string
+  city: string
+  postal_code: string
+  country_code: string
+}
+
+export interface Customer {
+  id: string
+  email: string
+  full_name: string
+  company_name: string | null
+  vat_number: string | null
+  vat_validated: boolean
+  country_code: string | null
+  billing_address: Address | null
+  shipping_address: Address | null
+  created_at: string
+}
+
+export interface OrderItem {
+  product_id: string
+  name: string
+  qty: number
+  unit_price: number
+  weight_kg: number
+}
+
+export interface Order {
+  id: string
+  customer_id: string
+  type: OrderType
+  status: OrderStatus
+  items: OrderItem[]
+  subtotal: number
+  shipping_cost: number
+  vat_rate: number
+  vat_amount: number
+  total: number
+  currency: string
+  stripe_payment_link_url: string | null
+  stripe_payment_intent_id: string | null
+  proforma_pdf_url: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  admin_notes: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  customer?: Customer
+}
+
+export interface ShippingRate {
+  id: string
+  origin_country_code: string
+  destination_country_code: string
+  weight_kg: number
+  rate_eur: number
+  transit_days: number
+}
+
+export interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  content: string
+  linked_product_ids: string[]
+  meta_title: string | null
+  meta_description: string | null
+  published_at: string | null
+  created_at: string
+}
+
+export interface ScrapeLog {
+  id: string
+  supplier_id: string
+  status: ScrapeStatus
+  products_updated: number
+  error_log: string | null
+  ran_at: string
+}
+
+// ============================================================
+// Cart Types
+// ============================================================
+
+export interface CartItem {
+  product_id: string
+  name: string
+  slug: string
+  price: number
+  weight_kg: number
+  qty: number
+  images: string[]
+  requires_confirmation: boolean
+  stock_status: StockStatus
+}
+
+// ============================================================
+// Checkout Types
+// ============================================================
+
+export interface CheckoutAddress {
+  full_name: string
+  company_name?: string
+  street: string
+  city: string
+  postal_code: string
+  country_code: string
+  vat_number?: string
+  vat_validated?: boolean
+}
+
+export interface VatResult {
+  rate: number
+  reverse_charge: boolean
+  reason: string
+}

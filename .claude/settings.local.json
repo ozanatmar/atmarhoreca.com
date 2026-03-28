@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --force)",
+      "Read(//d/OneDrive/Projects/**)",
+      "Bash(npx create-next-app@latest atmarhoreca-app --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack)",
+      "Bash(npx create-next-app@latest atmarhoreca-app --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --no-react-compiler)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(vercel --version)",
+      "Bash(npx vercel:*)",
+      "Bash(node -e \"const n = require\\(''nodemailer''\\); console.log\\(n.createTransport.toString\\(\\).slice\\(0,50\\)\\)\")",
+      "Bash(npm uninstall:*)",
+      "Bash(cd:*)",
+      "Bash(node -e \"const m = require\\(''@supabase/ssr''\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}
