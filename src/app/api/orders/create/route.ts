@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notify admin and customer on order creation
-  const customerInfo = { full_name, email: user.email, subtotal }
-  await notifyAdmin(order.id, customerInfo)
+  // Type B: notify admin and send order received email immediately (no payment step)
   if (type === 'B') {
+    const customerInfo = { full_name, email: user.email, subtotal }
+    await notifyAdmin(order.id, customerInfo)
     await sendEmail('order_received', order.id, { full_name, email: user.email, items, subtotal })
   }
 
