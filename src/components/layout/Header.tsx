@@ -75,7 +75,7 @@ export default function Header() {
               alt="Atmar Horeca"
               width={200}
               height={56}
-              className="h-14 w-auto"
+              className="h-12 w-auto"
             />
           </Link>
 

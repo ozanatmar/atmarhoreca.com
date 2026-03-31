@@ -11,7 +11,7 @@ export default function Footer() {
               alt="Atmar Horeca"
               width={200}
               height={56}
-              className="h-14 w-auto mb-3"
+              className="h-12 w-auto mb-3"
             />
             <p className="text-sm text-gray-300">
               Professional horeca equipment from Europe&apos;s best brands.
