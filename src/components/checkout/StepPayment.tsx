@@ -181,7 +181,7 @@ function StripePaymentForm({
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/order/${orderId}`,
+        return_url: `${window.location.origin}/order/${orderId}`,
       },
     })
 
