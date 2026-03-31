@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, shortId } from '@/lib/utils'
+import ClearCart from './ClearCart'
 
 export const metadata: Metadata = {
   title: 'Order Confirmation',
@@ -32,6 +33,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 bg-[#F5F5F5]">
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <ClearCart />
           <div className="bg-white rounded-2xl shadow-sm p-10">
             <div className="w-16 h-16 bg-[#7AB648] rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
