@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 import { createStaticClient } from '@/lib/supabase/static'
 import { formatPrice } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
@@ -13,20 +12,14 @@ interface Props {
 }
 
 async function getProduct(slug: string): Promise<Product | null> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, supplier:suppliers(*)')
-      .eq('slug', slug)
-      .eq('active', true)
-      .single()
-    if (error) console.error('[product page] supabase error:', error)
-    return data
-  } catch (err) {
-    console.error('[product page] createClient error:', err)
-    throw err
-  }
+  const supabase = createStaticClient()
+  const { data } = await supabase
+    .from('products')
+    .select('*, supplier:suppliers(*)')
+    .eq('slug', slug)
+    .eq('active', true)
+    .single()
+  return data
 }
 
 export async function generateStaticParams() {

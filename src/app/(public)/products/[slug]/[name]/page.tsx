@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 import { createStaticClient } from '@/lib/supabase/static'
 import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
@@ -14,7 +13,7 @@ interface Props {
 }
 
 async function getProduct(sku: string, name: string): Promise<Product | null> {
-  const supabase = await createClient()
+  const supabase = createStaticClient()
   const { data } = await supabase
     .from('products')
     .select('*, supplier:suppliers(*)')
