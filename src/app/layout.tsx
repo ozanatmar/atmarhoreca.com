@@ -22,8 +22,7 @@ export const metadata: Metadata = {
   description:
     'Professional horeca equipment from top European brands. EU-wide delivery, B2B VAT invoicing, no minimums.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://atmarhoreca.com'),
-  icons: { icon: 'http://atmar.bg/atmarhoreca/images/atmar_horeca_favicon_128x128.png' },
-  robots: { index: true, follow: true },
+robots: { index: true, follow: true },
 }
 
 export default function RootLayout({
