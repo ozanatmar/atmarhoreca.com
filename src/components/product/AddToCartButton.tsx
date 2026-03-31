@@ -23,7 +23,7 @@ export default function AddToCartButton({ product }: Props) {
   }, [])
 
   const isTypeB =
-    product.requires_confirmation || product.stock_status !== 'in_stock'
+    product.requires_confirmation || product.shipping_inefficient || product.stock_status !== 'in_stock'
   const label = isTypeB ? 'Request Order' : 'Add to Cart'
 
   function handleClick() {
@@ -41,6 +41,7 @@ export default function AddToCartButton({ product }: Props) {
       qty: 1,
       images: product.images,
       requires_confirmation: product.requires_confirmation,
+      shipping_inefficient: product.shipping_inefficient,
       stock_status: product.stock_status,
     })
     router.push('/cart')

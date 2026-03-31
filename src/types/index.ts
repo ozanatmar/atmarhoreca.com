@@ -138,6 +138,7 @@ export interface CartItem {
   qty: number
   images: string[]
   requires_confirmation: boolean
+  shipping_inefficient: boolean
   stock_status: StockStatus
 }
 

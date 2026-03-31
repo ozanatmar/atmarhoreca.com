@@ -9,6 +9,7 @@ export function determineOrderType(
   shippingAvailable: boolean,
 ): OrderType {
   if (items.some((item) => item.requires_confirmation)) return 'B'
+  if (items.some((item) => item.shipping_inefficient)) return 'B'
   if (items.some((item) => item.stock_status !== 'in_stock')) return 'B'
   if (!shippingAvailable) return 'B'
   return 'A'
