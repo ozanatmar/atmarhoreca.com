@@ -35,16 +35,19 @@ export async function POST(request: NextRequest) {
     const orderId = pi.metadata?.orderId
     if (!orderId) return NextResponse.json({ received: true })
 
-    const { data: order } = await supabase
+    const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*, customer:customers(full_name, email)')
       .eq('id', orderId)
       .single()
 
+    console.log('[webhook] orderId:', orderId, '| order found:', !!order, '| error:', orderError?.message)
+
     if (order && order.status !== 'paid') {
       await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
 
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
+      console.log('[webhook] sending email to:', customer?.email, '| telegram token set:', !!process.env.TELEGRAM_BOT_TOKEN)
 
       // Send payment confirmed email to customer
       await fetch(`${apiBaseUrl()}/api/email/send`, {
