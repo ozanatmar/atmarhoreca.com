@@ -33,12 +33,12 @@ function HeaderSearchBar() {
           type="search"
           name="q"
           placeholder="Search products..."
-          className="w-full py-2 pl-4 pr-10 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#F0A500]"
+          className="w-full py-2 pl-4 pr-10 rounded-lg bg-white/15 border border-white/40 text-white placeholder-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-[#F0A500] focus:bg-white focus:text-gray-900 focus:placeholder-gray-400"
           onChange={() => setSearching(false)}
         />
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#6B3D8F]"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
           aria-label="Search"
         >
           {searching
