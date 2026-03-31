@@ -95,7 +95,13 @@ export default function StepAddress({
             onBlur={validateVat}
           />
           {validating && <p className="text-xs text-gray-500 mt-1">Validating...</p>}
-          {vatStatus === 'valid' && <p className="text-xs text-[#7AB648] mt-1">Valid VAT number — 0% VAT applies</p>}
+          {vatStatus === 'valid' && (
+            <p className="text-xs text-[#7AB648] mt-1">
+              {address.country_code?.toUpperCase() === 'BG'
+                ? 'Valid VAT number — 20% Bulgarian VAT applies'
+                : 'Valid VAT number — 0% VAT applies (reverse charge)'}
+            </p>
+          )}
           {vatStatus === 'invalid' && <p className="text-xs text-[#C0392B] mt-1">Could not validate — standard VAT will apply</p>}
           {vatStatus === 'country_mismatch' && <p className="text-xs text-[#C0392B] mt-1">VAT number country does not match the selected billing country</p>}
         </div>
