@@ -41,9 +41,9 @@ export async function POST() {
         images: row[col('images')] ? row[col('images')].split('|').filter(Boolean) : [],
         meta_title: row[col('meta_title')] || null,
         meta_description: row[col('meta_description')] || null,
-        requires_confirmation: row[col('requires_confirmation')] === 'true',
-        shipping_inefficient: row[col('shipping_inefficient')] === 'true',
-        active: row[col('active')] === 'true',
+        requires_confirmation: row[col('requires_confirmation')]?.toLowerCase() === 'true',
+        shipping_inefficient: row[col('shipping_inefficient')]?.toLowerCase() === 'true',
+        active: row[col('active')]?.toLowerCase() === 'true',
       }
     })
 
