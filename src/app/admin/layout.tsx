@@ -14,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-56 bg-[#6B3D8F] text-white flex flex-col shrink-0">
+      <aside className="w-56 bg-[#6B3D8F] text-white flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto">
         <div className="p-4 border-b border-purple-700">
           <span className="font-bold text-lg">Admin</span>
         </div>
