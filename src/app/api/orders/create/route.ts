@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notify admin for Type B orders
+  // Notify admin and customer on order creation
+  const customerInfo = { full_name, email: user.email, subtotal }
+  await notifyAdmin(order.id, customerInfo)
   if (type === 'B') {
-    const customerInfo = { full_name, email: user.email, subtotal }
-    await notifyAdmin(order.id, customerInfo)
     await sendEmail('order_received', order.id, { full_name, email: user.email, items, subtotal })
   }
 
@@ -92,10 +92,15 @@ async function notifyAdmin(orderId: string, customer: { full_name: string; email
   }
 }
 
+function siteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
-  // Defer to email service — see /api/email helper
-  fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send`, {
+  fetch(`${siteUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ template, orderId, data }),

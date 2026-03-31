@@ -4,6 +4,12 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 function getStripe() { return new Stripe(process.env.STRIPE_SECRET_KEY!) }
 
+function siteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature')!
@@ -33,8 +39,9 @@ export async function POST(request: NextRequest) {
       await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
 
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
-      // Send payment confirmed email
-      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send`, {
+
+      // Send payment confirmed email to customer
+      await fetch(`${siteUrl()}/api/email/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -49,6 +56,19 @@ export async function POST(request: NextRequest) {
           },
         }),
       }).catch(console.error)
+
+      // Telegram notification to admin
+      const token = process.env.TELEGRAM_BOT_TOKEN
+      const chatId = process.env.TELEGRAM_CHAT_ID
+      if (token && chatId) {
+        const base = siteUrl()
+        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
+        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        }).catch(console.error)
+      }
     }
   }
 
