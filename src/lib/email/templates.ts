@@ -1,7 +1,7 @@
 import type { OrderItem } from '@/types'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
-const LOGO_URL = 'https://atmar.bg/Atmar_Horeca_Logo_-_White.png'
+const LOGO_URL = `${SITE_URL}/logo_white_no_bg.png`
 
 const REVOLUT_IBAN = process.env.REVOLUT_IBAN ?? ''
 const REVOLUT_BIC = process.env.REVOLUT_BIC ?? ''
