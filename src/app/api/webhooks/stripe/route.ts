@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chat_id: chatId, text }),
-        }).catch(console.error)
+        }).then(r => r.json()).then(r => console.log('[webhook] telegram result:', JSON.stringify(r))).catch(console.error)
       }
     }
   }
