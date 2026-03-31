@@ -92,6 +92,14 @@ async function notifyAdmin(orderId: string, customer: { full_name: string; email
   }
 }
 
+// For internal API calls — always use current deployment URL
+function apiBaseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  return 'http://localhost:3000'
+}
+
+// For public-facing links (emails, Telegram)
 function siteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
@@ -100,7 +108,7 @@ function siteUrl() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
-  fetch(`${siteUrl()}/api/email/send`, {
+  fetch(`${apiBaseUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ template, orderId, data }),

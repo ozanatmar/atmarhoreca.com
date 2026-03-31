@@ -4,6 +4,12 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 function getStripe() { return new Stripe(process.env.STRIPE_SECRET_KEY!) }
 
+function apiBaseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  return 'http://localhost:3000'
+}
+
 function siteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
 
       // Send payment confirmed email to customer
-      await fetch(`${siteUrl()}/api/email/send`, {
+      await fetch(`${apiBaseUrl()}/api/email/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
