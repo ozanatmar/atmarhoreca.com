@@ -49,21 +49,21 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <p className="text-xl font-bold text-[#1A1A5E] mb-6">{formatPrice(order.total)} EUR</p>
 
             {order.type === 'B' && (
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600 mb-8">
                 Your order has been received. We will check availability and send you a proforma
-                invoice within 24 hours.
+                invoice within 24 hours. You can pay by card or bank transfer once you receive it.
               </p>
             )}
 
             {order.type === 'A' && (
-              <p className="text-sm text-gray-600 mb-6">
-                Thank you for your payment. Your order is being processed and will be dispatched
-                soon.
+              <p className="text-sm text-gray-600 mb-8">
+                Your payment was successful. A confirmation email has been sent to you. Your order
+                is being processed and will be dispatched soon.
               </p>
             )}
 
             {order.tracking_number && (
-              <div className="bg-[#F5F5F5] rounded-xl p-4 mb-6 text-sm text-left">
+              <div className="bg-[#F5F5F5] rounded-xl p-4 mb-8 text-sm text-left">
                 <p className="font-semibold text-[#1A1A5E] mb-1">Tracking Information</p>
                 <p className="text-gray-700">Tracking: {order.tracking_number}</p>
                 {order.tracking_url && (
@@ -74,9 +74,20 @@ export default async function OrderConfirmationPage({ params }: Props) {
               </div>
             )}
 
-            <Link href="/account" className="text-[#6B3D8F] hover:underline text-sm">
-              View all orders
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/account"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#6B3D8F] text-white rounded-xl font-semibold hover:bg-[#5a3278] transition-colors"
+              >
+                View My Orders
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Continue Shopping
+              </Link>
+            </div>
           </div>
         </div>
       </main>
