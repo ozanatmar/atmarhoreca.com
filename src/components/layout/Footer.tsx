@@ -7,12 +7,11 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
           <div>
             <Image
-              src="http://atmar.bg/atmarhoreca/images/atmar_horeca_white_logo.png"
+              src="/logo_white_no_bg.png"
               alt="Atmar Horeca"
-              width={140}
-              height={40}
-              className="h-10 w-auto mb-3"
-              unoptimized
+              width={200}
+              height={56}
+              className="h-14 w-auto mb-3"
             />
             <p className="text-sm text-gray-300">
               Professional horeca equipment from Europe&apos;s best brands.
