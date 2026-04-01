@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
             items: order.items,
             total: order.total,
             type: order.type,
+            order_link: `${siteUrl()}/order/${orderId}`,
           },
         }),
       }).catch(console.error)

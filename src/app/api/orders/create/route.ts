@@ -59,22 +59,38 @@ export async function POST(request: NextRequest) {
 
   // Type B: notify admin and send order received email immediately (no payment step)
   if (type === 'B') {
-    const customerInfo = { full_name, email: user.email, subtotal }
-    await notifyAdmin(order.id, customerInfo)
-    await sendEmail('order_received', order.id, { full_name, email: user.email, items, subtotal })
+    // Fetch product slugs/skus for email links
+    const productIds = items.map((i: { product_id: string }) => i.product_id)
+    const { data: products } = await supabase.from('products').select('id, slug, sku').in('id', productIds)
+    const productMap = Object.fromEntries((products ?? []).map((p: { id: string; slug: string; sku: string | null }) => [p.id, p]))
+    const enrichedItems = items.map((i: { product_id: string }) => ({ ...i, ...productMap[i.product_id] }))
+
+    const orderLink = `${siteUrl()}/order/${order.id}`
+    const adminLink = `${siteUrl()}/admin/orders/${order.id}`
+
+    await notifyAdmin(order.id, {
+      full_name, email: user.email, subtotal,
+      phone, company_name, vat_number,
+      items: enrichedItems, vat_rate, vat_amount,
+      billing_address, admin_link: adminLink, order_link: orderLink,
+    })
+    await sendEmail('order_received', order.id, {
+      full_name, email: user.email, items: enrichedItems,
+      subtotal, vat_rate, vat_amount, billing_address,
+      order_link: orderLink,
+    })
   }
 
   return NextResponse.json({ orderId: order.id })
 }
 
-async function notifyAdmin(orderId: string, customer: { full_name: string; email?: string; subtotal: number }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function notifyAdmin(orderId: string, data: Record<string, any>) {
   // Telegram
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_CHAT_ID
   if (token && chatId) {
-    const text = `New order received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer.full_name} (${customer.email})\nSubtotal: €${customer.subtotal}\nView order: ${siteUrl}/admin/orders/${orderId}`
+    const text = `New order — #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${data.full_name} (${data.email})\n${data.phone ? `Phone: ${data.phone}\n` : ''}${data.company_name ? `Company: ${data.company_name}\n` : ''}Subtotal: €${data.subtotal}\nView: ${data.admin_link}`
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -83,14 +99,8 @@ async function notifyAdmin(orderId: string, customer: { full_name: string; email
   }
 
   // Email to admin
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail) {
-    await sendEmail('admin_new_order', orderId, {
-      full_name: customer.full_name,
-      email: customer.email,
-      subtotal: customer.subtotal,
-      admin_link: `${siteUrl}/admin/orders/${orderId}`,
-    })
+  if (process.env.ADMIN_EMAIL) {
+    await sendEmail('admin_new_order', orderId, data)
   }
 }
 
