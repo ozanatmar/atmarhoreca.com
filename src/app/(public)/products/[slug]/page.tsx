@@ -15,7 +15,7 @@ async function getProduct(slug: string): Promise<Product | null> {
   const supabase = createStaticClient()
   const { data } = await supabase
     .from('products')
-    .select('*, supplier:suppliers(*)')
+    .select('*, brand:brands(*)')
     .eq('slug', slug)
     .eq('active', true)
     .single()
@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
-  const supplier = product.supplier
+  const brand = product.brand
 
   const schema = {
     '@context': 'https://schema.org',
@@ -116,8 +116,8 @@ export default async function ProductPage({ params }: Props) {
             />
 
             {/* Lead time */}
-            {supplier?.lead_time_note && (
-              <p className="text-sm text-gray-600">{supplier.lead_time_note}</p>
+            {brand?.lead_time_note && (
+              <p className="text-sm text-gray-600">{brand.lead_time_note}</p>
             )}
 
             {/* CTA */}

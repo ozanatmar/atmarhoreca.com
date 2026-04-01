@@ -7,7 +7,7 @@ export type OrderType = 'A' | 'B'
 export type OrderStatus = 'pending_approval' | 'awaiting_payment' | 'paid' | 'fulfilled' | 'cancelled'
 export type ScrapeStatus = 'success' | 'failed'
 
-export interface Supplier {
+export interface Brand {
   id: string
   name: string
   country_code: string
@@ -21,7 +21,7 @@ export interface Supplier {
 
 export interface Product {
   id: string
-  supplier_id: string
+  brand_id: string
   name: string
   slug: string
   sku: string | null
@@ -39,7 +39,7 @@ export interface Product {
   active: boolean
   created_at: string
   // joined
-  supplier?: Supplier
+  brand?: Brand
 }
 
 export interface Address {
@@ -118,7 +118,7 @@ export interface BlogPost {
 
 export interface ScrapeLog {
   id: string
-  supplier_id: string
+  brand_id: string
   status: ScrapeStatus
   products_updated: number
   error_log: string | null

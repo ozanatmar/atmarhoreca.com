@@ -3,12 +3,12 @@ import ProductForm from '../ProductForm'
 
 export default async function NewProductPage() {
   const supabase = await createClient()
-  const { data: suppliers } = await supabase.from('suppliers').select('id, name').eq('active', true)
+  const { data: brands } = await supabase.from('brands').select('id, name').eq('active', true)
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold text-[#1A1A5E] mb-6">New Product</h1>
-      <ProductForm product={null} suppliers={suppliers ?? []} />
+      <ProductForm product={null} brands={brands ?? []} />
     </div>
   )
 }

@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import type { Supplier } from '@/types'
+import type { Brand } from '@/types'
 
 interface Props {
-  suppliers: Supplier[]
+  brands: Brand[]
 }
 
-const EMPTY: Partial<Supplier> = {
+const EMPTY: Partial<Brand> = {
   name: '',
   country_code: '',
   lead_time_note: '',
@@ -21,9 +21,9 @@ const EMPTY: Partial<Supplier> = {
   active: true,
 }
 
-export default function SupplierList({ suppliers }: Props) {
+export default function BrandList({ brands }: Props) {
   const router = useRouter()
-  const [editing, setEditing] = useState<Partial<Supplier> | null>(null)
+  const [editing, setEditing] = useState<Partial<Brand> | null>(null)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
@@ -31,9 +31,9 @@ export default function SupplierList({ suppliers }: Props) {
     setSaving(true)
     const supabase = createClient()
     if (editing.id) {
-      await supabase.from('suppliers').update(editing).eq('id', editing.id)
+      await supabase.from('brands').update(editing).eq('id', editing.id)
     } else {
-      await supabase.from('suppliers').insert(editing)
+      await supabase.from('brands').insert(editing)
     }
     setSaving(false)
     setEditing(null)
@@ -42,7 +42,7 @@ export default function SupplierList({ suppliers }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      {suppliers.map((s) => (
+      {brands.map((s) => (
         <div key={s.id} className="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between">
           <div>
             <p className="font-bold text-[#1A1A5E]">{s.name}</p>
@@ -52,11 +52,11 @@ export default function SupplierList({ suppliers }: Props) {
         </div>
       ))}
 
-      <Button onClick={() => setEditing(EMPTY)} className="w-fit">+ New Supplier</Button>
+      <Button onClick={() => setEditing(EMPTY)} className="w-fit">+ New Brand</Button>
 
       {editing && (
         <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-4 border-2 border-[#6B3D8F]">
-          <h2 className="font-bold text-[#1A1A5E]">{editing.id ? 'Edit Supplier' : 'New Supplier'}</h2>
+          <h2 className="font-bold text-[#1A1A5E]">{editing.id ? 'Edit Brand' : 'New Brand'}</h2>
           <Input label="Name" value={editing.name ?? ''} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required />
           <Input label="Country Code (ISO alpha-2)" value={editing.country_code ?? ''} onChange={(e) => setEditing({ ...editing, country_code: e.target.value.toUpperCase().slice(0, 2) })} required maxLength={2} />
           <Input label="Lead Time Note" value={editing.lead_time_note ?? ''} onChange={(e) => setEditing({ ...editing, lead_time_note: e.target.value })} />

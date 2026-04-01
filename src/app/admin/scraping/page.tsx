@@ -5,7 +5,7 @@ export default async function AdminScrapingPage() {
   const supabase = await createClient()
   const { data: logs } = await supabase
     .from('scrape_logs')
-    .select('*, supplier:suppliers(name)')
+    .select('*, brand:brands(name)')
     .order('ran_at', { ascending: false })
     .limit(10)
 

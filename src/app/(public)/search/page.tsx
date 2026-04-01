@@ -27,27 +27,27 @@ export default async function SearchPage({ searchParams }: Props) {
     images: string[]
     stock_status: string
     requires_confirmation: boolean
-    supplier: { name: string } | null
+    brand: { name: string } | null
   }> = []
 
   if (query) {
     const supabase = await createClient()
 
-    // Find supplier IDs matching the brand search term
-    const { data: matchedSuppliers } = await supabase
-      .from('suppliers')
+    // Find brand IDs matching the brand search term
+    const { data: matchedBrands } = await supabase
+      .from('brands')
       .select('id')
       .ilike('name', `%${query}%`)
-    const supplierIds = (matchedSuppliers ?? []).map((s: { id: string }) => s.id)
+    const brandIds = (matchedBrands ?? []).map((s: { id: string }) => s.id)
 
     let q = supabase
       .from('products')
-      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, supplier:suppliers(name)')
+      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, brand:brands(name)')
       .eq('active', true)
 
     const orFilters = [`name.ilike.%${query}%`, `description.ilike.%${query}%`, `sku.ilike.%${query}%`]
-    if (supplierIds.length > 0) {
-      orFilters.push(`supplier_id.in.(${supplierIds.join(',')})`)
+    if (brandIds.length > 0) {
+      orFilters.push(`brand_id.in.(${brandIds.join(',')})`)
     }
     q = q.or(orFilters.join(','))
 
@@ -91,9 +91,9 @@ export default async function SearchPage({ searchParams }: Props) {
               />
             </div>
             <div className="p-4 flex flex-col gap-1.5">
-              {p.supplier && (
+              {p.brand && (
                 <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">
-                  {Array.isArray(p.supplier) ? p.supplier[0]?.name : p.supplier.name}
+                  {Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name}
                 </span>
               )}
               <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{p.name}</h2>

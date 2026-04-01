@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 
 interface Props {
-  suppliers: { id: string; name: string }[]
+  brands: { id: string; name: string }[]
 }
 
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8/edit#gid=0'
 
-export default function BulkSheetsActions({ suppliers }: Props) {
+export default function BulkSheetsActions({ brands }: Props) {
   const router = useRouter()
-  const [supplierId, setSupplierId] = useState(suppliers[0]?.id ?? '')
+  const [brandId, setBrandId] = useState(brands[0]?.id ?? '')
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -25,7 +25,7 @@ export default function BulkSheetsActions({ suppliers }: Props) {
     const res = await fetch('/api/admin/products/export-to-sheets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ supplierId }),
+      body: JSON.stringify({ brandId }),
     })
     const json = await res.json()
     if (res.ok) {
@@ -75,11 +75,11 @@ export default function BulkSheetsActions({ suppliers }: Props) {
       <p className="text-xs font-semibold text-[#1A1A5E] uppercase tracking-wide">Bulk Edit via Google Sheets</p>
       <div className="flex flex-wrap items-center gap-3">
         <select
-          value={supplierId}
-          onChange={(e) => setSupplierId(e.target.value)}
+          value={brandId}
+          onChange={(e) => setBrandId(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
         >
-          {suppliers.map((s) => (
+          {brands.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>

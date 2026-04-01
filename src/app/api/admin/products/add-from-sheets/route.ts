@@ -46,16 +46,16 @@ export async function POST() {
   const col = (name: string) => header.indexOf(name)
 
   // Validate header columns
-  const REQUIRED_COLS = ['name', 'sku', 'supplier', 'price', 'weight_kg', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
+  const REQUIRED_COLS = ['name', 'sku', 'brand', 'price', 'weight_kg', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
   for (const colName of REQUIRED_COLS) {
     if (col(colName) === -1) {
       return NextResponse.json({ error: `Missing column "${colName}" in header row (row 2)` }, { status: 422 })
     }
   }
 
-  // Fetch all suppliers for name→id lookup
-  const { data: suppliers } = await supabase.from('suppliers').select('id, name')
-  const supplierMap = new Map((suppliers ?? []).map((s) => [s.name.toLowerCase(), s.id]))
+  // Fetch all brands for name→id lookup
+  const { data: brands } = await supabase.from('brands').select('id, name')
+  const brandMap = new Map((brands ?? []).map((s) => [s.name.toLowerCase(), s.id]))
 
   // Validate all rows before inserting anything
   for (let i = 0; i < dataRows.length; i++) {
@@ -74,12 +74,12 @@ export async function POST() {
       return NextResponse.json({ error: `Empty SKU in ${cellRef(col('sku'), rowNum)}` }, { status: 422 })
     }
 
-    const supplierName = get('supplier')
-    if (!supplierName) {
-      return NextResponse.json({ error: `Empty supplier in ${cellRef(col('supplier'), rowNum)}` }, { status: 422 })
+    const brandName = get('brand')
+    if (!brandName) {
+      return NextResponse.json({ error: `Empty brand in ${cellRef(col('brand'), rowNum)}` }, { status: 422 })
     }
-    if (!supplierMap.has(supplierName.toLowerCase())) {
-      return NextResponse.json({ error: `Unknown supplier "${supplierName}" in ${cellRef(col('supplier'), rowNum)}` }, { status: 422 })
+    if (!brandMap.has(brandName.toLowerCase())) {
+      return NextResponse.json({ error: `Unknown brand "${brandName}" in ${cellRef(col('brand'), rowNum)}` }, { status: 422 })
     }
 
     const priceStr = get('price')
@@ -137,7 +137,7 @@ export async function POST() {
       name,
       slug: slugify(name),
       sku: get('sku'),
-      supplier_id: supplierMap.get(get('supplier').toLowerCase())!,
+      brand_id: brandMap.get(get('brand').toLowerCase())!,
       description: get('description') || null,
       price: parseFloat(get('price')),
       weight_kg: parseFloat(get('weight_kg')),

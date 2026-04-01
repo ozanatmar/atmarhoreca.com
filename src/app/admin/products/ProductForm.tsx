@@ -11,7 +11,7 @@ import type { Product } from '@/types'
 
 interface Props {
   product: Product | null
-  suppliers: { id: string; name: string }[]
+  brands: { id: string; name: string }[]
 }
 
 const STOCK_OPTIONS = [
@@ -20,11 +20,11 @@ const STOCK_OPTIONS = [
   { value: 'out_of_stock', label: 'Out of Stock' },
 ]
 
-export default function ProductForm({ product, suppliers }: Props) {
+export default function ProductForm({ product, brands }: Props) {
   const router = useRouter()
   const [name, setName] = useState(product?.name ?? '')
   const [sku, setSku] = useState(product?.sku ?? '')
-  const [supplierId, setSupplierId] = useState(product?.supplier_id ?? suppliers[0]?.id ?? '')
+  const [brandId, setBrandId] = useState(product?.brand_id ?? brands[0]?.id ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
   const [price, setPrice] = useState(String(product?.price ?? ''))
   const [weightKg, setWeightKg] = useState(String(product?.weight_kg ?? ''))
@@ -59,7 +59,7 @@ export default function ProductForm({ product, suppliers }: Props) {
     }
 
     const payload = {
-      supplier_id: supplierId,
+      brand_id: brandId,
       name,
       slug,
       sku: sku || null,
@@ -107,17 +107,17 @@ export default function ProductForm({ product, suppliers }: Props) {
       )}
       <Input label="Product Name" value={name} onChange={(e) => setName(e.target.value)} required />
       <div>
-        <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required hint="Supplier or internal SKU — used in the product URL" />
+        <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required hint="Brand or internal SKU — used in the product URL" />
         <p className="text-xs text-gray-400 mt-1 font-mono">
           atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : '[sku]/'}{name ? slugify(name) : '[product-name]'}
         </p>
       </div>
 
       <Select
-        label="Supplier"
-        value={supplierId}
-        onChange={(e) => setSupplierId(e.target.value)}
-        options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
+        label="Brand"
+        value={brandId}
+        onChange={(e) => setBrandId(e.target.value)}
+        options={brands.map((s) => ({ value: s.id, label: s.name }))}
         required
       />
 

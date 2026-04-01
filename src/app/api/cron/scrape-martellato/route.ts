@@ -12,18 +12,18 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServiceClient()
 
-  // Get Martellato supplier ID
-  const { data: supplier } = await supabase
-    .from('suppliers')
+  // Get Martellato brand ID
+  const { data: brand } = await supabase
+    .from('brands')
     .select('id')
     .eq('name', 'Martellato')
     .single()
 
-  if (!supplier) {
-    return NextResponse.json({ error: 'Martellato supplier not found' }, { status: 500 })
+  if (!brand) {
+    return NextResponse.json({ error: 'Martellato brand not found' }, { status: 500 })
   }
 
-  const supplierId = supplier.id
+  const brandId = brand.id
 
   try {
     // 1. Fetch sitemap
@@ -53,12 +53,12 @@ export async function GET(request: NextRequest) {
     const { data: products } = await supabase
       .from('products')
       .select('id, martellato_url, stock_status')
-      .eq('supplier_id', supplierId)
+      .eq('brand_id', brandId)
       .not('martellato_url', 'is', null)
 
     if (!products?.length) {
       await supabase.from('scrape_logs').insert({
-        supplier_id: supplierId,
+        brand_id: brandId,
         status: 'success',
         products_updated: 0,
       })
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     // 5. Log success
     await supabase.from('scrape_logs').insert({
-      supplier_id: supplierId,
+      brand_id: brandId,
       status: 'success',
       products_updated: updated,
     })
@@ -97,11 +97,11 @@ export async function GET(request: NextRequest) {
     // Set all Martellato products to 'unknown'
     await supabase.from('products')
       .update({ stock_status: 'unknown' })
-      .eq('supplier_id', supplierId)
+      .eq('brand_id', brandId)
       .not('martellato_url', 'is', null)
 
     await supabase.from('scrape_logs').insert({
-      supplier_id: supplierId,
+      brand_id: brandId,
       status: 'failed',
       products_updated: 0,
       error_log: errorMessage,

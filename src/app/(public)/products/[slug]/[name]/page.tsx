@@ -16,7 +16,7 @@ async function getProduct(sku: string, name: string): Promise<Product | null> {
   const supabase = createStaticClient()
   const { data } = await supabase
     .from('products')
-    .select('*, supplier:suppliers(*)')
+    .select('*, brand:brands(*)')
     .eq('sku', decodeURIComponent(sku))
     .eq('slug', name)
     .eq('active', true)
@@ -66,7 +66,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
-  const supplier = product.supplier
+  const brand = product.brand
   const url = `${siteUrl}${productUrl(product)}`
 
   const schema = {
@@ -114,8 +114,8 @@ export default async function ProductPage({ params }: Props) {
               requiresConfirmation={product.requires_confirmation}
             />
 
-            {supplier?.lead_time_note && (
-              <p className="text-sm text-gray-600">{supplier.lead_time_note}</p>
+            {brand?.lead_time_note && (
+              <p className="text-sm text-gray-600">{brand.lead_time_note}</p>
             )}
 
             <AddToCartButton product={product} />

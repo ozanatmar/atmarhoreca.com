@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { writeToSheet } from '@/lib/google-sheets'
 
 const HEADERS = [
-  'id', 'name', 'sku', 'supplier', 'description', 'price', 'weight_kg', 'stock_status',
+  'id', 'name', 'sku', 'brand', 'description', 'price', 'weight_kg', 'stock_status',
   'martellato_url', 'images', 'meta_title', 'meta_description',
   'requires_confirmation', 'shipping_inefficient', 'active',
 ]
@@ -15,27 +15,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { supplierId } = await request.json()
-  if (!supplierId) return NextResponse.json({ error: 'supplierId required' }, { status: 400 })
+  const { brandId } = await request.json()
+  if (!brandId) return NextResponse.json({ error: 'brandId required' }, { status: 400 })
 
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, name, sku, supplier:suppliers(name), description, price, weight_kg, stock_status, martellato_url, images, meta_title, meta_description, requires_confirmation, shipping_inefficient, active')
-    .eq('supplier_id', supplierId)
+    .select('id, name, sku, brand:brands(name), description, price, weight_kg, stock_status, martellato_url, images, meta_title, meta_description, requires_confirmation, shipping_inefficient, active')
+    .eq('brand_id', brandId)
     .order('name')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!products?.length) return NextResponse.json({ error: 'No products found for this supplier' }, { status: 404 })
+  if (!products?.length) return NextResponse.json({ error: 'No products found for this brand' }, { status: 404 })
 
   const rows = [
     HEADERS,
     ...products.map((p) => {
-      const supplier = Array.isArray(p.supplier) ? p.supplier[0] : p.supplier
+      const brand = Array.isArray(p.brand) ? p.brand[0] : p.brand
       return [
         p.id,
         p.name,
         p.sku ?? '',
-        supplier?.name ?? '',
+        brand?.name ?? '',
         p.description ?? '',
         String(p.price),
         String(p.weight_kg),

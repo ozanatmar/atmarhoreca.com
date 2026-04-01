@@ -8,13 +8,13 @@ import ProductsTable from './ProductsTable'
 
 export default async function AdminProductsPage() {
   const supabase = await createClient()
-  const [{ data: products }, { data: suppliers }] = await Promise.all([
+  const [{ data: products }, { data: brands }] = await Promise.all([
     supabase
       .from('products')
-      .select('id, name, sku, price, weight_kg, stock_status, active, images, supplier:suppliers(name)')
+      .select('id, name, sku, price, weight_kg, stock_status, active, images, brand:brands(name)')
       .order('name'),
     supabase
-      .from('suppliers')
+      .from('brands')
       .select('id, name')
       .order('name'),
   ])
@@ -28,7 +28,7 @@ export default async function AdminProductsPage() {
         </Link>
       </div>
 
-      <BulkSheetsActions suppliers={suppliers ?? []} />
+      <BulkSheetsActions brands={brands ?? []} />
 
       <ProductsTable products={products ?? []} />
     </div>

@@ -7,7 +7,7 @@ import Badge from '@/components/ui/Badge'
 import type { ScrapeLog } from '@/types'
 
 interface Props {
-  logs: (ScrapeLog & { supplier?: { name: string } })[]
+  logs: (ScrapeLog & { brand?: { name: string } })[]
 }
 
 export default function ScrapingPanel({ logs }: Props) {

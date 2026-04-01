@@ -25,14 +25,14 @@ interface Product {
   stock_status: string
   active: boolean
   images: string[] | null
-  supplier: { name: string } | { name: string }[] | null
+  brand: { name: string } | { name: string }[] | null
 }
 
-type SortCol = 'name' | 'sku' | 'supplier' | 'price' | 'weight_kg' | 'stock_status' | 'active'
+type SortCol = 'name' | 'sku' | 'brand' | 'price' | 'weight_kg' | 'stock_status' | 'active'
 
-function getSupplierName(supplier: Product['supplier']): string {
-  if (!supplier) return ''
-  return Array.isArray(supplier) ? (supplier[0]?.name ?? '') : supplier.name
+function getBrandName(brand: Product['brand']): string {
+  if (!brand) return ''
+  return Array.isArray(brand) ? (brand[0]?.name ?? '') : brand.name
 }
 
 export default function ProductsTable({ products }: { products: Product[] }) {
@@ -74,7 +74,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
           (p) =>
             p.name.toLowerCase().includes(q) ||
             (p.sku ?? '').toLowerCase().includes(q) ||
-            getSupplierName(p.supplier).toLowerCase().includes(q)
+            getBrandName(p.brand).toLowerCase().includes(q)
         )
       : products
   }, [products, filter])
@@ -86,7 +86,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
       let bv: string | number = ''
       if (sortCol === 'name') { av = a.name; bv = b.name }
       else if (sortCol === 'sku') { av = a.sku ?? ''; bv = b.sku ?? '' }
-      else if (sortCol === 'supplier') { av = getSupplierName(a.supplier); bv = getSupplierName(b.supplier) }
+      else if (sortCol === 'brand') { av = getBrandName(a.brand); bv = getBrandName(b.brand) }
       else if (sortCol === 'price') { av = a.price; bv = b.price }
       else if (sortCol === 'weight_kg') { av = a.weight_kg; bv = b.weight_kg }
       else if (sortCol === 'stock_status') { av = a.stock_status; bv = b.stock_status }
@@ -118,7 +118,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Filter by name, SKU or supplier..."
+          placeholder="Filter by name, SKU or brand..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full max-w-sm border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
@@ -132,7 +132,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               <th className="px-4 py-3 w-14" />
               <Th col="name" className="text-left">Name</Th>
               <Th col="sku" className="text-left">SKU</Th>
-              <Th col="supplier" className="text-left">Supplier</Th>
+              <Th col="brand" className="text-left">Brand</Th>
               <Th col="price" className="text-right">Price</Th>
               <Th col="weight_kg" className="text-right">Weight</Th>
               <Th col="stock_status" className="text-left">Stock</Th>
@@ -160,7 +160,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.sku ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-600">{getSupplierName(p.supplier)}</td>
+                  <td className="px-4 py-3 text-gray-600">{getBrandName(p.brand)}</td>
                   <td className="px-4 py-3 text-right">{p.price.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right">{p.weight_kg} kg</td>
                   <td className="px-4 py-3">
