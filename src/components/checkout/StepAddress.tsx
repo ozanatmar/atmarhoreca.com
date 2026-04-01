@@ -73,6 +73,7 @@ export default function StepAddress({
 
         <Input label="Full Name" value={address.full_name} onChange={(e) => update('full_name', e.target.value)} required />
         <Input label="Company Name" value={address.company_name ?? ''} onChange={(e) => update('company_name', e.target.value)} />
+        <Input label="Phone Number" value={address.phone ?? ''} onChange={(e) => update('phone', e.target.value)} hint="Required for delivery" required />
         <Input label="Street Address" value={address.street} onChange={(e) => update('street', e.target.value)} required />
         <div className="grid grid-cols-2 gap-4">
           <Input label="City" value={address.city} onChange={(e) => update('city', e.target.value)} required />

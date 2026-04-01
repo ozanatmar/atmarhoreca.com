@@ -54,6 +54,7 @@ export interface Customer {
   email: string
   full_name: string
   company_name: string | null
+  phone: string | null
   vat_number: string | null
   vat_validated: boolean
   country_code: string | null
@@ -149,6 +150,7 @@ export interface CartItem {
 export interface CheckoutAddress {
   full_name: string
   company_name?: string
+  phone?: string
   street: string
   city: string
   postal_code: string

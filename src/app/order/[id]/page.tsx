@@ -153,6 +153,7 @@ export default async function OrderPage({ params }: Props) {
                     <p>{customer.billing_address.country_code}</p>
                   </>
                 )}
+                {customer?.phone && <p className="mt-1">{customer.phone}</p>}
                 <p className="mt-1 text-gray-500">{customer?.email}</p>
               </div>
             </div>

@@ -27,6 +27,7 @@ export default function CheckoutFlow({ customer, userId, shippingRates }: Props)
   const [address, setAddress] = useState<CheckoutAddress>({
     full_name: customer?.full_name ?? '',
     company_name: customer?.company_name ?? '',
+    phone: customer?.phone ?? '',
     street: customer?.billing_address?.street ?? '',
     city: customer?.billing_address?.city ?? '',
     postal_code: customer?.billing_address?.postal_code ?? '',

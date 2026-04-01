@@ -51,6 +51,7 @@ export default function StepPayment(props: StepProps) {
         shipping_address: shippingAddr,
         full_name: address.full_name,
         company_name: address.company_name,
+        phone: address.phone,
         vat_number: address.vat_number,
         vat_validated: address.vat_validated,
       }),

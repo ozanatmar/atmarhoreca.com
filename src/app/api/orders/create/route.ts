@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     shipping_address,
     full_name,
     company_name,
+    phone,
     vat_number,
     vat_validated,
   } = body
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     email: user.email!,
     full_name,
     company_name: company_name || null,
+    phone: phone || null,
     vat_number: vat_number || null,
     vat_validated: vat_validated ?? false,
     country_code: billing_address.country_code,
