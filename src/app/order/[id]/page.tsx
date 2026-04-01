@@ -1,8 +1,9 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { formatPrice, shortId } from '@/lib/utils'
+import { formatPrice, shortId, productUrl } from '@/lib/utils'
 import ClearCart from './ClearCart'
 
 export const metadata: Metadata = {
@@ -39,6 +40,14 @@ export default async function OrderPage({ params }: Props) {
   if (!order) notFound()
 
   const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
+
+  // Fetch product images and slugs for order items
+  const productIds = order.items.map((i: { product_id: string }) => i.product_id)
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, slug, sku, images')
+    .in('id', productIds)
+  const productMap = Object.fromEntries((products ?? []).map((p) => [p.id, p]))
   const isNew = order.status === 'pending_approval' || order.status === 'awaiting_payment'
 
   return (
@@ -99,14 +108,32 @@ export default async function OrderPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {order.items.map((item: { product_id: string; name: string; qty: number; unit_price: number }, i: number) => (
-                  <tr key={item.product_id} className={i % 2 === 0 ? 'bg-white' : 'bg-[#F5F5F5]'}>
-                    <td className="px-6 py-3 text-gray-800">{item.name}</td>
-                    <td className="px-4 py-3 text-center text-gray-600">{item.qty}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{formatPrice(item.unit_price)}</td>
-                    <td className="px-6 py-3 text-right font-semibold text-[#1A1A5E]">{formatPrice(item.unit_price * item.qty)}</td>
-                  </tr>
-                ))}
+                {order.items.map((item: { product_id: string; name: string; qty: number; unit_price: number }, i: number) => {
+                  const product = productMap[item.product_id]
+                  const image = product?.images?.[0]
+                  const url = product ? productUrl(product) : null
+                  return (
+                    <tr key={item.product_id} className={i % 2 === 0 ? 'bg-white' : 'bg-[#F5F5F5]'}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {image && (
+                            <div className="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+                              <Image src={image} alt={item.name} width={48} height={48} className="object-contain w-full h-full" unoptimized />
+                            </div>
+                          )}
+                          {url ? (
+                            <Link href={url} className="text-[#1A1A5E] hover:underline font-medium text-sm">{item.name}</Link>
+                          ) : (
+                            <span className="text-gray-800 text-sm">{item.name}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-gray-600">{item.qty}</td>
+                      <td className="px-4 py-3 text-right text-gray-600">{formatPrice(item.unit_price)}</td>
+                      <td className="px-6 py-3 text-right font-semibold text-[#1A1A5E]">{formatPrice(item.unit_price * item.qty)}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
