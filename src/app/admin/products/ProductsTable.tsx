@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Badge from '@/components/ui/Badge'
@@ -23,6 +24,7 @@ interface Product {
   weight_kg: number
   stock_status: string
   active: boolean
+  images: string[] | null
   supplier: { name: string } | { name: string }[] | null
 }
 
@@ -127,6 +129,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
         <table className="w-full text-sm">
           <thead className="bg-[#F5F5F5] border-b border-gray-200">
             <tr>
+              <th className="px-4 py-3 w-14" />
               <Th col="name" className="text-left">Name</Th>
               <Th col="sku" className="text-left">SKU</Th>
               <Th col="supplier" className="text-left">Supplier</Th>
@@ -142,6 +145,15 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               const stock = STOCK_BADGE[p.stock_status as StockStatus]
               return (
                 <tr key={p.id} className={`hover:bg-purple-50 ${i % 2 === 1 ? 'bg-[#F5F5F5]' : ''}`}>
+                  <td className="px-2 py-2 pl-4">
+                    {p.images?.[0] ? (
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                        <Image src={p.images[0]} alt={p.name} width={40} height={40} className="object-contain w-full h-full" unoptimized />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-md bg-gray-100 border border-gray-200" />
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <Link href={`/admin/products/${p.id}`} className="text-[#6B3D8F] hover:underline font-medium">
                       {p.name}
@@ -173,7 +185,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
+                <td colSpan={9} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
               </tr>
             )}
           </tbody>
