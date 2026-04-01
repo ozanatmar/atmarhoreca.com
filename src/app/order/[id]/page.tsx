@@ -194,6 +194,7 @@ export default async function OrderPage({ params }: Props) {
                     <p>{customer.shipping_address.street}</p>
                     <p>{customer.shipping_address.postal_code} {customer.shipping_address.city}</p>
                     <p>{customer.shipping_address.country_code}</p>
+                    {customer.phone && <p className="mt-1">{customer.phone}</p>}
                   </>
                 ) : customer?.billing_address ? (
                   <>
@@ -201,6 +202,7 @@ export default async function OrderPage({ params }: Props) {
                     <p>{customer.billing_address.street}</p>
                     <p>{customer.billing_address.postal_code} {customer.billing_address.city}</p>
                     <p>{customer.billing_address.country_code}</p>
+                    {customer.phone && <p className="mt-1">{customer.phone}</p>}
                   </>
                 ) : (
                   <p className="text-gray-400">Same as billing</p>
