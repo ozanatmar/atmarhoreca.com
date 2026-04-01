@@ -44,9 +44,9 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
         {items.map((item, i) => (
           <div key={item.product_id} className={`flex gap-4 p-4 items-center ${i > 0 ? 'border-t border-gray-100' : ''}`}>
-            <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+            <Link href={`/products/${encodeURIComponent(item.sku ?? item.slug)}/${item.slug}`} className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200 hover:opacity-80 transition-opacity">
               <Image src={item.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'} alt={item.name} fill className="object-contain" unoptimized />
-            </div>
+            </Link>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{item.name}</p>
               <p className="text-xs text-gray-500">{formatPrice(item.price)} each</p>
