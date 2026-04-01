@@ -79,7 +79,7 @@ export default async function SearchPage({ searchParams }: Props) {
           <Link
             key={p.id}
             href={productUrl(p)}
-            className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+            className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
           >
             <div className="relative aspect-square bg-gray-50">
               <Image
@@ -90,7 +90,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 unoptimized
               />
             </div>
-            <div className="p-4 flex flex-col gap-1.5">
+            <div className="p-4 flex flex-col flex-1 gap-1.5">
               <div className="flex items-center gap-2">
                 {p.brand && (
                   <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">
@@ -101,7 +101,7 @@ export default async function SearchPage({ searchParams }: Props) {
                   <span className="text-xs text-gray-400 font-mono">{p.sku}</span>
                 )}
               </div>
-              <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{p.name}</h2>
+              <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2 flex-1">{p.name}</h2>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-bold text-[#1A1A5E]">
                   {formatPrice(p.price)}
