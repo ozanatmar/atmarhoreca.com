@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { useCartStore } from '@/lib/cart-store'
 import { createClient } from '@/lib/supabase/client'
@@ -48,7 +48,7 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
               <Image src={item.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'} alt={item.name} fill className="object-contain" unoptimized />
             </Link>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{item.name}</p>
+              <Link href={productUrl(item)} className="text-sm font-semibold text-[#1A1A5E] hover:underline line-clamp-2">{item.name}</Link>
               <p className="text-xs text-gray-500">{formatPrice(item.price)} each</p>
             </div>
             <div className="flex items-center gap-1.5">

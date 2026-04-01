@@ -34,7 +34,7 @@ export default function CartPage() {
             className={`flex gap-4 p-4 items-center ${i > 0 ? 'border-t border-gray-100' : ''}`}
           >
             {/* Image */}
-            <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+            <Link href={productUrl(item)} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200 hover:opacity-80 transition-opacity">
               <Image
                 src={item.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'}
                 alt={item.name}
@@ -42,7 +42,7 @@ export default function CartPage() {
                 className="object-contain"
                 unoptimized
               />
-            </div>
+            </Link>
 
             {/* Name */}
             <div className="flex-1 min-w-0">
