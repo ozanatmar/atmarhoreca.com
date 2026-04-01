@@ -98,7 +98,19 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Product details */}
           <div className="flex flex-col gap-5">
-            <h1 className="text-3xl font-bold text-[#1A1A5E]">{product.name}</h1>
+            <div>
+              {(brand || product.sku) && (
+                <div className="flex items-center gap-2 mb-2">
+                  {brand && (
+                    <span className="text-sm font-semibold text-[#6B3D8F] uppercase tracking-wide">{brand.name}</span>
+                  )}
+                  {product.sku && (
+                    <span className="text-sm text-gray-400 font-mono">{product.sku}</span>
+                  )}
+                </div>
+              )}
+              <h1 className="text-3xl font-bold text-[#1A1A5E]">{product.name}</h1>
+            </div>
 
             {/* Price */}
             <div>
