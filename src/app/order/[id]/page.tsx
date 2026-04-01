@@ -83,7 +83,7 @@ export default async function OrderPage({ params }: Props) {
 
             {order.type === 'B' && isNew && (
               <p className="text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
-                We will check availability and send you a proforma invoice within 24 hours. You can pay by card or bank transfer once you receive it.
+                We will check availability and send you a proforma invoice within 2 business days. You can pay by card or bank transfer once you receive it.
               </p>
             )}
             {order.type === 'A' && isNew && (

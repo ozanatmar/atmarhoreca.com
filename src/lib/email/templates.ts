@@ -156,7 +156,7 @@ export function orderReceivedEmail(orderId: string, data: {
     <h2 style="color:#1A1A5E;margin-top:0;">Your order has been received</h2>
     <p>Dear ${data.full_name},</p>
     <p>Thank you for your order <strong>#${shortId(orderId)}</strong>. We have received it and are currently checking product availability with our supplier.</p>
-    <p>We will send you a proforma invoice within <strong>24 hours</strong>. You can pay by card or bank transfer once you receive it.</p>
+    <p>We will send you a proforma invoice within <strong>2 business days</strong>. You can pay by card or bank transfer once you receive it.</p>
     ${itemsTable(data.items, SITE_URL)}
     ${pricingTable({ subtotal: data.subtotal, vat_rate: data.vat_rate, vat_amount: data.vat_amount, type: 'B' })}
     ${data.billing_address ? addressBlock('Billing Address', data.billing_address) : ''}
