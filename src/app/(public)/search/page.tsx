@@ -27,7 +27,7 @@ export default async function SearchPage({ searchParams }: Props) {
     images: string[]
     stock_status: string
     requires_confirmation: boolean
-    brand: { name: string } | null
+    brand: { name: string } | { name: string }[] | null
   }> = []
 
   if (query) {
