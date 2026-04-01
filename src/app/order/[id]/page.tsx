@@ -117,9 +117,15 @@ export default async function OrderPage({ params }: Props) {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {image && (
-                            <div className="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
-                              <Image src={image} alt={item.name} width={48} height={48} className="object-contain w-full h-full" unoptimized />
-                            </div>
+                            url ? (
+                              <Link href={url} className="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200 block hover:opacity-80 transition-opacity">
+                                <Image src={image} alt={item.name} width={48} height={48} className="object-contain w-full h-full" unoptimized />
+                              </Link>
+                            ) : (
+                              <div className="w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+                                <Image src={image} alt={item.name} width={48} height={48} className="object-contain w-full h-full" unoptimized />
+                              </div>
+                            )
                           )}
                           {url ? (
                             <Link href={url} className="text-[#1A1A5E] hover:underline font-medium text-sm">{item.name}</Link>
