@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
 import { formatPrice, productUrl } from '@/lib/utils'
@@ -70,6 +72,20 @@ export default async function ProductPage({ params }: Props) {
   const url = `${siteUrl}${productUrl(product)}`
 
   const brandName = Array.isArray(brand) ? brand[0]?.name : brand?.name
+
+  // Related products — same brand, exclude current
+  let related: Array<{ id: string; name: string; slug: string; sku: string | null; price: number; images: string[]; stock_status: string; requires_confirmation: boolean }> = []
+  if (product.brand_id) {
+    const supabase = createStaticClient()
+    const { data } = await supabase
+      .from('products')
+      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation')
+      .eq('brand_id', product.brand_id)
+      .eq('active', true)
+      .neq('id', product.id)
+      .limit(4)
+    related = data ?? []
+  }
 
   const schema = {
     '@context': 'https://schema.org',
@@ -176,6 +192,38 @@ export default async function ProductPage({ params }: Props) {
               className="prose prose-sm max-w-none text-gray-700"
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
+          </div>
+        )}
+
+        {related.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-xl font-bold text-[#1A1A5E] mb-6">Related Products</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {related.map((p) => (
+                <Link
+                  key={p.id}
+                  href={productUrl(p)}
+                  className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                >
+                  <div className="relative aspect-square bg-gray-50">
+                    <Image
+                      src={p.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'}
+                      alt={[brandName, p.name].filter(Boolean).join(' ')}
+                      fill
+                      className="object-contain p-3 group-hover:scale-105 transition-transform"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="p-3 flex flex-col flex-1 gap-1">
+                    <p className="text-xs font-semibold text-[#1A1A5E] line-clamp-2 flex-1">{p.name}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-sm font-bold text-[#1A1A5E]">{formatPrice(p.price)}</span>
+                      <StockBadge stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'} requiresConfirmation={p.requires_confirmation} />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>
