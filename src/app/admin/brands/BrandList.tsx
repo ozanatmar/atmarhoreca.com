@@ -18,6 +18,7 @@ const EMPTY: Partial<Brand> = {
   handling_days: 5,
   default_requires_confirmation: false,
   contact_email: '',
+  minimum_order_amount: null,
   active: true,
 }
 
@@ -62,6 +63,7 @@ export default function BrandList({ brands }: Props) {
           <Input label="Lead Time Note" value={editing.lead_time_note ?? ''} onChange={(e) => setEditing({ ...editing, lead_time_note: e.target.value })} />
           <Input label="Handling Days" type="number" min={0} value={String(editing.handling_days ?? 5)} onChange={(e) => setEditing({ ...editing, handling_days: parseInt(e.target.value) })} />
           <Input label="Contact Email" type="email" value={editing.contact_email ?? ''} onChange={(e) => setEditing({ ...editing, contact_email: e.target.value })} />
+          <Input label="Minimum Order Amount (€, leave empty for no minimum)" type="number" min={0} step={0.01} value={editing.minimum_order_amount != null ? String(editing.minimum_order_amount) : ''} onChange={(e) => setEditing({ ...editing, minimum_order_amount: e.target.value ? parseFloat(e.target.value) : null })} />
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={editing.default_requires_confirmation ?? false} onChange={(e) => setEditing({ ...editing, default_requires_confirmation: e.target.checked })} />
             <span className="text-sm">Default requires confirmation</span>

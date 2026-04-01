@@ -1,13 +1,41 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Minus, Plus, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { useCartStore } from '@/lib/cart-store'
+import { createClient } from '@/lib/supabase/client'
 import type { StepProps } from './types'
 
 export default function StepCart({ items, subtotal, setStep }: StepProps) {
   const { updateQty, removeItem } = useCartStore()
+  const [minimumErrors, setMinimumErrors] = useState<string[]>([])
+
+  useEffect(() => {
+    const brandIds = [...new Set(items.map((i) => i.brand_id).filter(Boolean))] as string[]
+    if (brandIds.length === 0) { setMinimumErrors([]); return }
+
+    const supabase = createClient()
+    supabase
+      .from('brands')
+      .select('id, name, minimum_order_amount')
+      .in('id', brandIds)
+      .then(({ data }) => {
+        if (!data) return
+        const errors: string[] = []
+        for (const brand of data) {
+          if (!brand.minimum_order_amount) continue
+          const total = items
+            .filter((i) => i.brand_id === brand.id)
+            .reduce((sum, i) => sum + i.price * i.qty, 0)
+          if (total < brand.minimum_order_amount) {
+            errors.push(`Minimum order for ${brand.name} is ${formatPrice(brand.minimum_order_amount)}. Your current total is ${formatPrice(total)}.`)
+          }
+        }
+        setMinimumErrors(errors)
+      })
+  }, [items])
 
   return (
     <div>
@@ -40,12 +68,20 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
         ))}
       </div>
 
+      {minimumErrors.length > 0 && (
+        <div className="bg-[#FFF8E1] border border-[#F0A500] rounded-xl p-4 mb-4 flex flex-col gap-1.5">
+          {minimumErrors.map((err, i) => (
+            <p key={i} className="text-sm text-gray-700">{err}</p>
+          ))}
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between mb-6">
         <div>
           <p className="text-sm text-gray-600">Subtotal (excl. VAT &amp; shipping)</p>
           <p className="text-lg font-bold text-[#1A1A5E]">{formatPrice(subtotal)}</p>
         </div>
-        <Button size="lg" onClick={() => setStep(2)}>
+        <Button size="lg" onClick={() => setStep(2)} disabled={minimumErrors.length > 0}>
           Continue
         </Button>
       </div>

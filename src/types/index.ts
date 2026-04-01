@@ -15,6 +15,7 @@ export interface Brand {
   handling_days: number
   default_requires_confirmation: boolean
   contact_email: string | null
+  minimum_order_amount: number | null
   active: boolean
   created_at: string
 }
@@ -131,6 +132,8 @@ export interface ScrapeLog {
 
 export interface CartItem {
   product_id: string
+  brand_id: string | null
+  brand_name: string | null
   name: string
   slug: string
   sku: string | null

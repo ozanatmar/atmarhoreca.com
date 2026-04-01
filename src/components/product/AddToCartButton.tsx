@@ -31,8 +31,12 @@ export default function AddToCartButton({ product }: Props) {
       router.push(`/login?next=${productUrl(product)}`)
       return
     }
+    const brand = product.brand
+    const brandName = Array.isArray(brand) ? brand[0]?.name ?? null : brand?.name ?? null
     addItem({
       product_id: product.id,
+      brand_id: product.brand_id ?? null,
+      brand_name: brandName,
       name: product.name,
       slug: product.slug,
       sku: product.sku ?? null,

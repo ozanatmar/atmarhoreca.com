@@ -24,6 +24,21 @@ export async function POST(request: NextRequest) {
     vat_validated,
   } = body
 
+  // Validate minimum order amounts per brand
+  const brandIds = [...new Set((items as { brand_id?: string }[]).map((i) => i.brand_id).filter(Boolean))] as string[]
+  if (brandIds.length > 0) {
+    const { data: brands } = await supabase.from('brands').select('id, name, minimum_order_amount').in('id', brandIds)
+    for (const brand of brands ?? []) {
+      if (!brand.minimum_order_amount) continue
+      const total = (items as { brand_id: string; unit_price: number; qty: number }[])
+        .filter((i) => i.brand_id === brand.id)
+        .reduce((sum, i) => sum + i.unit_price * i.qty, 0)
+      if (total < brand.minimum_order_amount) {
+        return NextResponse.json({ error: `Minimum order for ${brand.name} is €${brand.minimum_order_amount.toFixed(2)}` }, { status: 422 })
+      }
+    }
+  }
+
   // Upsert customer record with latest address info
   await supabase.from('customers').upsert({
     id: user.id,
