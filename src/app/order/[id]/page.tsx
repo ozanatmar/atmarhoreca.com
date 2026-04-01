@@ -32,7 +32,7 @@ export default async function OrderPage({ params }: Props) {
 
   const { data: order } = await supabase
     .from('orders')
-    .select('*, customer:customers(full_name, email, company_name, vat_number, billing_address, shipping_address)')
+    .select('*, customer:customers(full_name, email, company_name, phone, vat_number, billing_address, shipping_address)')
     .eq('id', id)
     .eq('customer_id', user.id)
     .single()
