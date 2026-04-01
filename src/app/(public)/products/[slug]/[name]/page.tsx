@@ -92,13 +92,37 @@ export default async function ProductPage({ params }: Props) {
     url,
   }
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Brands', item: `${siteUrl}/brands` },
+      ...(brandName ? [{ '@type': 'ListItem', position: 3, name: brandName }] : []),
+      { '@type': 'ListItem', position: brandName ? 4 : 3, name: product.name, item: url },
+    ],
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <nav className="text-xs text-gray-400 mb-6 flex items-center gap-1.5">
+          <span>Home</span>
+          <span>›</span>
+          <span>Brands</span>
+          {brandName && <><span>›</span><span>{brandName}</span></>}
+          <span>›</span>
+          <span className="text-gray-500 truncate">{product.name}</span>
+        </nav>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <ImageGallery images={product.images} alt={[brandName, product.name].filter(Boolean).join(' ')} />
 
