@@ -22,8 +22,12 @@ export default function AddToCartButton({ product }: Props) {
     supabase.auth.getUser().then(({ data }) => setLoggedIn(!!data.user))
   }, [])
 
+  const brandObj = Array.isArray(product.brand) ? product.brand[0] : product.brand
   const isTypeB =
-    product.requires_confirmation || product.shipping_inefficient || product.stock_status !== 'in_stock'
+    product.requires_confirmation ||
+    (brandObj?.default_requires_confirmation ?? false) ||
+    product.shipping_inefficient ||
+    product.stock_status !== 'in_stock'
   const label = isTypeB ? 'Request Order' : 'Add to Cart'
 
   function handleClick() {
@@ -31,8 +35,9 @@ export default function AddToCartButton({ product }: Props) {
       router.push(`/login?next=${productUrl(product)}`)
       return
     }
-    const brand = product.brand
-    const brandName = Array.isArray(brand) ? brand[0]?.name ?? null : brand?.name ?? null
+    const brand = Array.isArray(product.brand) ? product.brand[0] : product.brand
+    const brandName = brand?.name ?? null
+    const requiresConfirmation = product.requires_confirmation || (brand?.default_requires_confirmation ?? false)
     addItem({
       product_id: product.id,
       brand_id: product.brand_id ?? null,
@@ -44,7 +49,7 @@ export default function AddToCartButton({ product }: Props) {
       weight_kg: product.weight_kg,
       qty: 1,
       images: product.images,
-      requires_confirmation: product.requires_confirmation,
+      requires_confirmation: requiresConfirmation,
       shipping_inefficient: product.shipping_inefficient,
       stock_status: product.stock_status,
     })
