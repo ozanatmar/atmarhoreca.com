@@ -73,7 +73,7 @@ async function notifyAdmin(orderId: string, customer: { full_name: string; email
   const chatId = process.env.TELEGRAM_CHAT_ID
   if (token && chatId) {
     const text = `New order received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer.full_name} (${customer.email})\nSubtotal: €${customer.subtotal}\nView order: ${siteUrl}/admin/orders/${orderId}`
-    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text }),
@@ -108,7 +108,7 @@ function siteUrl() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
-  fetch(`${apiBaseUrl()}/api/email/send`, {
+  await fetch(`${apiBaseUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ template, orderId, data }),
