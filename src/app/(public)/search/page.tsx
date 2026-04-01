@@ -91,15 +91,17 @@ export default async function SearchPage({ searchParams }: Props) {
               />
             </div>
             <div className="p-4 flex flex-col gap-1.5">
-              {p.brand && (
-                <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">
-                  {Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {p.brand && (
+                  <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">
+                    {Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name}
+                  </span>
+                )}
+                {p.sku && (
+                  <span className="text-xs text-gray-400 font-mono">{p.sku}</span>
+                )}
+              </div>
               <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{p.name}</h2>
-              {p.sku && (
-                <span className="text-xs text-gray-400 font-mono">{p.sku}</span>
-              )}
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-bold text-[#1A1A5E]">
                   {formatPrice(p.price)}
