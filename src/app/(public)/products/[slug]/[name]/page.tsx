@@ -69,12 +69,16 @@ export default async function ProductPage({ params }: Props) {
   const brand = product.brand
   const url = `${siteUrl}${productUrl(product)}`
 
+  const brandName = Array.isArray(brand) ? brand[0]?.name : brand?.name
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description ?? '',
     image: product.images,
+    ...(brandName && { brand: { '@type': 'Brand', name: brandName } }),
+    ...(product.sku && { sku: product.sku, mpn: product.sku }),
     offers: {
       '@type': 'Offer',
       price: product.price.toString(),
@@ -96,7 +100,7 @@ export default async function ProductPage({ params }: Props) {
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <ImageGallery images={product.images} alt={product.name} />
+          <ImageGallery images={product.images} alt={[brandName, product.name].filter(Boolean).join(' ')} />
 
           <div className="flex flex-col gap-5">
             <div>
