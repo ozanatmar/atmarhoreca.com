@@ -27,16 +27,31 @@ export default async function SearchPage({ searchParams }: Props) {
     images: string[]
     stock_status: string
     requires_confirmation: boolean
+    supplier: { name: string } | null
   }> = []
 
   if (query) {
     const supabase = await createClient()
-    const { data } = await supabase
+
+    // Find supplier IDs matching the brand search term
+    const { data: matchedSuppliers } = await supabase
+      .from('suppliers')
+      .select('id')
+      .ilike('name', `%${query}%`)
+    const supplierIds = (matchedSuppliers ?? []).map((s: { id: string }) => s.id)
+
+    let q = supabase
       .from('products')
-      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation')
+      .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, supplier:suppliers(name)')
       .eq('active', true)
-      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-      .limit(48)
+
+    const orFilters = [`name.ilike.%${query}%`, `description.ilike.%${query}%`, `sku.ilike.%${query}%`]
+    if (supplierIds.length > 0) {
+      orFilters.push(`supplier_id.in.(${supplierIds.join(',')})`)
+    }
+    q = q.or(orFilters.join(','))
+
+    const { data } = await q.limit(48)
     products = data ?? []
   }
 
@@ -75,9 +90,17 @@ export default async function SearchPage({ searchParams }: Props) {
                 unoptimized
               />
             </div>
-            <div className="p-4 flex flex-col gap-2">
+            <div className="p-4 flex flex-col gap-1.5">
+              {p.supplier && (
+                <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">
+                  {Array.isArray(p.supplier) ? p.supplier[0]?.name : p.supplier.name}
+                </span>
+              )}
               <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{p.name}</h2>
-              <div className="flex items-center justify-between">
+              {p.sku && (
+                <span className="text-xs text-gray-400 font-mono">{p.sku}</span>
+              )}
+              <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-bold text-[#1A1A5E]">
                   {formatPrice(p.price)}
                 </span>
