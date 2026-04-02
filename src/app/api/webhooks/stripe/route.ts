@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
       // Admin email notification
       if (process.env.ADMIN_EMAIL) {
-        fetch(`${apiBaseUrl()}/api/email/send`, {
+        await fetch(`${apiBaseUrl()}/api/email/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -93,11 +93,11 @@ export async function POST(request: NextRequest) {
       if (token && chatId) {
         const base = siteUrl()
         const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
-        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chat_id: chatId, text }),
-        }).then(r => r.json()).then(r => console.log('[webhook] telegram result:', JSON.stringify(r))).catch(console.error)
+        }).catch(console.error)
       }
     }
   }
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
       // Admin email notification
       if (process.env.ADMIN_EMAIL) {
-        fetch(`${apiBaseUrl()}/api/email/send`, {
+        await fetch(`${apiBaseUrl()}/api/email/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       if (token && chatId) {
         const base = siteUrl()
         const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
-        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chat_id: chatId, text }),
