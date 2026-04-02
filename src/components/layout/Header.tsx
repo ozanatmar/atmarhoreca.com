@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, User, Search, Loader2 } from 'lucide-react'
-import { Suspense, useEffect, useState } from 'react'
+import { ShoppingCart, User, Search, Loader2, LogOut, UserCircle } from 'lucide-react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
@@ -57,6 +57,65 @@ function HeaderSearchBar() {
 
 function MobileSearchBar() {
   return <SearchBar className="flex w-full" />
+}
+
+function UserMenu() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [])
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="p-2 hover:text-[#F0A500] transition-colors"
+        aria-label="Account"
+      >
+        <User className="w-6 h-6" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <Link
+            href="/account"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <UserCircle className="w-4 h-4 text-[#6B3D8F]" />
+            My Account
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <LogOut className="w-4 h-4 text-gray-400" />
+            Log Out
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function Header() {
@@ -117,13 +176,11 @@ export default function Header() {
                 </span>
               )}
             </Link>
-            <Link
-              href={user ? '/account' : '/login'}
-              className="p-2 hover:text-[#F0A500] transition-colors"
-              aria-label={user ? 'Account' : 'Login'}
-            >
-              <User className="w-6 h-6" />
-            </Link>
+            {user ? <UserMenu /> : (
+              <Link href="/login" className="p-2 hover:text-[#F0A500] transition-colors" aria-label="Login">
+                <User className="w-6 h-6" />
+              </Link>
+            )}
           </nav>
         </div>
 
