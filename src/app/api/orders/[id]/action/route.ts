@@ -192,6 +192,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         full_name: customer?.full_name,
         email: customer?.email,
         items: order.items,
+        subtotal: order.subtotal,
+        shipping_cost: order.shipping_cost,
+        vat_rate: order.vat_rate,
+        vat_amount: order.vat_amount,
+        total: order.total,
         tracking_number,
         tracking_url: tracking_url || null,
       })

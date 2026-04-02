@@ -248,6 +248,11 @@ export function paymentConfirmedEmail(orderId: string, data: {
 export function orderFulfilledEmail(orderId: string, data: {
   full_name: string
   items: OrderItem[]
+  subtotal: number
+  shipping_cost: number
+  vat_rate: number
+  vat_amount: number
+  total: number
   tracking_number: string
   tracking_url?: string | null
 }) {
@@ -262,6 +267,7 @@ export function orderFulfilledEmail(orderId: string, data: {
     <p><strong>Tracking Number:</strong> ${data.tracking_number}</p>
     ${trackBtn}
     ${itemsTable(data.items, SITE_URL)}
+    ${pricingTable({ subtotal: data.subtotal, shipping_cost: data.shipping_cost, vat_rate: data.vat_rate, vat_amount: data.vat_amount, total: data.total })}
   `
   return { subject: `Your order has been shipped — Order #${shortId(orderId)}`, html: baseLayout(content) }
 }
