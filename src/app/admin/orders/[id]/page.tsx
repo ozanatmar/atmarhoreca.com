@@ -67,18 +67,6 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <Row label={`VAT (${(order.vat_rate * 100).toFixed(0)}%)`} value={formatPrice(order.vat_amount)} />
             <Row label="Total" value={formatPrice(order.total)} bold />
             <Row label="Currency" value={order.currency} />
-            {order.estimated_ship_date && (
-              <Row
-                label="Est. Ship Date"
-                value={new Date(order.estimated_ship_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              />
-            )}
-            {order.estimated_delivery_date && (
-              <Row
-                label="Est. Delivery Date"
-                value={new Date(order.estimated_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              />
-            )}
           </dl>
           {order.stripe_payment_link_url && (
             <div className="mt-3">
@@ -89,6 +77,35 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Timeline */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <h2 className="font-bold text-[#1A1A5E] mb-3">Timeline</h2>
+        <dl className="text-sm space-y-1.5">
+          <Row
+            label="Order Placed"
+            value={new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          />
+          {order.paid_at && (
+            <Row
+              label="Payment Received"
+              value={new Date(order.paid_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            />
+          )}
+          {order.estimated_ship_date && (
+            <Row
+              label="Est. Ship Date"
+              value={new Date(order.estimated_ship_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            />
+          )}
+          {order.estimated_delivery_date && (
+            <Row
+              label="Est. Delivery Date"
+              value={new Date(order.estimated_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            />
+          )}
+        </dl>
       </div>
 
       {/* Items */}

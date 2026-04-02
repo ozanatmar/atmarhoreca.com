@@ -167,7 +167,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     case 'mark_paid_bank': {
-      await supabase.from('orders').update({ status: 'paid' }).eq('id', id)
+      await supabase.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id)
       await sendEmail('payment_confirmed', id, {
         full_name: customer?.full_name,
         email: customer?.email,

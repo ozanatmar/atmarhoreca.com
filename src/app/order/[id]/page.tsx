@@ -217,30 +217,16 @@ export default async function OrderPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Estimated dates */}
-          {(order.estimated_ship_date || order.estimated_delivery_date) && (
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
-              <h2 className="font-semibold text-[#1A1A5E] mb-3">Estimated Timeline</h2>
-              <div className="flex flex-col gap-2 text-sm">
-                {order.estimated_ship_date && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Estimated Ship Date</span>
-                    <span className="font-medium text-[#1A1A5E]">
-                      {new Date(order.estimated_ship_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
-                  </div>
-                )}
-                {order.estimated_delivery_date && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Estimated Delivery</span>
-                    <span className="font-medium text-[#1A1A5E]">
-                      {new Date(order.estimated_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
-                  </div>
-                )}
-              </div>
+          {/* Timeline */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
+            <h2 className="font-semibold text-[#1A1A5E] mb-3">Timeline</h2>
+            <div className="flex flex-col gap-2 text-sm">
+              <DateRow label="Order Placed" value={order.created_at} />
+              {order.paid_at && <DateRow label="Payment Received" value={order.paid_at} />}
+              {order.estimated_ship_date && <DateRow label="Estimated Ship Date" value={order.estimated_ship_date} dateOnly />}
+              {order.estimated_delivery_date && <DateRow label="Estimated Delivery" value={order.estimated_delivery_date} dateOnly />}
             </div>
-          )}
+          </div>
 
           {/* Tracking */}
           {order.tracking_number && (
@@ -269,6 +255,18 @@ export default async function OrderPage({ params }: Props) {
           </div>
         </div>
       </main>
+    </div>
+  )
+}
+
+function DateRow({ label, value, dateOnly }: { label: string; value: string; dateOnly?: boolean }) {
+  const formatted = dateOnly
+    ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return (
+    <div className="flex justify-between">
+      <span className="text-gray-600">{label}</span>
+      <span className="font-medium text-[#1A1A5E]">{formatted}</span>
     </div>
   )
 }

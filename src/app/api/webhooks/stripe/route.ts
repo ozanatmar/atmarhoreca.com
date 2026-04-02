@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     console.log('[webhook] orderId:', orderId, '| order found:', !!order, '| error:', orderError?.message)
 
     if (order && order.status !== 'paid') {
-      await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
+      await supabase.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', orderId)
 
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
       console.log('[webhook] sending email to:', customer?.email, '| telegram token set:', !!process.env.TELEGRAM_BOT_TOKEN)
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (order && order.status !== 'paid') {
-      await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
+      await supabase.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', orderId)
 
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
 

@@ -90,6 +90,7 @@ export interface Order {
   estimated_delivery_days: number | null
   estimated_ship_date: string | null
   estimated_delivery_date: string | null
+  paid_at: string | null
   tracking_number: string | null
   tracking_url: string | null
   admin_notes: string | null
