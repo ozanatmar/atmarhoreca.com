@@ -217,6 +217,31 @@ export default async function OrderPage({ params }: Props) {
             </div>
           </div>
 
+          {/* Estimated dates */}
+          {(order.estimated_ship_date || order.estimated_delivery_date) && (
+            <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
+              <h2 className="font-semibold text-[#1A1A5E] mb-3">Estimated Timeline</h2>
+              <div className="flex flex-col gap-2 text-sm">
+                {order.estimated_ship_date && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Estimated Ship Date</span>
+                    <span className="font-medium text-[#1A1A5E]">
+                      {new Date(order.estimated_ship_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                )}
+                {order.estimated_delivery_date && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Estimated Delivery</span>
+                    <span className="font-medium text-[#1A1A5E]">
+                      {new Date(order.estimated_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Tracking */}
           {order.tracking_number && (
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">

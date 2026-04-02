@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { addBusinessDays } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -25,16 +26,18 @@ export async function POST(request: NextRequest) {
     vat_validated,
   } = body
 
-  // Validate minimum order amounts per brand
+  // Fetch brand data (min order validation + handling days for estimated dates)
   const brandIds = [...new Set((items as { brand_id?: string }[]).map((i) => i.brand_id).filter(Boolean))] as string[]
+  let brands: { id: string; name: string; minimum_order_amount: number | null; handling_days: number | null }[] = []
   if (brandIds.length > 0) {
-    const { data: brands } = await supabase.from('brands').select('id, name, minimum_order_amount').in('id', brandIds)
-    for (const brand of brands ?? []) {
+    const { data } = await supabase.from('brands').select('id, name, minimum_order_amount, handling_days').in('id', brandIds)
+    brands = data ?? []
+    for (const brand of brands) {
       if (!brand.minimum_order_amount) continue
-      const total = (items as { brand_id: string; unit_price: number; qty: number }[])
+      const brandTotal = (items as { brand_id: string; unit_price: number; qty: number }[])
         .filter((i) => i.brand_id === brand.id)
         .reduce((sum, i) => sum + i.unit_price * i.qty, 0)
-      if (total < brand.minimum_order_amount) {
+      if (brandTotal < brand.minimum_order_amount) {
         return NextResponse.json({ error: `Minimum order for ${brand.name} is €${brand.minimum_order_amount.toFixed(2)}` }, { status: 422 })
       }
     }
@@ -54,6 +57,16 @@ export async function POST(request: NextRequest) {
     shipping_address,
   })
 
+  // Compute estimated ship / delivery dates for Type A orders
+  let estimated_ship_date: string | null = null
+  let estimated_delivery_date: string | null = null
+  if (type === 'A' && estimated_delivery_days != null) {
+    const maxHandlingDays = brands.length ? Math.max(...brands.map(b => b.handling_days ?? 1)) : 1
+    const now = new Date()
+    estimated_ship_date = addBusinessDays(now, maxHandlingDays).toISOString().slice(0, 10)
+    estimated_delivery_date = addBusinessDays(now, estimated_delivery_days).toISOString().slice(0, 10)
+  }
+
   const { data: order, error } = await supabase
     .from('orders')
     .insert({
@@ -68,6 +81,8 @@ export async function POST(request: NextRequest) {
       total,
       currency: 'EUR',
       estimated_delivery_days: estimated_delivery_days ?? null,
+      estimated_ship_date,
+      estimated_delivery_date,
     })
     .select('id')
     .single()

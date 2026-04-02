@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { generateProformaPDF } from '@/lib/pdf/proforma'
 import { calculateShipping } from '@/lib/shipping'
+import { addBusinessDays } from '@/lib/utils'
 
 function getStripe() { return new Stripe(process.env.STRIPE_SECRET_KEY!) }
 
@@ -60,26 +61,19 @@ export async function POST(request: NextRequest, { params }: Params) {
         payment_intent_data: { metadata: { orderId: id } },
       })
 
-      await supabase.from('orders').update({
-        status: 'awaiting_payment',
-        shipping_cost: shippingCost,
-        vat_amount: vatAmount,
-        total: newTotal,
-        stripe_payment_link_url: paymentLink.url,
-      }).eq('id', id)
-
       // Look up transit days + brand handling days for delivery estimate
       const destCountry = customer?.billing_address?.country_code
       const totalWeight = (order.items as { weight_kg: number; qty: number }[])
         .reduce((sum, i) => sum + i.weight_kg * i.qty, 0)
       let estimatedDeliveryDays: number | null = null
+      let maxHandlingDays = 1
       if (destCountry) {
         const productIds = (order.items as { product_id: string }[]).map(i => i.product_id)
         const [{ data: shippingRates }, { data: products }] = await Promise.all([
           supabase.from('shipping_rates').select('*'),
           supabase.from('products').select('id, brand:brands(handling_days)').in('id', productIds),
         ])
-        const handlingDays = Math.max(
+        maxHandlingDays = Math.max(
           1,
           ...((products ?? []).map((p: { brand?: { handling_days?: number } | { handling_days?: number }[] | null }) => {
             const brand = Array.isArray(p.brand) ? p.brand[0] : p.brand
@@ -87,8 +81,29 @@ export async function POST(request: NextRequest, { params }: Params) {
           }))
         )
         const shippingResult = calculateShipping(shippingRates ?? [], 'IT', destCountry, totalWeight)
-        if (shippingResult) estimatedDeliveryDays = handlingDays + shippingResult.transitDays
+        if (shippingResult) estimatedDeliveryDays = maxHandlingDays + shippingResult.transitDays
       }
+
+      // Compute estimated dates
+      let estimated_ship_date: string | null = null
+      let estimated_delivery_date: string | null = null
+      if (estimatedDeliveryDays != null) {
+        const now = new Date()
+        estimated_ship_date = addBusinessDays(now, maxHandlingDays).toISOString().slice(0, 10)
+        estimated_delivery_date = addBusinessDays(now, estimatedDeliveryDays).toISOString().slice(0, 10)
+      }
+
+      // Update order with financials + dates
+      await supabase.from('orders').update({
+        status: 'awaiting_payment',
+        shipping_cost: shippingCost,
+        vat_amount: vatAmount,
+        total: newTotal,
+        stripe_payment_link_url: paymentLink.url,
+        estimated_delivery_days: estimatedDeliveryDays,
+        estimated_ship_date,
+        estimated_delivery_date,
+      }).eq('id', id)
 
       // Generate proforma PDF
       const pdfBuffer = await generateProformaPDF({

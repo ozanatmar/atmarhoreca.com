@@ -88,6 +88,8 @@ export interface Order {
   stripe_payment_intent_id: string | null
   proforma_pdf_url: string | null
   estimated_delivery_days: number | null
+  estimated_ship_date: string | null
+  estimated_delivery_date: string | null
   tracking_number: string | null
   tracking_url: string | null
   admin_notes: string | null

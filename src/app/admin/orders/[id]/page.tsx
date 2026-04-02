@@ -67,6 +67,18 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <Row label={`VAT (${(order.vat_rate * 100).toFixed(0)}%)`} value={formatPrice(order.vat_amount)} />
             <Row label="Total" value={formatPrice(order.total)} bold />
             <Row label="Currency" value={order.currency} />
+            {order.estimated_ship_date && (
+              <Row
+                label="Est. Ship Date"
+                value={new Date(order.estimated_ship_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              />
+            )}
+            {order.estimated_delivery_date && (
+              <Row
+                label="Est. Delivery Date"
+                value={new Date(order.estimated_delivery_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              />
+            )}
           </dl>
           {order.stripe_payment_link_url && (
             <div className="mt-3">

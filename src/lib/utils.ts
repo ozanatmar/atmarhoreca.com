@@ -81,3 +81,15 @@ export function businessDaysLabel(days: number): string {
   if (days === 1) return '1 business day'
   return `${days} business days`
 }
+
+// Add N business days to a date (skips Saturdays and Sundays)
+export function addBusinessDays(from: Date, days: number): Date {
+  const result = new Date(from)
+  let added = 0
+  while (added < days) {
+    result.setDate(result.getDate() + 1)
+    const day = result.getDay()
+    if (day !== 0 && day !== 6) added++
+  }
+  return result
+}
