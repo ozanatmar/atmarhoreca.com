@@ -88,7 +88,7 @@ function UserMenu() {
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen(true)}
         className="p-2 hover:text-[#F0A500] transition-colors"
         aria-label="Account"
       >
