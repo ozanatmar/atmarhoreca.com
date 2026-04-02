@@ -4,6 +4,7 @@ import {
   proformaInvoiceEmail,
   paymentConfirmedEmail,
   orderFulfilledEmail,
+  orderCancelledEmail,
   adminNewOrderEmail,
   adminPaymentReceivedEmail,
 } from '@/lib/email/templates'
@@ -60,6 +61,10 @@ export async function POST(request: NextRequest) {
       break
     case 'order_fulfilled':
       email = orderFulfilledEmail(orderId, data)
+      to = data.email
+      break
+    case 'order_cancelled':
+      email = orderCancelledEmail(orderId, data)
       to = data.email
       break
     case 'admin_new_order':

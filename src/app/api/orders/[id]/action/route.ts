@@ -216,6 +216,14 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     case 'cancel': {
       await supabase.from('orders').update({ status: 'cancelled' }).eq('id', id)
+      await sendEmail('order_cancelled', id, {
+        full_name: customer?.full_name,
+        email: customer?.email,
+        items: order.items,
+        subtotal: orderSubtotal,
+        vat_rate: orderVatRate,
+        vat_amount: orderVatAmount,
+      })
       return NextResponse.json({ message: 'Order cancelled' })
     }
 

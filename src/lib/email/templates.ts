@@ -273,6 +273,29 @@ export function orderFulfilledEmail(orderId: string, data: {
 }
 
 // ============================================================
+// Email #5 — Order Cancelled
+// ============================================================
+export function orderCancelledEmail(orderId: string, data: {
+  full_name: string
+  items: OrderItem[]
+  subtotal: number
+  vat_rate: number
+  vat_amount: number
+}) {
+  const content = `
+    <h2 style="color:#1A1A5E;margin-top:0;">Your order has been cancelled</h2>
+    <p>Dear ${data.full_name},</p>
+    <p>Your order <strong>#${shortId(orderId)}</strong> has been cancelled. If you have any questions, please contact us.</p>
+    ${itemsTable(data.items, SITE_URL)}
+    ${pricingTable({ subtotal: data.subtotal, vat_rate: data.vat_rate, vat_amount: data.vat_amount, type: 'B' })}
+    <p style="margin-top:24px;">
+      <a href="${SITE_URL}" style="color:#6B3D8F;font-weight:bold;">Continue shopping →</a>
+    </p>
+  `
+  return { subject: `Order cancelled — Order #${shortId(orderId)}`, html: baseLayout(content) }
+}
+
+// ============================================================
 // Admin payment received email (Type A — card payment)
 // ============================================================
 export function adminPaymentReceivedEmail(orderId: string, data: {
