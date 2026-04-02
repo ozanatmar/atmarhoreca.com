@@ -34,6 +34,8 @@ export interface ProformaPDFData {
   vat_rate: number
   vat_amount: number
   total: number
+  // Delivery
+  estimated_delivery_days?: number | null
   // Payment
   stripe_payment_link_url: string
   iban: string
@@ -72,7 +74,8 @@ export async function generateProformaPDF(data: ProformaPDFData): Promise<Buffer
     leftY += 14
     doc.fillColor(GRAY).font('Helvetica').fontSize(8.5)
     doc.text('VAT: BG205062463', 50, leftY); leftY += 11
-    doc.text('Varna, Bulgaria', 50, leftY); leftY += 11
+    doc.text('Manol Lazarov str. 67', 50, leftY); leftY += 11
+    doc.text('9022 Varna, Bulgaria', 50, leftY); leftY += 11
     doc.text('orders@atmarhoreca.com', 50, leftY); leftY += 11
     doc.text('atmarhoreca.com', 50, leftY)
 
@@ -148,6 +151,15 @@ export async function generateProformaPDF(data: ProformaPDFData): Promise<Buffer
     doc.fillColor(DARK_BLUE).font('Helvetica-Bold').fontSize(10)
     doc.text('TOTAL', totalsX, y, { width: 120 })
     doc.text(`€${Number(data.total).toFixed(2)}`, totalsX + 124, y, { width: 60, align: 'right' })
+
+    // ── Delivery note ────────────────────────────────────────────
+    if (data.estimated_delivery_days != null) {
+      y += 20
+      doc.fillColor(DARK_BLUE).font('Helvetica-Bold').fontSize(8.5)
+        .text('Estimated Delivery: ', 50, y, { continued: true })
+      doc.fillColor(GRAY).font('Helvetica')
+        .text(`${data.estimated_delivery_days} business days from payment confirmation`)
+    }
 
     // ── Payment details ──────────────────────────────────────────
     y += 36

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { generateProformaPDF } from '@/lib/pdf/proforma'
+import { calculateShipping } from '@/lib/shipping'
 
 function getStripe() { return new Stripe(process.env.STRIPE_SECRET_KEY!) }
 
@@ -67,6 +68,17 @@ export async function POST(request: NextRequest, { params }: Params) {
         stripe_payment_link_url: paymentLink.url,
       }).eq('id', id)
 
+      // Look up transit days for delivery estimate
+      const destCountry = customer?.billing_address?.country_code
+      const totalWeight = (order.items as { weight_kg: number; qty: number }[])
+        .reduce((sum, i) => sum + i.weight_kg * i.qty, 0)
+      let estimatedDeliveryDays: number | null = null
+      if (destCountry) {
+        const { data: shippingRates } = await supabase.from('shipping_rates').select('*')
+        const shippingResult = calculateShipping(shippingRates ?? [], 'IT', destCountry, totalWeight)
+        if (shippingResult) estimatedDeliveryDays = 5 + shippingResult.transitDays
+      }
+
       // Generate proforma PDF
       const pdfBuffer = await generateProformaPDF({
         orderId: id,
@@ -81,6 +93,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         vat_amount: vatAmount,
         total: newTotal,
         stripe_payment_link_url: paymentLink.url,
+        estimated_delivery_days: estimatedDeliveryDays,
         iban: process.env.REVOLUT_EUR_IBAN ?? '',
         bic: process.env.REVOLUT_EUR_BIC ?? '',
         account_holder: process.env.REVOLUT_ACCOUNT_HOLDER ?? 'Atmar Horeca EOOD',
