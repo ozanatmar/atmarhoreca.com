@@ -55,6 +55,7 @@ export async function POST(request: NextRequest, { params }: Params) {
           },
         ],
         metadata: { orderId: id },
+        payment_intent_data: { metadata: { orderId: id } },
       })
 
       await supabase.from('orders').update({
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
-  fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send`, {
+  await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ template, orderId, data }),

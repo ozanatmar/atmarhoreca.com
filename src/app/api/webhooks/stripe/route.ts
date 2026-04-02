@@ -87,7 +87,46 @@ export async function POST(request: NextRequest) {
     const orderId = session.metadata?.orderId
     if (!orderId) return NextResponse.json({ received: true })
 
-    await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
+    const { data: order } = await supabase
+      .from('orders')
+      .select('*, customer:customers(full_name, email)')
+      .eq('id', orderId)
+      .single()
+
+    if (order && order.status !== 'paid') {
+      await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId)
+
+      const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
+
+      await fetch(`${apiBaseUrl()}/api/email/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: 'payment_confirmed',
+          orderId,
+          data: {
+            full_name: customer?.full_name,
+            email: customer?.email,
+            items: order.items,
+            total: order.total,
+            type: order.type,
+            order_link: `${siteUrl()}/order/${orderId}`,
+          },
+        }),
+      }).catch(console.error)
+
+      const token = process.env.TELEGRAM_BOT_TOKEN
+      const chatId = process.env.TELEGRAM_CHAT_ID
+      if (token && chatId) {
+        const base = siteUrl()
+        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
+        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        }).catch(console.error)
+      }
+    }
   }
 
   return NextResponse.json({ received: true })
