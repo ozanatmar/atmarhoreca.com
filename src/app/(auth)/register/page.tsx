@@ -19,26 +19,27 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
-    const { data, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
+    // Create account via server route (bypasses Supabase email validation)
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, full_name: fullName }),
     })
+    const json = await res.json()
 
-    if (authError) {
-      setError(authError.message)
+    if (!res.ok) {
+      setError(json.error ?? 'Something went wrong')
       setLoading(false)
       return
     }
 
-    if (data.user) {
-      await supabase.from('customers').insert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        email_verified: false,
-      })
+    // Sign in the newly created user
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) {
+      setError(signInError.message)
+      setLoading(false)
+      return
     }
 
     // Send verification email
