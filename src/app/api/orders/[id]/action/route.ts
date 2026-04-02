@@ -68,15 +68,26 @@ export async function POST(request: NextRequest, { params }: Params) {
         stripe_payment_link_url: paymentLink.url,
       }).eq('id', id)
 
-      // Look up transit days for delivery estimate
+      // Look up transit days + brand handling days for delivery estimate
       const destCountry = customer?.billing_address?.country_code
       const totalWeight = (order.items as { weight_kg: number; qty: number }[])
         .reduce((sum, i) => sum + i.weight_kg * i.qty, 0)
       let estimatedDeliveryDays: number | null = null
       if (destCountry) {
-        const { data: shippingRates } = await supabase.from('shipping_rates').select('*')
+        const productIds = (order.items as { product_id: string }[]).map(i => i.product_id)
+        const [{ data: shippingRates }, { data: products }] = await Promise.all([
+          supabase.from('shipping_rates').select('*'),
+          supabase.from('products').select('id, brand:brands(handling_days)').in('id', productIds),
+        ])
+        const handlingDays = Math.max(
+          1,
+          ...((products ?? []).map((p: { brand?: { handling_days?: number } | { handling_days?: number }[] | null }) => {
+            const brand = Array.isArray(p.brand) ? p.brand[0] : p.brand
+            return brand?.handling_days ?? 1
+          }))
+        )
         const shippingResult = calculateShipping(shippingRates ?? [], 'IT', destCountry, totalWeight)
-        if (shippingResult) estimatedDeliveryDays = 5 + shippingResult.transitDays
+        if (shippingResult) estimatedDeliveryDays = handlingDays + shippingResult.transitDays
       }
 
       // Generate proforma PDF

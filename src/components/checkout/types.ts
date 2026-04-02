@@ -25,4 +25,5 @@ export interface StepProps {
   setOrderId: (id: string) => void
   clearCart: () => void
   router: AppRouterInstance
+  maxHandlingDays: number
 }

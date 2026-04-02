@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/cart-store'
+import { createClient } from '@/lib/supabase/client'
 import { calculateVat, cartSubtotal, cartTotalWeight } from '@/lib/utils'
 import { calculateShipping } from '@/lib/shipping'
 import { determineOrderType } from '@/lib/order-type'
@@ -38,6 +39,20 @@ export default function CheckoutFlow({ customer, userId, shippingRates }: Props)
   const [sameShipping, setSameShipping] = useState(true)
   const [shippingAddress, setShippingAddress] = useState<CheckoutAddress>(address)
   const [orderId, setOrderId] = useState<string | null>(null)
+  const [maxHandlingDays, setMaxHandlingDays] = useState(1)
+
+  useEffect(() => {
+    const brandIds = [...new Set(items.map(i => i.brand_id).filter(Boolean))] as string[]
+    if (brandIds.length === 0) return
+    createClient()
+      .from('brands')
+      .select('handling_days')
+      .in('id', brandIds)
+      .then(({ data }) => {
+        if (!data?.length) return
+        setMaxHandlingDays(Math.max(...data.map(b => b.handling_days ?? 1)))
+      })
+  }, [items])
 
   if (items.length === 0 && step < 4) {
     router.push('/cart')
@@ -87,6 +102,7 @@ export default function CheckoutFlow({ customer, userId, shippingRates }: Props)
     setOrderId,
     clearCart,
     router,
+    maxHandlingDays,
   }
 
   return (

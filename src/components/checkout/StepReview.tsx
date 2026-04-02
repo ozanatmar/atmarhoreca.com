@@ -16,9 +16,9 @@ export default function StepReview({
   vatAmount,
   total,
   setStep,
+  maxHandlingDays,
 }: StepProps) {
   const destAddress = sameShipping ? address : shippingAddress
-  const supplier = { handling_days: 5 } // from DB in real usage; 5 = Martellato default
 
   return (
     <div>
@@ -80,7 +80,7 @@ export default function StepReview({
           <p className="text-sm text-gray-600">
             Estimated delivery:{' '}
             <strong className="text-[#1A1A5E]">
-              {businessDaysLabel(supplier.handling_days + shippingResult.transitDays)}
+              {businessDaysLabel(maxHandlingDays + shippingResult.transitDays)}
             </strong>{' '}
             from payment confirmation
           </p>

@@ -9,10 +9,8 @@ import type { StepProps } from './types'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
-const SUPPLIER_HANDLING_DAYS = 5 // Martellato default
-
 export default function StepPayment(props: StepProps) {
-  const { orderType, total, subtotal, shippingCost, vatAmount, vatResult, items, address, sameShipping, shippingAddress, userId, setOrderId, clearCart, router, setStep, shippingResult } = props
+  const { orderType, total, subtotal, shippingCost, vatAmount, vatResult, items, address, sameShipping, shippingAddress, userId, setOrderId, clearCart, router, setStep, shippingResult, maxHandlingDays } = props
 
   const [submitting, setSubmitting] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
@@ -50,7 +48,7 @@ export default function StepPayment(props: StepProps) {
         total,
         type: props.orderType,
         estimated_delivery_days: props.orderType === 'A' && shippingResult
-          ? SUPPLIER_HANDLING_DAYS + shippingResult.transitDays
+          ? maxHandlingDays + shippingResult.transitDays
           : null,
         billing_address: billingAddr,
         shipping_address: shippingAddr,
