@@ -263,6 +263,39 @@ export function orderFulfilledEmail(orderId: string, data: {
 }
 
 // ============================================================
+// Admin payment received email (Type A — card payment)
+// ============================================================
+export function adminPaymentReceivedEmail(orderId: string, data: {
+  full_name: string
+  email?: string
+  items: OrderItem[]
+  total: number
+  admin_link: string
+}) {
+  const content = `
+    <h2 style="color:#1A1A5E;margin-top:0;">💳 Payment received</h2>
+    <p><strong>Order:</strong> #${shortId(orderId)}</p>
+
+    <div style="background:#f5f5f5;border-radius:8px;padding:16px;font-size:14px;margin-bottom:16px;">
+      <strong style="color:#1A1A5E;">Customer</strong><br/>
+      ${data.full_name}<br/>
+      ${data.email ?? ''}
+    </div>
+
+    ${itemsTable(data.items, SITE_URL)}
+
+    <p style="font-size:16px;font-weight:bold;">Total paid: €${data.total.toFixed(2)}</p>
+
+    <div style="margin:24px 0;">
+      <a href="${data.admin_link}" style="background:#6B3D8F;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
+        View in Admin
+      </a>
+    </div>
+  `
+  return { subject: `Payment received — Order #${shortId(orderId)}`, html: baseLayout(content) }
+}
+
+// ============================================================
 // Admin new order email
 // ============================================================
 export function adminNewOrderEmail(orderId: string, data: {

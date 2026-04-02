@@ -68,6 +68,25 @@ export async function POST(request: NextRequest) {
         }),
       }).catch(console.error)
 
+      // Admin email notification
+      if (process.env.ADMIN_EMAIL) {
+        fetch(`${apiBaseUrl()}/api/email/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template: 'admin_payment_received',
+            orderId,
+            data: {
+              full_name: customer?.full_name,
+              email: customer?.email,
+              items: order.items,
+              total: order.total,
+              admin_link: `${siteUrl()}/admin/orders/${orderId}`,
+            },
+          }),
+        }).catch(console.error)
+      }
+
       // Telegram notification to admin
       const token = process.env.TELEGRAM_BOT_TOKEN
       const chatId = process.env.TELEGRAM_CHAT_ID
@@ -116,6 +135,25 @@ export async function POST(request: NextRequest) {
           },
         }),
       }).catch(console.error)
+
+      // Admin email notification
+      if (process.env.ADMIN_EMAIL) {
+        fetch(`${apiBaseUrl()}/api/email/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template: 'admin_payment_received',
+            orderId,
+            data: {
+              full_name: customer?.full_name,
+              email: customer?.email,
+              items: order.items,
+              total: order.total,
+              admin_link: `${siteUrl()}/admin/orders/${orderId}`,
+            },
+          }),
+        }).catch(console.error)
+      }
 
       const token = process.env.TELEGRAM_BOT_TOKEN
       const chatId = process.env.TELEGRAM_CHAT_ID

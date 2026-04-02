@@ -5,6 +5,7 @@ import {
   paymentConfirmedEmail,
   orderFulfilledEmail,
   adminNewOrderEmail,
+  adminPaymentReceivedEmail,
 } from '@/lib/email/templates'
 
 const FROM_EMAIL = 'orders@atmarhoreca.com'
@@ -55,6 +56,10 @@ export async function POST(request: NextRequest) {
       break
     case 'admin_new_order':
       email = adminNewOrderEmail(orderId, data)
+      to = process.env.ADMIN_EMAIL!
+      break
+    case 'admin_payment_received':
+      email = adminPaymentReceivedEmail(orderId, data)
       to = process.env.ADMIN_EMAIL!
       break
     default:
