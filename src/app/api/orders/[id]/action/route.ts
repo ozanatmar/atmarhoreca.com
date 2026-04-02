@@ -33,6 +33,13 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
 
+  // Supabase returns numeric columns as strings — parse once here
+  const orderSubtotal = Number(order.subtotal)
+  const orderShippingCost = Number(order.shipping_cost)
+  const orderVatRate = Number(order.vat_rate)
+  const orderVatAmount = Number(order.vat_amount)
+  const orderTotal = Number(order.total)
+
   switch (action) {
     case 'save_notes': {
       await supabase.from('orders').update({ admin_notes: body.admin_notes }).eq('id', id)
@@ -156,11 +163,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         full_name: customer?.full_name,
         email: customer?.email,
         items: order.items,
-        subtotal: order.subtotal,
-        shipping_cost: order.shipping_cost,
-        vat_rate: order.vat_rate,
-        vat_amount: order.vat_amount,
-        total: order.total,
+        subtotal: orderSubtotal,
+        shipping_cost: orderShippingCost,
+        vat_rate: orderVatRate,
+        vat_amount: orderVatAmount,
+        total: orderTotal,
         stripe_payment_link_url: order.stripe_payment_link_url,
       })
       return NextResponse.json({ message: 'Proforma resent' })
@@ -172,7 +179,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         full_name: customer?.full_name,
         email: customer?.email,
         items: order.items,
-        total: order.total,
+        subtotal: orderSubtotal,
+        shipping_cost: orderShippingCost,
+        vat_rate: orderVatRate,
+        vat_amount: orderVatAmount,
+        total: orderTotal,
         type: order.type,
       })
       return NextResponse.json({ message: 'Order marked as paid' })
@@ -192,11 +203,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         full_name: customer?.full_name,
         email: customer?.email,
         items: order.items,
-        subtotal: order.subtotal,
-        shipping_cost: order.shipping_cost,
-        vat_rate: order.vat_rate,
-        vat_amount: order.vat_amount,
-        total: order.total,
+        subtotal: orderSubtotal,
+        shipping_cost: orderShippingCost,
+        vat_rate: orderVatRate,
+        vat_amount: orderVatAmount,
+        total: orderTotal,
         tracking_number,
         tracking_url: tracking_url || null,
       })

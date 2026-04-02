@@ -49,6 +49,12 @@ export async function POST(request: NextRequest) {
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
       console.log('[webhook] sending email to:', customer?.email, '| telegram token set:', !!process.env.TELEGRAM_BOT_TOKEN)
 
+      const subtotal = Number(order.subtotal)
+      const shippingCost = Number(order.shipping_cost)
+      const vatRate = Number(order.vat_rate)
+      const vatAmount = Number(order.vat_amount)
+      const total = Number(order.total)
+
       // Send payment confirmed email to customer
       await fetch(`${apiBaseUrl()}/api/email/send`, {
         method: 'POST',
@@ -60,11 +66,11 @@ export async function POST(request: NextRequest) {
             full_name: customer?.full_name,
             email: customer?.email,
             items: order.items,
-            subtotal: order.subtotal,
-            shipping_cost: order.shipping_cost,
-            vat_rate: order.vat_rate,
-            vat_amount: order.vat_amount,
-            total: order.total,
+            subtotal,
+            shipping_cost: shippingCost,
+            vat_rate: vatRate,
+            vat_amount: vatAmount,
+            total,
             type: order.type,
             estimated_days: order.estimated_delivery_days ?? undefined,
             order_link: `${siteUrl()}/order/${orderId}`,
@@ -84,11 +90,11 @@ export async function POST(request: NextRequest) {
               full_name: customer?.full_name,
               email: customer?.email,
               items: order.items,
-              subtotal: order.subtotal,
-              shipping_cost: order.shipping_cost,
-              vat_rate: order.vat_rate,
-              vat_amount: order.vat_amount,
-              total: order.total,
+              subtotal,
+              shipping_cost: shippingCost,
+              vat_rate: vatRate,
+              vat_amount: vatAmount,
+              total,
               admin_link: `${siteUrl()}/admin/orders/${orderId}`,
             },
           }),
@@ -100,7 +106,7 @@ export async function POST(request: NextRequest) {
       const chatId = process.env.TELEGRAM_CHAT_ID
       if (token && chatId) {
         const base = siteUrl()
-        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
+        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${total.toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -125,6 +131,11 @@ export async function POST(request: NextRequest) {
       await supabase.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', orderId)
 
       const customer = Array.isArray(order.customer) ? order.customer[0] : order.customer
+      const subtotal = Number(order.subtotal)
+      const shippingCost = Number(order.shipping_cost)
+      const vatRate = Number(order.vat_rate)
+      const vatAmount = Number(order.vat_amount)
+      const total = Number(order.total)
 
       await fetch(`${apiBaseUrl()}/api/email/send`, {
         method: 'POST',
@@ -136,11 +147,11 @@ export async function POST(request: NextRequest) {
             full_name: customer?.full_name,
             email: customer?.email,
             items: order.items,
-            subtotal: order.subtotal,
-            shipping_cost: order.shipping_cost,
-            vat_rate: order.vat_rate,
-            vat_amount: order.vat_amount,
-            total: order.total,
+            subtotal,
+            shipping_cost: shippingCost,
+            vat_rate: vatRate,
+            vat_amount: vatAmount,
+            total,
             type: order.type,
             estimated_days: order.estimated_delivery_days ?? undefined,
             order_link: `${siteUrl()}/order/${orderId}`,
@@ -160,11 +171,11 @@ export async function POST(request: NextRequest) {
               full_name: customer?.full_name,
               email: customer?.email,
               items: order.items,
-              subtotal: order.subtotal,
-              shipping_cost: order.shipping_cost,
-              vat_rate: order.vat_rate,
-              vat_amount: order.vat_amount,
-              total: order.total,
+              subtotal,
+              shipping_cost: shippingCost,
+              vat_rate: vatRate,
+              vat_amount: vatAmount,
+              total,
               admin_link: `${siteUrl()}/admin/orders/${orderId}`,
             },
           }),
@@ -175,7 +186,7 @@ export async function POST(request: NextRequest) {
       const chatId = process.env.TELEGRAM_CHAT_ID
       if (token && chatId) {
         const base = siteUrl()
-        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${Number(order.total).toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
+        const text = `💳 Payment received — Order #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${customer?.full_name} (${customer?.email})\nTotal: €${total.toFixed(2)}\nView: ${base}/admin/orders/${orderId}`
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
