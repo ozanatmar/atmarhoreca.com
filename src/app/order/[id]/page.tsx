@@ -250,6 +250,7 @@ export default async function OrderPage({ params }: Props) {
               className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
               Continue Shopping
             </Link>
+          </div>
     </div>
   )
 }
