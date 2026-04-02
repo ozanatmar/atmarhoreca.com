@@ -6,8 +6,8 @@ const ASSET_URL = process.env.NEXT_PUBLIC_SITE_URL
   ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://atmarhoreca.com')
 const LOGO_URL = `${ASSET_URL}/logo_white_no_bg.png`
 
-const REVOLUT_IBAN = process.env.REVOLUT_IBAN ?? ''
-const REVOLUT_BIC = process.env.REVOLUT_BIC ?? ''
+const REVOLUT_IBAN = process.env.REVOLUT_EUR_IBAN ?? ''
+const REVOLUT_BIC = process.env.REVOLUT_EUR_BIC ?? ''
 const REVOLUT_HOLDER = process.env.REVOLUT_ACCOUNT_HOLDER ?? 'Atmar Horeca EOOD'
 
 function baseLayout(content: string): string {

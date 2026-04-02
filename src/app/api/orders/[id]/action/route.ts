@@ -81,8 +81,8 @@ export async function POST(request: NextRequest, { params }: Params) {
         vat_amount: vatAmount,
         total: newTotal,
         stripe_payment_link_url: paymentLink.url,
-        iban: process.env.REVOLUT_IBAN ?? '',
-        bic: process.env.REVOLUT_BIC ?? '',
+        iban: process.env.REVOLUT_EUR_IBAN ?? '',
+        bic: process.env.REVOLUT_EUR_BIC ?? '',
         account_holder: process.env.REVOLUT_ACCOUNT_HOLDER ?? 'Atmar Horeca EOOD',
       }).catch(() => null)
 
