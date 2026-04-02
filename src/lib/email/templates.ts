@@ -107,7 +107,7 @@ function pricingTable(data: {
 
   const vatRow = data.vat_rate > 0
     ? `<tr><td style="padding:4px 0;color:#555;">VAT (${(data.vat_rate * 100).toFixed(0)}%)</td><td style="padding:4px 0;text-align:right;">€${data.vat_amount.toFixed(2)}</td></tr>`
-    : `<tr><td style="padding:4px 0;color:#555;">VAT</td><td style="padding:4px 0;text-align:right;color:#555;">0% (reverse charge)</td></tr>`
+    : `<tr><td style="padding:4px 0;color:#555;">VAT</td><td style="padding:4px 0;text-align:right;color:#555;">0%</td></tr>`
 
   const totalRow = data.total != null
     ? `<tr style="font-weight:bold;font-size:16px;border-top:2px solid #1A1A5E;"><td style="padding:8px 0;">Total</td><td style="text-align:right;">€${data.total.toFixed(2)}</td></tr>`
