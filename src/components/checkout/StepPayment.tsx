@@ -36,6 +36,7 @@ export default function StepPayment(props: StepProps) {
       body: JSON.stringify({
         items: items.map((i) => ({
           product_id: i.product_id,
+          brand_id: i.brand_id,
           name: i.name,
           qty: i.qty,
           unit_price: i.price,
