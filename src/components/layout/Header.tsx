@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { useCartStore } from '@/lib/cart-store'
 
-function HeaderSearchBar() {
+function SearchBar({ className }: { className: string }) {
   const [searching, setSearching] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
@@ -19,7 +19,7 @@ function HeaderSearchBar() {
 
   return (
     <form
-      className="hidden sm:flex flex-1 max-w-lg mx-6"
+      className={className}
       onSubmit={(e) => {
         e.preventDefault()
         const q = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value.trim()
@@ -51,6 +51,14 @@ function HeaderSearchBar() {
   )
 }
 
+function HeaderSearchBar() {
+  return <SearchBar className="hidden sm:flex flex-1 max-w-lg mx-6" />
+}
+
+function MobileSearchBar() {
+  return <SearchBar className="flex w-full" />
+}
+
 export default function Header() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.qty, 0))
@@ -67,8 +75,8 @@ export default function Header() {
   return (
     <header className="bg-[#6B3D8F] text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top row: logo + icons */}
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
               src="/logo_white_no_bg.png"
@@ -79,7 +87,7 @@ export default function Header() {
             />
           </Link>
 
-          {/* Search bar */}
+          {/* Search bar — inline on sm+ */}
           <Suspense fallback={
             <div className="hidden sm:flex flex-1 max-w-lg mx-6">
               <div className="relative w-full">
@@ -117,6 +125,13 @@ export default function Header() {
               <User className="w-6 h-6" />
             </Link>
           </nav>
+        </div>
+
+        {/* Search bar — full width row on mobile only */}
+        <div className="sm:hidden pb-3">
+          <Suspense fallback={null}>
+            <MobileSearchBar />
+          </Suspense>
         </div>
       </div>
     </header>

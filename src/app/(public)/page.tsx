@@ -1,19 +1,17 @@
 import { Globe, FileText, Package, Search } from 'lucide-react'
-import SearchForm from './SearchForm'
 
 export default function LandingPage() {
   return (
     <div>
-      {/* Hero / Search */}
+      {/* Hero */}
       <section className="bg-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-[#1A1A5E] mb-4">
             Professional Horeca Equipment
           </h1>
-          <p className="text-lg text-gray-600 mb-10">
+          <p className="text-lg text-gray-600">
             Top European brands, delivered across the EU. B2B invoicing, no minimums.
           </p>
-          <SearchForm />
         </div>
       </section>
 
