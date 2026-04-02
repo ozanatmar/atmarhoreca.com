@@ -142,9 +142,15 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 }
 
+function apiBaseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  return 'http://localhost:3000'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
-  await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send`, {
+  await fetch(`${apiBaseUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ template, orderId, data }),
