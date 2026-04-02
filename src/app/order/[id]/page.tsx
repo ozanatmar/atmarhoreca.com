@@ -51,9 +51,7 @@ export default async function OrderPage({ params }: Props) {
   const isNew = order.status === 'pending_approval' || order.status === 'awaiting_payment'
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 bg-[#F5F5F5]">
-        <div className="max-w-3xl mx-auto px-4 py-10">
+    <div className="max-w-3xl mx-auto px-4 py-10">
           <ClearCart />
 
           {/* Header */}
@@ -252,9 +250,6 @@ export default async function OrderPage({ params }: Props) {
               className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
               Continue Shopping
             </Link>
-          </div>
-        </div>
-      </main>
     </div>
   )
 }
