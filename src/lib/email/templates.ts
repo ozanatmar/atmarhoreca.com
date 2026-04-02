@@ -213,6 +213,10 @@ export function proformaInvoiceEmail(orderId: string, data: {
 export function paymentConfirmedEmail(orderId: string, data: {
   full_name: string
   items: OrderItem[]
+  subtotal: number
+  shipping_cost: number
+  vat_rate: number
+  vat_amount: number
   total: number
   type: string
   estimated_days?: number
@@ -232,7 +236,7 @@ export function paymentConfirmedEmail(orderId: string, data: {
     <p>We have received your payment for Order <strong>#${shortId(orderId)}</strong>. Your order is being processed and will be dispatched soon.</p>
     ${deliveryNote}
     ${itemsTable(data.items, SITE_URL)}
-    <p style="font-weight:bold;font-size:16px;">Total paid: €${data.total.toFixed(2)}</p>
+    ${pricingTable({ subtotal: data.subtotal, shipping_cost: data.shipping_cost, vat_rate: data.vat_rate, vat_amount: data.vat_amount, total: data.total })}
     ${viewOrder}
   `
   return { subject: `Payment confirmed — Order #${shortId(orderId)}`, html: baseLayout(content) }
@@ -269,6 +273,10 @@ export function adminPaymentReceivedEmail(orderId: string, data: {
   full_name: string
   email?: string
   items: OrderItem[]
+  subtotal: number
+  shipping_cost: number
+  vat_rate: number
+  vat_amount: number
   total: number
   admin_link: string
 }) {
@@ -283,8 +291,7 @@ export function adminPaymentReceivedEmail(orderId: string, data: {
     </div>
 
     ${itemsTable(data.items, SITE_URL)}
-
-    <p style="font-size:16px;font-weight:bold;">Total paid: €${data.total.toFixed(2)}</p>
+    ${pricingTable({ subtotal: data.subtotal, shipping_cost: data.shipping_cost, vat_rate: data.vat_rate, vat_amount: data.vat_amount, total: data.total })}
 
     <div style="margin:24px 0;">
       <a href="${data.admin_link}" style="background:#6B3D8F;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
