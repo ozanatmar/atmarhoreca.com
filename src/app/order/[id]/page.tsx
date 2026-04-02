@@ -242,7 +242,7 @@ export default async function OrderPage({ params }: Props) {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link href="/account"
+            <Link href="/account?tab=orders"
               className="inline-flex items-center justify-center px-6 py-3 bg-[#6B3D8F] text-white rounded-xl font-semibold hover:bg-[#5a3278] transition-colors">
               View All Orders
             </Link>

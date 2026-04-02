@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import AccountForm from './AccountForm'
@@ -29,7 +30,9 @@ export default async function AccountPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-2xl font-bold text-[#1A1A5E] mb-8">My Account</h1>
-      <AccountForm customer={customer} userId={user.id} orders={orders ?? []} />
+      <Suspense>
+        <AccountForm customer={customer} userId={user.id} orders={orders ?? []} />
+      </Suspense>
     </div>
   )
 }

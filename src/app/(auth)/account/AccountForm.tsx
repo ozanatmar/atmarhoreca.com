@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
@@ -46,7 +47,11 @@ const STATUS_VARIANT: Record<string, 'green' | 'orange' | 'red' | 'purple' | 'gr
 }
 
 export default function AccountForm({ customer, userId, orders }: Props) {
-  const [tab, setTab] = useState<Tab>('profile')
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get('tab')
+    return (t === 'orders' || t === 'addresses') ? t : 'profile'
+  })
 
   // Profile state
   const [fullName, setFullName] = useState(customer?.full_name ?? '')
