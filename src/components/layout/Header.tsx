@@ -96,7 +96,8 @@ function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+        <div className="absolute right-0 top-full pt-2 w-44 z-50">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 py-1">
           <Link
             href="/account"
             onClick={() => setOpen(false)}
@@ -112,6 +113,7 @@ function UserMenu() {
             <LogOut className="w-4 h-4 text-gray-400" />
             Log Out
           </button>
+        </div>
         </div>
       )}
     </div>
