@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
+import { generateProformaPDF } from '@/lib/pdf/proforma'
 
 function getStripe() { return new Stripe(process.env.STRIPE_SECRET_KEY!) }
 
@@ -66,10 +67,13 @@ export async function POST(request: NextRequest, { params }: Params) {
         stripe_payment_link_url: paymentLink.url,
       }).eq('id', id)
 
-      // Send proforma email
-      await sendEmail('proforma_invoice', id, {
-        full_name: customer?.full_name,
-        email: customer?.email,
+      // Generate proforma PDF
+      const pdfBuffer = await generateProformaPDF({
+        orderId: id,
+        buyer_name: customer?.full_name ?? '',
+        buyer_company: customer?.company_name ?? null,
+        buyer_vat: customer?.vat_number ?? null,
+        buyer_address: customer?.billing_address ?? null,
         items: order.items,
         subtotal: newSubtotal,
         shipping_cost: shippingCost,
@@ -77,7 +81,30 @@ export async function POST(request: NextRequest, { params }: Params) {
         vat_amount: vatAmount,
         total: newTotal,
         stripe_payment_link_url: paymentLink.url,
-      })
+        iban: process.env.REVOLUT_IBAN ?? '',
+        bic: process.env.REVOLUT_BIC ?? '',
+        account_holder: process.env.REVOLUT_ACCOUNT_HOLDER ?? 'Atmar Horeca EOOD',
+      }).catch(() => null)
+
+      // Send proforma email with PDF attachment
+      await sendEmail(
+        'proforma_invoice',
+        id,
+        {
+          full_name: customer?.full_name,
+          email: customer?.email,
+          items: order.items,
+          subtotal: newSubtotal,
+          shipping_cost: shippingCost,
+          vat_rate: order.vat_rate,
+          vat_amount: vatAmount,
+          total: newTotal,
+          stripe_payment_link_url: paymentLink.url,
+        },
+        pdfBuffer
+          ? [{ content: pdfBuffer.toString('base64'), name: `Proforma_${id.slice(0, 8).toUpperCase()}.pdf` }]
+          : undefined,
+      )
 
       return NextResponse.json({ message: 'Order approved and proforma sent' })
     }
@@ -149,10 +176,10 @@ function apiBaseUrl() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendEmail(template: string, orderId: string, data: Record<string, any>) {
+async function sendEmail(template: string, orderId: string, data: Record<string, any>, attachments?: { content: string; name: string }[]) {
   await fetch(`${apiBaseUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ template, orderId, data }),
+    body: JSON.stringify({ template, orderId, data, attachments }),
   }).catch(console.error)
 }

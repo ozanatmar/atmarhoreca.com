@@ -11,19 +11,27 @@ import {
 const FROM_EMAIL = 'orders@atmarhoreca.com'
 const FROM_NAME = 'Atmar Horeca'
 
-async function sendEmail(to: string, subject: string, html: string) {
+interface Attachment {
+  content: string // base64
+  name: string
+}
+
+async function sendEmail(to: string, subject: string, html: string, attachments?: Attachment[]) {
+  const body: Record<string, unknown> = {
+    sender: { name: FROM_NAME, email: FROM_EMAIL },
+    to: [{ email: to }],
+    subject,
+    htmlContent: html,
+  }
+  if (attachments?.length) body.attachment = attachments
+
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
       'api-key': process.env.BREVO_API_KEY!,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({
-      sender: { name: FROM_NAME, email: FROM_EMAIL },
-      to: [{ email: to }],
-      subject,
-      htmlContent: html,
-    }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const text = await res.text()
@@ -32,7 +40,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const { template, orderId, data } = await request.json()
+  const { template, orderId, data, attachments } = await request.json()
 
   let email: { subject: string; html: string } | null = null
   let to: string = data.email ?? process.env.ADMIN_EMAIL!
@@ -69,7 +77,7 @@ export async function POST(request: NextRequest) {
   if (!to) return NextResponse.json({ error: 'No recipient' }, { status: 400 })
 
   try {
-    await sendEmail(to, email.subject, email.html)
+    await sendEmail(to, email.subject, email.html, attachments)
     return NextResponse.json({ sent: true })
   } catch (err) {
     console.error('Email send error:', err)
