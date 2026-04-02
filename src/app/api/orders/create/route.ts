@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     vat_amount,
     total,
     type,
+    estimated_delivery_days,
     billing_address,
     shipping_address,
     full_name,
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
       vat_amount,
       total,
       currency: 'EUR',
+      estimated_delivery_days: estimated_delivery_days ?? null,
     })
     .select('id')
     .single()

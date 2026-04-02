@@ -9,6 +9,7 @@ const TABS: { label: string; status: OrderStatus }[] = [
   { label: 'Awaiting Payment', status: 'awaiting_payment' },
   { label: 'Paid', status: 'paid' },
   { label: 'Fulfilled', status: 'fulfilled' },
+  { label: 'Cancelled', status: 'cancelled' },
 ]
 
 interface Props {

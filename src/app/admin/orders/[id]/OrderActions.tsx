@@ -78,8 +78,8 @@ export default function OrderActions({ order }: Props) {
         </div>
       )}
 
-      {/* Awaiting payment — bank transfer */}
-      {order.status === 'awaiting_payment' && (
+      {/* Awaiting payment — bank transfer (Type B only) */}
+      {order.type === 'B' && order.status === 'awaiting_payment' && (
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <h2 className="font-bold text-[#1A1A5E] mb-3">Payment</h2>
           {order.stripe_payment_link_url && (
