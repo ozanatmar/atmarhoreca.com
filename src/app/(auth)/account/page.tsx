@@ -31,7 +31,7 @@ export default async function AccountPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-2xl font-bold text-[#1A1A5E] mb-8">My Account</h1>
       <Suspense>
-        <AccountForm customer={customer} userId={user.id} orders={orders ?? []} />
+        <AccountForm customer={customer} userId={user.id} orders={orders ?? []} emailVerified={customer?.email_verified ?? false} />
       </Suspense>
     </div>
   )

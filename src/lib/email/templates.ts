@@ -273,7 +273,28 @@ export function orderFulfilledEmail(orderId: string, data: {
 }
 
 // ============================================================
-// Email #5 — Order Cancelled
+// Email #5 — Email Verification
+// ============================================================
+export function emailVerificationEmail(data: {
+  full_name: string
+  verify_url: string
+}) {
+  const content = `
+    <h2 style="color:#1A1A5E;margin-top:0;">Verify your email address</h2>
+    <p>Hi ${data.full_name},</p>
+    <p>Thanks for registering with Atmar Horeca. Please verify your email address by clicking the button below.</p>
+    <div style="margin:28px 0;text-align:center;">
+      <a href="${data.verify_url}" style="background:#6B3D8F;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
+        Verify Email Address
+      </a>
+    </div>
+    <p style="font-size:13px;color:#888;">This link expires in 24 hours. If you did not create an account, you can ignore this email.</p>
+  `
+  return { subject: 'Verify your email address — Atmar Horeca', html: baseLayout(content) }
+}
+
+// ============================================================
+// Email #6 — Order Cancelled
 // ============================================================
 export function orderCancelledEmail(orderId: string, data: {
   full_name: string

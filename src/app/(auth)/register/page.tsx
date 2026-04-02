@@ -2,19 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
 export default function RegisterPage() {
-  const router = useRouter()
-
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,17 +32,45 @@ export default function RegisterPage() {
       return
     }
 
-    // Create customer record
     if (data.user) {
       await supabase.from('customers').insert({
         id: data.user.id,
         email,
         full_name: fullName,
+        email_verified: false,
       })
     }
 
-    router.push('/')
-    router.refresh()
+    // Send verification email
+    await fetch('/api/auth/send-verification', { method: 'POST' })
+
+    setLoading(false)
+    setDone(true)
+  }
+
+  if (done) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8 text-center">
+          <div className="w-14 h-14 bg-[#6B3D8F] rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-[#1A1A5E] mb-2">Check your inbox</h1>
+          <p className="text-sm text-gray-600 mb-1">
+            We sent a verification link to <strong>{email}</strong>.
+          </p>
+          <p className="text-sm text-gray-500 mb-6">Click the link in the email to verify your account. The link expires in 24 hours.</p>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center px-6 py-3 bg-[#6B3D8F] text-white rounded-xl font-semibold hover:bg-[#5a3278] transition-colors"
+          >
+            Continue to site
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -26,6 +26,7 @@ interface Props {
   customer: Customer | null
   userId: string
   orders: OrderRow[]
+  emailVerified: boolean
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -46,7 +47,15 @@ const STATUS_VARIANT: Record<string, 'green' | 'orange' | 'red' | 'purple' | 'gr
   cancelled: 'red',
 }
 
-export default function AccountForm({ customer, userId, orders }: Props) {
+export default function AccountForm({ customer, userId, orders, emailVerified }: Props) {
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  async function handleResend() {
+    setResendState('sending')
+    await fetch('/api/auth/send-verification', { method: 'POST' })
+    setResendState('sent')
+  }
+
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get('tab')
@@ -142,6 +151,29 @@ export default function AccountForm({ customer, userId, orders }: Props) {
 
   return (
     <div>
+      {/* Unverified email banner */}
+      {!emailVerified && (
+        <div className="flex items-center justify-between gap-4 bg-[#FFF8E7] border border-[#F0A500] rounded-xl px-4 py-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-2 text-sm text-[#7A5000]">
+            <svg className="w-4 h-4 shrink-0 text-[#F0A500]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+            </svg>
+            <span>Your email address is not verified.</span>
+          </div>
+          {resendState === 'sent' ? (
+            <span className="text-sm text-[#7AB648] font-medium">Verification email sent!</span>
+          ) : (
+            <button
+              onClick={handleResend}
+              disabled={resendState === 'sending'}
+              className="text-sm font-semibold text-[#6B3D8F] hover:underline disabled:opacity-50"
+            >
+              {resendState === 'sending' ? 'Sending...' : 'Resend verification email'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Tab bar */}
       <div className="flex gap-1 mb-6 border-b border-gray-200">
         {tabs.map(t => (

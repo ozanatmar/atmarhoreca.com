@@ -7,6 +7,7 @@ import {
   orderCancelledEmail,
   adminNewOrderEmail,
   adminPaymentReceivedEmail,
+  emailVerificationEmail,
 } from '@/lib/email/templates'
 
 const FROM_EMAIL = 'orders@atmarhoreca.com'
@@ -67,6 +68,31 @@ export async function POST(request: NextRequest) {
       email = orderCancelledEmail(orderId, data)
       to = data.email
       break
+    case 'email_verification': {
+      const verificationEmail = emailVerificationEmail(data)
+      to = data.email
+      try {
+        const body: Record<string, unknown> = {
+          sender: { name: 'Atmar Horeca', email: 'emailverification@atmarhoreca.com' },
+          to: [{ email: to }],
+          subject: verificationEmail.subject,
+          htmlContent: verificationEmail.html,
+        }
+        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: { 'api-key': process.env.BREVO_API_KEY!, 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (!res.ok) {
+          const text = await res.text()
+          throw new Error(`Brevo error ${res.status}: ${text}`)
+        }
+        return NextResponse.json({ sent: true })
+      } catch (err) {
+        console.error('Email send error:', err)
+        return NextResponse.json({ error: 'Email failed' }, { status: 500 })
+      }
+    }
     case 'admin_new_order':
       email = adminNewOrderEmail(orderId, data)
       to = process.env.ADMIN_EMAIL!

@@ -58,6 +58,7 @@ export interface Customer {
   phone: string | null
   vat_number: string | null
   vat_validated: boolean
+  email_verified: boolean
   country_code: string | null
   billing_address: Address | null
   shipping_address: Address | null
