@@ -104,6 +104,33 @@ export default function StepPayment(props: StepProps) {
     setSubmitting(false)
   }
 
+  const emailVerified = props.customer?.email_verified ?? false
+
+  if (!emailVerified) {
+    return (
+      <div>
+        <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Step 4 — {orderType === 'B' ? 'Submit Order' : 'Payment'}</h2>
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex items-start gap-3 bg-[#FFF8E7] border border-[#F0A500] rounded-xl px-4 py-3 mb-6">
+            <svg className="w-5 h-5 text-[#F0A500] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold text-[#7A5000] mb-1">Email verification required</p>
+              <p className="text-sm text-[#7A5000]">
+                Please verify your email address before placing an order.{' '}
+                <a href="/account" className="underline font-medium">Go to your account</a> to resend the verification email.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" onClick={() => setStep(3)}>Back</Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (orderType === 'B') {
     return (
       <div>
