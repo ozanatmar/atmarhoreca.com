@@ -141,8 +141,10 @@ export default function StepPayment(props: StepProps) {
             Your order total is <strong className="text-[#1A1A5E]">{formatPrice(total)}</strong>.
           </p>
           <p className="text-sm text-gray-600 mb-6">
-            No payment is taken now. After submitting, we will check availability and send you a
-            proforma invoice within 2 business days. You can then pay by card or bank transfer.
+            {!props.shippingResult
+              ? 'No payment is taken now. After submitting, we will calculate the shipping cost to your location and send you a proforma invoice. You can then pay by card or bank transfer.'
+              : 'No payment is taken now. After submitting, we will check availability and send you a proforma invoice within 2 business days. You can then pay by card or bank transfer.'
+            }
           </p>
           {error && <p className="text-sm text-[#C0392B] mb-4">{error}</p>}
           <p className="text-xs text-gray-500 mb-4">

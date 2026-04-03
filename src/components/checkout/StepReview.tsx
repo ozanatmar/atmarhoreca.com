@@ -29,7 +29,11 @@ export default function StepReview({
         <div>
           <p className="text-sm text-gray-500">Order Type</p>
           <p className="font-semibold text-[#1A1A5E]">
-            {orderType === 'A' ? 'Direct Order' : 'Quote Required'}
+            {orderType === 'A'
+              ? 'Direct Order'
+              : !shippingResult
+              ? 'Shipping Quote Required'
+              : 'Quote Required'}
           </p>
         </div>
         <Badge variant={orderType === 'A' ? 'green' : 'orange'}>
