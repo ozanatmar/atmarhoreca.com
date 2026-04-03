@@ -30,7 +30,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Already verified' }, { status: 400 })
   }
 
-  const serviceClient = await createServiceClient()
+  const serviceClient = createServiceClient()
 
   // Delete any existing tokens for this user
   await serviceClient.from('email_verification_tokens').delete().eq('user_id', user.id)

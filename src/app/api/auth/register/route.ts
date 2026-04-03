@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
 
   // Use admin API to bypass Supabase's email validation
   const { data, error } = await supabase.auth.admin.createUser({

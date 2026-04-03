@@ -17,7 +17,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
   if (!token) redirect('/')
 
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
 
   const { data: record } = await supabase
     .from('email_verification_tokens')
