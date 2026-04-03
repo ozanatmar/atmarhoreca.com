@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
-import { COUNTRY_OPTIONS } from '@/lib/countries'
 
 export const metadata: Metadata = {
   title: 'Shipping Policy',
@@ -16,27 +14,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-const COUNTRY_NAMES = Object.fromEntries(
-  COUNTRY_OPTIONS.filter(c => c.value).map(c => [c.value, c.label])
-)
-
-export default async function ShippingPage() {
-  const supabase = await createClient()
-  const { data: rates } = await supabase
-    .from('shipping_rates')
-    .select('destination_country_code, transit_days')
-    .order('transit_days')
-    .order('destination_country_code')
-
-  // Group by transit days
-  const grouped: Record<number, string[]> = {}
-  for (const r of rates ?? []) {
-    if (!grouped[r.transit_days]) grouped[r.transit_days] = []
-    grouped[r.transit_days].push(
-      COUNTRY_NAMES[r.destination_country_code] ?? r.destination_country_code
-    )
-  }
-
+export default function ShippingPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-3xl font-bold text-[#1A1A5E] mb-2">Shipping Policy</h1>
@@ -87,49 +65,11 @@ export default async function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="5. Delivery Times">
-        <p>Estimated transit times after dispatch (business days, mainland destinations):</p>
-        {Object.keys(grouped).length > 0 ? (
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-700 w-28">Transit Days</th>
-                  <th className="text-left px-3 py-2 font-semibold text-gray-700">Destinations</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(grouped).map(([days, countries], i) => (
-                  <tr key={days} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-3 py-2 font-semibold text-[#1A1A5E] border-t border-gray-100">
-                      {days} {Number(days) === 1 ? 'day' : 'days'}
-                    </td>
-                    <td className="px-3 py-2 text-gray-700 border-t border-gray-100">
-                      {countries.join(', ')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <ul className="list-disc pl-5 space-y-1 mt-1">
-            <li>Varies by destination — see your order page for an estimated delivery date.</li>
-          </ul>
-        )}
-        <p className="mt-3">
-          These are estimates only. Atmar Horeca is not liable for delays caused by carrier operations,
-          customs processing, adverse weather, or other circumstances beyond our control.
-        </p>
+      <Section title="5. Shipping Costs">
         <p>
-          For non-EU countries, transit times vary by destination and customs clearance duration.
-        </p>
-      </Section>
-
-      <Section title="6. Shipping Costs">
-        <p>
-          <strong>Shipping is free to all EU mainland destinations</strong>, subject to the minimum
-          order requirements per brand shown at checkout.
+          <strong>Shipping is free to all EU mainland destinations</strong> (excluding Cyprus and Malta),
+          subject to the minimum order requirements per brand shown at checkout.
+          Deliveries to Cyprus and Malta require a shipping quote due to the additional cost of island freight.
         </p>
         <p>
           For non-EU destinations, shipping costs are calculated individually and will be confirmed
@@ -145,7 +85,7 @@ export default async function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="7. Customs and Import Duties">
+      <Section title="6. Customs and Import Duties">
         <p>
           For deliveries within the EU, no customs duties apply. All prices include VAT where applicable,
           or are shown with the applicable VAT rate at checkout.
@@ -157,7 +97,7 @@ export default async function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="8. Damaged or Lost Shipments">
+      <Section title="7. Damaged or Lost Shipments">
         <p>
           Risk of loss and damage passes to you upon delivery. If your order arrives damaged or appears
           to have been lost in transit, follow these steps:
@@ -189,7 +129,7 @@ export default async function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="9. Delivery Address">
+      <Section title="8. Delivery Address">
         <p>
           Please ensure your delivery address is accurate at the time of ordering. We are not responsible
           for failed deliveries due to incorrect or incomplete addresses. Re-delivery or address correction
@@ -197,7 +137,7 @@ export default async function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="10. Contact">
+      <Section title="9. Contact">
         <p>
           For shipping enquiries:{' '}
           <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
