@@ -87,7 +87,7 @@ export async function POST(request: NextRequest, { params }: Params) {
             return brand?.handling_days ?? 1
           }))
         )
-        const shippingResult = calculateShipping(shippingRates ?? [], 'IT', destCountry, totalWeight)
+        const shippingResult = calculateShipping(shippingRates ?? [], 'IT', destCountry)
         if (shippingResult) estimatedDeliveryDays = maxHandlingDays + shippingResult.transitDays
       }
 
