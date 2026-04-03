@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import { COUNTRY_OPTIONS } from '@/lib/countries'
 
 export const metadata: Metadata = {
   title: 'Shipping Policy',
@@ -14,7 +16,27 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-export default function ShippingPage() {
+const COUNTRY_NAMES = Object.fromEntries(
+  COUNTRY_OPTIONS.filter(c => c.value).map(c => [c.value, c.label])
+)
+
+export default async function ShippingPage() {
+  const supabase = await createClient()
+  const { data: rates } = await supabase
+    .from('shipping_rates')
+    .select('destination_country_code, transit_days')
+    .order('transit_days')
+    .order('destination_country_code')
+
+  // Group by transit days
+  const grouped: Record<number, string[]> = {}
+  for (const r of rates ?? []) {
+    if (!grouped[r.transit_days]) grouped[r.transit_days] = []
+    grouped[r.transit_days].push(
+      COUNTRY_NAMES[r.destination_country_code] ?? r.destination_country_code
+    )
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="text-3xl font-bold text-[#1A1A5E] mb-2">Shipping Policy</h1>
@@ -66,17 +88,41 @@ export default function ShippingPage() {
       </Section>
 
       <Section title="5. Delivery Times">
-        <p>Estimated transit times after dispatch:</p>
-        <ul className="list-disc pl-5 space-y-1 mt-1">
-          <li><strong>Bulgaria:</strong> 1–2 business days</li>
-          <li><strong>Central Europe (DE, AT, CZ, PL, HU, etc.):</strong> 2–4 business days</li>
-          <li><strong>Western Europe (FR, NL, BE, IT, ES, etc.):</strong> 3–5 business days</li>
-          <li><strong>Northern Europe (SE, FI, DK, NO, etc.):</strong> 3–6 business days</li>
-          <li><strong>Non-EU countries:</strong> 5–10 business days (varies by destination and customs)</li>
-        </ul>
-        <p className="mt-2">
+        <p>Estimated transit times after dispatch (business days, mainland destinations):</p>
+        {Object.keys(grouped).length > 0 ? (
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left px-3 py-2 font-semibold text-gray-700 w-28">Transit Days</th>
+                  <th className="text-left px-3 py-2 font-semibold text-gray-700">Destinations</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(grouped).map(([days, countries], i) => (
+                  <tr key={days} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-3 py-2 font-semibold text-[#1A1A5E] border-t border-gray-100">
+                      {days} {Number(days) === 1 ? 'day' : 'days'}
+                    </td>
+                    <td className="px-3 py-2 text-gray-700 border-t border-gray-100">
+                      {countries.join(', ')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <ul className="list-disc pl-5 space-y-1 mt-1">
+            <li>Varies by destination — see your order page for an estimated delivery date.</li>
+          </ul>
+        )}
+        <p className="mt-3">
           These are estimates only. Atmar Horeca is not liable for delays caused by carrier operations,
           customs processing, adverse weather, or other circumstances beyond our control.
+        </p>
+        <p>
+          For non-EU countries, transit times vary by destination and customs clearance duration.
         </p>
       </Section>
 
