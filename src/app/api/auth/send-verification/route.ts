@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+// Public-facing URL — used in the verification link inside the email
 function siteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
+// Internal API URL — used to call our own API routes server-to-server
+function apiBaseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
   return 'http://localhost:3000'
 }
 
@@ -39,7 +47,7 @@ export async function POST() {
 
   const verifyUrl = `${siteUrl()}/verify-email?token=${token}`
 
-  await fetch(`${siteUrl()}/api/email/send`, {
+  const emailRes = await fetch(`${apiBaseUrl()}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -52,6 +60,10 @@ export async function POST() {
       },
     }),
   })
+
+  if (!emailRes.ok) {
+    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+  }
 
   return NextResponse.json({ sent: true })
 }

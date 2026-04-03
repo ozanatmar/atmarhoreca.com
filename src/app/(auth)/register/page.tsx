@@ -43,7 +43,12 @@ export default function RegisterPage() {
     }
 
     // Send verification email
-    await fetch('/api/auth/send-verification', { method: 'POST' })
+    const verifyRes = await fetch('/api/auth/send-verification', { method: 'POST' })
+    if (!verifyRes.ok) {
+      setError('Account created but failed to send verification email. You can resend it from your account page.')
+      setLoading(false)
+      return
+    }
 
     setLoading(false)
     setDone(true)

@@ -48,12 +48,12 @@ const STATUS_VARIANT: Record<string, 'green' | 'orange' | 'red' | 'purple' | 'gr
 }
 
 export default function AccountForm({ customer, userId, orders, emailVerified }: Props) {
-  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
   async function handleResend() {
     setResendState('sending')
-    await fetch('/api/auth/send-verification', { method: 'POST' })
-    setResendState('sent')
+    const res = await fetch('/api/auth/send-verification', { method: 'POST' })
+    setResendState(res.ok ? 'sent' : 'error')
   }
 
   const searchParams = useSearchParams()
@@ -162,6 +162,8 @@ export default function AccountForm({ customer, userId, orders, emailVerified }:
           </div>
           {resendState === 'sent' ? (
             <span className="text-sm text-[#7AB648] font-medium">Verification email sent!</span>
+          ) : resendState === 'error' ? (
+            <span className="text-sm text-[#C0392B] font-medium">Failed to send — please try again</span>
           ) : (
             <button
               onClick={handleResend}
