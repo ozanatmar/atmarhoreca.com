@@ -135,6 +135,13 @@ export default function Header() {
 
   return (
     <header className="bg-[#6B3D8F] text-white shadow-md">
+      {/* Free delivery banner */}
+      <div className="bg-[#5a3278] text-center py-1.5 px-4 text-xs text-white/90">
+        Free delivery to all EU mainland destinations*&nbsp;
+        <Link href="/shipping" className="underline underline-offset-2 hover:text-white">
+          *Conditions apply
+        </Link>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top row: logo + icons */}
         <div className="flex items-center justify-between h-16">
