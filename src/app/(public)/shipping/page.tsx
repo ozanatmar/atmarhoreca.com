@@ -82,14 +82,19 @@ export default function ShippingPage() {
 
       <Section title="6. Shipping Costs">
         <p>
-          Shipping costs are calculated at checkout based on the destination country and total order weight.
-          Rates are shown before payment is made. For non-EU destinations, contact us for a quote.
+          <strong>Shipping is free to all EU mainland destinations</strong>, subject to the minimum
+          order requirements per brand shown at checkout.
         </p>
         <p>
-          <strong>Pre-set shipping rates apply to mainland destinations only.</strong> Deliveries to
+          For non-EU destinations, shipping costs are calculated individually and will be confirmed
+          before your order is dispatched. You will have the option to accept the shipping cost or
+          cancel the order for a full refund.
+        </p>
+        <p>
+          <strong>Pre-set free shipping applies to mainland destinations only.</strong> Deliveries to
           islands (including but not limited to Greek islands, the Canary Islands, the Balearic Islands,
           and other offshore territories) may incur additional carrier surcharges. If your delivery
-          address is on an island, we will contact you before dispatch to confirm any additional shipping
+          address is on an island, we will contact you before dispatch to confirm any additional
           cost. You will have the option to accept the surcharge or cancel the order for a full refund.
         </p>
       </Section>

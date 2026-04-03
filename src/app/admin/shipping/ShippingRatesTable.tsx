@@ -27,7 +27,7 @@ export default function ShippingRatesTable({ rates }: Props) {
     })
     const json = await res.json()
     if (res.ok) {
-      setMsg(`Synced ${json.count} rows successfully`)
+      setMsg(`Synced ${json.count} routes successfully`)
       setMsgType('success')
       router.refresh()
     } else {
@@ -37,17 +37,9 @@ export default function ShippingRatesTable({ rates }: Props) {
     setSyncing(false)
   }
 
-  // Group by origin+destination
-  const grouped: Record<string, ShippingRate[]> = {}
-  for (const rate of rates) {
-    const key = `${rate.origin_country_code} → ${rate.destination_country_code}`
-    if (!grouped[key]) grouped[key] = []
-    grouped[key].push(rate)
-  }
-
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <Button onClick={handleSync} disabled={syncing}>
           {syncing ? 'Syncing...' : 'Sync from Google Sheets'}
         </Button>
@@ -60,34 +52,34 @@ export default function ShippingRatesTable({ rates }: Props) {
           Open Sheet ↗
         </a>
       </div>
+      <p className="text-xs text-gray-500 mb-6">
+        Sheet columns: <span className="font-mono">A: origin</span>, <span className="font-mono">B: destination</span>, <span className="font-mono">C: transit_days</span>. Shipping is free for all listed routes.
+      </p>
       {msg && <p className={`text-sm mb-4 ${msgType === 'error' ? 'text-red-600' : 'text-[#7AB648]'}`}>{msg}</p>}
 
-      {Object.entries(grouped).map(([route, routeRates]) => (
-        <div key={route} className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
-          <div className="bg-[#F5F5F5] px-4 py-2 font-semibold text-[#1A1A5E] text-sm">{route}</div>
+      {rates.length > 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left px-4 py-2 text-gray-500 font-medium">Weight (kg)</th>
-                <th className="text-right px-4 py-2 text-gray-500 font-medium">Rate (EUR)</th>
-                <th className="text-right px-4 py-2 text-gray-500 font-medium">Transit Days</th>
+            <thead className="bg-[#F5F5F5]">
+              <tr>
+                <th className="text-left px-4 py-3 text-[#1A1A5E] font-semibold">Origin</th>
+                <th className="text-left px-4 py-3 text-[#1A1A5E] font-semibold">Destination</th>
+                <th className="text-right px-4 py-3 text-[#1A1A5E] font-semibold">Transit Days</th>
               </tr>
             </thead>
             <tbody>
-              {routeRates.map((r) => (
-                <tr key={r.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-2">{r.weight_kg} kg</td>
-                  <td className="px-4 py-2 text-right">€{r.rate_eur}</td>
-                  <td className="px-4 py-2 text-right">{r.transit_days} days</td>
+              {rates.map((r, i) => (
+                <tr key={r.id} className={i % 2 === 0 ? 'bg-white' : 'bg-[#F5F5F5]'}>
+                  <td className="px-4 py-2 font-mono">{r.origin_country_code}</td>
+                  <td className="px-4 py-2 font-mono">{r.destination_country_code}</td>
+                  <td className="px-4 py-2 text-right">{r.transit_days}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      ))}
-
-      {rates.length === 0 && (
-        <p className="text-gray-500 text-sm">No shipping rates configured yet. Sync from Google Sheets to get started.</p>
+      ) : (
+        <p className="text-gray-500 text-sm">No routes configured yet. Sync from Google Sheets to get started.</p>
       )}
     </div>
   )

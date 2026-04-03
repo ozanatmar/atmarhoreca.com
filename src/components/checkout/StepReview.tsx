@@ -54,8 +54,8 @@ export default function StepReview({
         <div className="flex flex-col gap-2 text-sm">
           <Row label="Subtotal (excl. VAT)" value={formatPrice(subtotal)} />
 
-          {orderType === 'A' ? (
-            <Row label="Shipping" value={formatPrice(shippingCost)} />
+          {shippingResult ? (
+            <Row label="Shipping" value="Free" />
           ) : (
             <div className="flex justify-between">
               <span className="text-gray-600">Shipping</span>

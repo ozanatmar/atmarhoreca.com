@@ -105,8 +105,6 @@ export interface ShippingRate {
   id: string
   origin_country_code: string
   destination_country_code: string
-  weight_kg: number
-  rate_eur: number
   transit_days: number
 }
 

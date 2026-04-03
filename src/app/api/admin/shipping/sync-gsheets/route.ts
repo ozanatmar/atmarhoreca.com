@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
     const res = await fetch(csvUrl, { signal: AbortSignal.timeout(10000) })
     if (!res.ok) return NextResponse.json({ error: `Google Sheets returned ${res.status}` }, { status: 502 })
     csvText = await res.text()
-    // If Google returns HTML (login redirect), the sheet is not public
     if (csvText.trimStart().startsWith('<')) {
       return NextResponse.json({ error: 'Sheet is not publicly accessible. Share it as "Anyone with the link can view".' }, { status: 403 })
     }
@@ -35,26 +34,23 @@ export async function POST(request: NextRequest) {
   const lines = csvText.trim().split('\n').slice(1) // skip header row
   const rows = lines
     .map((line) => {
-      // Handle CSV values that may be quoted
       const cols = line.split(',').map((s) => s.replace(/^"|"$/g, '').trim())
-      const [origin, destination, weight, rate, transit] = cols
+      const [origin, destination, transit] = cols
       return {
         origin_country_code: origin?.toUpperCase(),
         destination_country_code: destination?.toUpperCase(),
-        weight_kg: parseInt(weight),
-        rate_eur: parseFloat(rate),
         transit_days: parseInt(transit),
       }
     })
-    .filter((r) => r.origin_country_code && r.destination_country_code && !isNaN(r.weight_kg) && !isNaN(r.rate_eur))
+    .filter((r) => r.origin_country_code && r.destination_country_code && !isNaN(r.transit_days))
 
   if (rows.length === 0) {
-    return NextResponse.json({ error: 'No valid rows found. Check column order: origin, destination, weight_kg, rate_eur, transit_days' }, { status: 400 })
+    return NextResponse.json({ error: 'No valid rows found. Check column order: A: origin, B: destination, C: transit_days' }, { status: 400 })
   }
 
   const { error } = await supabase
     .from('shipping_rates')
-    .upsert(rows, { onConflict: 'origin_country_code,destination_country_code,weight_kg' })
+    .upsert(rows, { onConflict: 'origin_country_code,destination_country_code' })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

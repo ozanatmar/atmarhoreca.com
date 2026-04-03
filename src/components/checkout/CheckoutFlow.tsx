@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/cart-store'
 import { createClient } from '@/lib/supabase/client'
-import { calculateVat, cartSubtotal, cartTotalWeight } from '@/lib/utils'
+import { calculateVat, cartSubtotal } from '@/lib/utils'
 import { calculateShipping } from '@/lib/shipping'
 import { determineOrderType } from '@/lib/order-type'
 import type { Customer, ShippingRate, CheckoutAddress } from '@/types'
@@ -65,16 +65,15 @@ export default function CheckoutFlow({ customer, userId, shippingRates }: Props)
     : shippingAddress.country_code
 
   // Compute shipping and order type
-  const totalWeight = cartTotalWeight(items)
   const originCountry = 'IT' // Martellato is IT; in future could vary per supplier
 
   const shippingResult = destCountry
-    ? calculateShipping(shippingRates, originCountry, destCountry, totalWeight)
+    ? calculateShipping(shippingRates, originCountry, destCountry)
     : null
 
   const orderType = determineOrderType(items, !!shippingResult)
   const subtotal = cartSubtotal(items)
-  const shippingCost = orderType === 'A' && shippingResult ? shippingResult.cost : 0
+  const shippingCost = 0 // EU shipping is free; non-EU is Type B (no charge at checkout)
   const vatResult = calculateVat(address.country_code || 'BG', address.vat_validated ?? false)
   const vatAmount = (subtotal + shippingCost) * vatResult.rate
   const total = subtotal + shippingCost + vatAmount
