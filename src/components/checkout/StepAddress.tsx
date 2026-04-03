@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
+import CountrySelect from '@/components/ui/CountrySelect'
 import Button from '@/components/ui/Button'
-import { COUNTRY_OPTIONS } from '@/lib/countries'
 import type { StepProps } from './types'
 import type { CheckoutAddress } from '@/types'
 
@@ -79,11 +78,10 @@ export default function StepAddress({
           <Input label="City" value={address.city} onChange={(e) => update('city', e.target.value)} required />
           <Input label="Postal Code" value={address.postal_code} onChange={(e) => update('postal_code', e.target.value)} required />
         </div>
-        <Select
+        <CountrySelect
           label="Country"
           value={address.country_code}
           onChange={(e) => update('country_code', e.target.value)}
-          options={COUNTRY_OPTIONS}
           required
         />
 

@@ -7,8 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import CountrySelect from '@/components/ui/CountrySelect'
 import type { Customer } from '@/types'
-import { COUNTRY_OPTIONS } from '@/lib/countries'
 import { shortId, formatPrice } from '@/lib/utils'
 
 type Tab = 'profile' | 'addresses' | 'orders'
@@ -248,19 +248,11 @@ export default function AccountForm({ customer, userId, orders, emailVerified }:
                 <Input label="City" value={billCity} onChange={e => setBillCity(e.target.value)} />
                 <Input label="Postal Code" value={billPostal} onChange={e => setBillPostal(e.target.value)} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                <select
-                  value={billCountry}
-                  onChange={e => setBillCountry(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                >
-                  <option value="">Select country</option>
-                  {COUNTRY_OPTIONS.map(c => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
+              <CountrySelect
+                label="Country"
+                value={billCountry}
+                onChange={e => setBillCountry(e.target.value)}
+              />
             </div>
           </div>
 
@@ -284,19 +276,11 @@ export default function AccountForm({ customer, userId, orders, emailVerified }:
                   <Input label="City" value={shipCity} onChange={e => setShipCity(e.target.value)} />
                   <Input label="Postal Code" value={shipPostal} onChange={e => setShipPostal(e.target.value)} />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                  <select
-                    value={shipCountry}
-                    onChange={e => setShipCountry(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                  >
-                    <option value="">Select country</option>
-                    {COUNTRY_OPTIONS.map(c => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <CountrySelect
+                  label="Country"
+                  value={shipCountry}
+                  onChange={e => setShipCountry(e.target.value)}
+                />
               </div>
             )}
           </div>
