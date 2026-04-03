@@ -43,7 +43,18 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="3. Carriers">
+      <Section title="3. Delivery Arrangement">
+        <p>
+          All deliveries are arranged exclusively by Atmar Horeca. We do not offer collection in person
+          and customers may not arrange their own courier or freight service to collect goods.
+          There is no facility for pickup from our office, warehouse, or any other location.
+        </p>
+        <p>
+          Orders are shipped only to the delivery address provided at checkout.
+        </p>
+      </Section>
+
+      <Section title="4. Carriers">
         <p>
           We ship via <strong>Eurosender</strong>, a logistics platform that selects the most suitable
           carrier for each shipment — typically <strong>FedEx</strong> or <strong>DHL</strong>.
@@ -54,7 +65,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="4. Delivery Times">
+      <Section title="5. Delivery Times">
         <p>Estimated transit times after dispatch:</p>
         <ul className="list-disc pl-5 space-y-1 mt-1">
           <li><strong>Bulgaria:</strong> 1–2 business days</li>
@@ -69,7 +80,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="5. Shipping Costs">
+      <Section title="6. Shipping Costs">
         <p>
           Shipping costs are calculated at checkout based on the destination country and total order weight.
           Rates are shown before payment is made. For non-EU destinations, contact us for a quote.
@@ -83,7 +94,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="6. Customs and Import Duties">
+      <Section title="7. Customs and Import Duties">
         <p>
           For deliveries within the EU, no customs duties apply. All prices include VAT where applicable,
           or are shown with the applicable VAT rate at checkout.
@@ -95,7 +106,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="7. Damaged or Lost Shipments">
+      <Section title="8. Damaged or Lost Shipments">
         <p>
           Risk of loss and damage passes to you upon delivery. If your order arrives damaged or appears
           to have been lost in transit, follow these steps:
@@ -127,7 +138,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="8. Delivery Address">
+      <Section title="9. Delivery Address">
         <p>
           Please ensure your delivery address is accurate at the time of ordering. We are not responsible
           for failed deliveries due to incorrect or incomplete addresses. Re-delivery or address correction
@@ -135,7 +146,7 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="9. Contact">
+      <Section title="10. Contact">
         <p>
           For shipping enquiries:{' '}
           <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
