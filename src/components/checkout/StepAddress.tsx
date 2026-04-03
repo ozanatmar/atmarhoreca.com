@@ -125,11 +125,10 @@ export default function StepAddress({
               <Input label="City" value={shippingAddress.city} onChange={(e) => updateShipping('city', e.target.value)} required />
               <Input label="Postal Code" value={shippingAddress.postal_code} onChange={(e) => updateShipping('postal_code', e.target.value)} required />
             </div>
-            <Select
+            <CountrySelect
               label="Country"
               value={shippingAddress.country_code}
               onChange={(e) => updateShipping('country_code', e.target.value)}
-              options={COUNTRY_OPTIONS}
               required
             />
           </div>
