@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -112,9 +113,25 @@ export default function RegisterPage() {
             autoComplete="new-password"
           />
 
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={e => setAgreed(e.target.checked)}
+              className="mt-0.5 shrink-0"
+              required
+            />
+            <span className="text-sm text-gray-600">
+              I have read and agree to the{' '}
+              <Link href="/privacy-policy" target="_blank" className="text-[#6B3D8F] hover:underline font-medium">Privacy Policy</Link>
+              {' '}and{' '}
+              <Link href="/terms" target="_blank" className="text-[#6B3D8F] hover:underline font-medium">Terms &amp; Conditions</Link>.
+            </span>
+          </label>
+
           {error && <p className="text-sm text-[#C0392B]">{error}</p>}
 
-          <Button type="submit" size="lg" disabled={loading} className="mt-2">
+          <Button type="submit" size="lg" disabled={loading || !agreed} className="mt-2">
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>

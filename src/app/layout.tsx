@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Nunito } from 'next/font/google'
+import CookieConsentManager from '@/components/layout/CookieConsentManager'
 import './globals.css'
 
 const inter = Inter({
@@ -32,7 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${nunito.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieConsentManager />
+      </body>
     </html>
   )
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import { formatPrice } from '@/lib/utils'
 import type { StepProps } from './types'
@@ -144,6 +145,12 @@ export default function StepPayment(props: StepProps) {
             proforma invoice within 2 business days. You can then pay by card or bank transfer.
           </p>
           {error && <p className="text-sm text-[#C0392B] mb-4">{error}</p>}
+          <p className="text-xs text-gray-500 mb-4">
+            By submitting this order you agree to our{' '}
+            <Link href="/shipping" target="_blank" className="underline hover:text-gray-700">Shipping Policy</Link>
+            {' '}and{' '}
+            <Link href="/returns" target="_blank" className="underline hover:text-gray-700">Return &amp; Refund Policy</Link>.
+          </p>
           <div className="flex gap-3">
             <Button type="button" variant="outline" onClick={() => setStep(3)}>Back</Button>
             <Button size="lg" onClick={handleTypeBSubmit} disabled={submitting}>
@@ -167,6 +174,12 @@ export default function StepPayment(props: StepProps) {
         {!clientSecret && (
           <>
             {error && <p className="text-sm text-[#C0392B] mb-4">{error}</p>}
+            <p className="text-xs text-gray-500 mb-4">
+              By placing this order you agree to our{' '}
+              <Link href="/shipping" target="_blank" className="underline hover:text-gray-700">Shipping Policy</Link>
+              {' '}and{' '}
+              <Link href="/returns" target="_blank" className="underline hover:text-gray-700">Return &amp; Refund Policy</Link>.
+            </p>
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(3)}>Back</Button>
               <Button size="lg" onClick={handleTypeAInit} disabled={submitting}>
