@@ -68,7 +68,7 @@ function tokenize(name: string): Set<string> {
   return new Set(
     name.toLowerCase()
       .split(/[\s\-—–_/()]+/)
-      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+      .filter(w => w.length > 0 && !STOP_WORDS.has(w))
   )
 }
 
