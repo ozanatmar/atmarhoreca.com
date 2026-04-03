@@ -62,6 +62,55 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600
 
+const STOP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'in', 'for', 'to', 'with', 'de', 'la', 'le'])
+
+function tokenize(name: string): Set<string> {
+  return new Set(
+    name.toLowerCase()
+      .split(/[\s\-—–_/()]+/)
+      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+  )
+}
+
+type Candidate = { id: string; name: string; slug: string; sku: string | null; price: number; images: string[]; stock_status: string; requires_confirmation: boolean }
+
+function pickRelated(currentName: string, candidates: Candidate[], limit: number): Candidate[] {
+  const currentWords = tokenize(currentName)
+  const scored = candidates.map(p => {
+    const words = tokenize(p.name)
+    const overlap = [...words].filter(w => currentWords.has(w)).length
+    return { p, overlap }
+  })
+
+  const picked = new Set<string>()
+  const result: Candidate[] = []
+
+  for (let threshold = 4; threshold >= 1 && result.length < limit; threshold--) {
+    const matches = scored.filter(({ p, overlap }) => overlap >= threshold && !picked.has(p.id))
+    for (const { p } of matches) {
+      if (result.length >= limit) break
+      result.push(p)
+      picked.add(p.id)
+    }
+  }
+
+  // Fill remainder with random same-brand products not yet picked
+  if (result.length < limit) {
+    const remaining = candidates.filter(p => !picked.has(p.id))
+    // shuffle
+    for (let i = remaining.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [remaining[i], remaining[j]] = [remaining[j], remaining[i]]
+    }
+    for (const p of remaining) {
+      if (result.length >= limit) break
+      result.push(p)
+    }
+  }
+
+  return result
+}
+
 export default async function ProductPage({ params }: Props) {
   const { slug: sku, name } = await params
   const product = await getProduct(sku, name)
@@ -73,7 +122,7 @@ export default async function ProductPage({ params }: Props) {
 
   const brandName = Array.isArray(brand) ? brand[0]?.name : brand?.name
 
-  // Related products — same brand, exclude current
+  // Related products — same brand, ranked by word overlap with current product name
   let related: Array<{ id: string; name: string; slug: string; sku: string | null; price: number; images: string[]; stock_status: string; requires_confirmation: boolean }> = []
   if (product.brand_id) {
     const supabase = createStaticClient()
@@ -83,8 +132,8 @@ export default async function ProductPage({ params }: Props) {
       .eq('brand_id', product.brand_id)
       .eq('active', true)
       .neq('id', product.id)
-      .limit(4)
-    related = data ?? []
+    const candidates = data ?? []
+    related = pickRelated(product.name, candidates, 4)
   }
 
   const schema = {
