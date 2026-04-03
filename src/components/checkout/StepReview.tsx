@@ -19,6 +19,15 @@ export default function StepReview({
   maxHandlingDays,
 }: StepProps) {
   const destAddress = sameShipping ? address : shippingAddress
+  const hasProductTypeB = orderType === 'B' && items.some(i => i.requires_confirmation || i.stock_status !== 'in_stock')
+  const needsShippingQuote = orderType === 'B' && !shippingResult
+
+  function getOrderTypeLabel() {
+    if (orderType === 'A') return 'Direct Order'
+    if (needsShippingQuote && hasProductTypeB) return 'Availability & Shipping Quote Required'
+    if (needsShippingQuote) return 'Shipping Quote Required'
+    return 'Quote Required'
+  }
 
   return (
     <div>
@@ -28,13 +37,7 @@ export default function StepReview({
       <div className="bg-white rounded-2xl shadow-sm p-5 mb-4 flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500">Order Type</p>
-          <p className="font-semibold text-[#1A1A5E]">
-            {orderType === 'A'
-              ? 'Direct Order'
-              : !shippingResult
-              ? 'Shipping Quote Required'
-              : 'Quote Required'}
-          </p>
+          <p className="font-semibold text-[#1A1A5E]">{getOrderTypeLabel()}</p>
         </div>
         <Badge variant={orderType === 'A' ? 'green' : 'orange'}>
           Type {orderType}
@@ -92,9 +95,11 @@ export default function StepReview({
       )}
 
       {/* Destination warning */}
-      {orderType === 'B' && !shippingResult && destAddress.country_code && (
+      {orderType === 'B' && needsShippingQuote && destAddress.country_code && (
         <div className="bg-[#FFF8E1] border border-[#F0A500] rounded-xl p-4 text-sm text-gray-700 mb-4">
-          Shipping to your location will be calculated individually and included in your proforma invoice.
+          {hasProductTypeB
+            ? 'Availability and shipping cost to your location will be confirmed in your proforma invoice.'
+            : 'Shipping to your location will be calculated individually and included in your proforma invoice.'}
         </div>
       )}
 

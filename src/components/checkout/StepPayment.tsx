@@ -133,6 +133,18 @@ export default function StepPayment(props: StepProps) {
   }
 
   if (orderType === 'B') {
+    const hasProductTypeB = items.some(i => i.requires_confirmation || i.stock_status !== 'in_stock')
+    const needsShippingQuote = !props.shippingResult
+
+    let typeBMessage: string
+    if (needsShippingQuote && hasProductTypeB) {
+      typeBMessage = 'No payment is taken now. After submitting, we will check availability and calculate the shipping cost to your location, then send you a proforma invoice. You can then pay by card or bank transfer.'
+    } else if (needsShippingQuote) {
+      typeBMessage = 'No payment is taken now. After submitting, we will calculate the shipping cost to your location and send you a proforma invoice. You can then pay by card or bank transfer.'
+    } else {
+      typeBMessage = 'No payment is taken now. After submitting, we will check availability and send you a proforma invoice within 2 business days. You can then pay by card or bank transfer.'
+    }
+
     return (
       <div>
         <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Step 4 — Submit Order</h2>
@@ -141,10 +153,7 @@ export default function StepPayment(props: StepProps) {
             Your order total is <strong className="text-[#1A1A5E]">{formatPrice(total)}</strong>.
           </p>
           <p className="text-sm text-gray-600 mb-6">
-            {!props.shippingResult
-              ? 'No payment is taken now. After submitting, we will calculate the shipping cost to your location and send you a proforma invoice. You can then pay by card or bank transfer.'
-              : 'No payment is taken now. After submitting, we will check availability and send you a proforma invoice within 2 business days. You can then pay by card or bank transfer.'
-            }
+            {typeBMessage}
           </p>
           {error && <p className="text-sm text-[#C0392B] mb-4">{error}</p>}
           <p className="text-xs text-gray-500 mb-4">
