@@ -70,8 +70,6 @@ export async function POST(request: NextRequest, { params }: Params) {
 
       // Look up transit days + brand handling days for delivery estimate
       const destCountry = customer?.billing_address?.country_code
-      const totalWeight = (order.items as { weight_kg: number; qty: number }[])
-        .reduce((sum, i) => sum + i.weight_kg * i.qty, 0)
       let estimatedDeliveryDays: number | null = null
       let maxHandlingDays = 1
       if (destCountry) {
