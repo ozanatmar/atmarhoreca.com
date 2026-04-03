@@ -37,14 +37,13 @@ export default function TermsPage() {
           European Union and, on a case-by-case basis, internationally.
         </p>
         <p>
-          <strong>Business customers</strong> are persons or entities purchasing in the course of a trade,
-          business, or profession. By checking out without indicating personal consumer use, or by
-          providing a VAT number, you confirm you are acting as a business customer.
+          <strong>Business customers (B2B)</strong> are identified by the presence of a company name
+          and/or a VAT number in the order. If either field is filled in at checkout, the order is
+          treated as a business purchase and business terms apply.
         </p>
         <p>
-          <strong>Consumers</strong> are natural persons purchasing for personal, non-commercial use.
-          Consumers have additional rights under EU consumer protection law, as set out in these terms
-          and our Return &amp; Refund Policy.
+          <strong>Consumers (B2C)</strong> are customers who leave both the company name and VAT number
+          fields empty at checkout. Consumer protection rights under EU law apply to these orders.
         </p>
         <p>
           You must be at least 18 years old to place an order.

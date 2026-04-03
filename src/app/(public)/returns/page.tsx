@@ -22,13 +22,13 @@ export default function ReturnsPage() {
 
       <Section title="1. Definitions">
         <p>
-          <strong>Consumer (B2C):</strong> a natural person purchasing goods for personal use, not in the course of a business or trade.
+          <strong>Consumer (B2C):</strong> a customer who leaves both the company name and VAT number fields empty at checkout.
         </p>
         <p>
-          <strong>Business customer (B2B):</strong> any person or entity purchasing goods for business, professional, or commercial purposes, regardless of whether a VAT number is provided.
+          <strong>Business customer (B2B):</strong> a customer who provides a company name and/or a VAT number at checkout. This applies regardless of whether the purchaser is a registered business.
         </p>
         <p>
-          By completing a purchase, you confirm which category applies to you. Atmar Horeca reserves the right to request evidence of consumer status where there is reasonable doubt.
+          By completing a purchase, you confirm that the information provided at checkout accurately reflects your status. Providing a company name or VAT number constitutes a declaration that you are purchasing as a business and waives your consumer return rights.
         </p>
       </Section>
 
