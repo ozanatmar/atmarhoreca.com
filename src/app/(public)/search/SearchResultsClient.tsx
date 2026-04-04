@@ -141,44 +141,6 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
         />
       </div>
 
-      {/* Brand */}
-      {allBrands.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Brand</p>
-          <div className="flex flex-col gap-2">
-            {allBrands.map(b => (
-              <label key={b.id} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.has(b.id)}
-                  onChange={() => toggleBrand(b.id)}
-                  className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
-                />
-                {b.name}
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Availability */}
-      <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Availability</p>
-        <div className="flex flex-col gap-2">
-          {AVAILABILITY_OPTIONS.map(({ key, label }) => (
-            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
-              <input
-                type="checkbox"
-                checked={selectedAvail.has(key)}
-                onChange={() => toggleAvail(key)}
-                className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-      </div>
-
       {/* Price range */}
       {globalMin < globalMax && (
         <div>
@@ -237,6 +199,44 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
           </div>
         </div>
       )}
+
+      {/* Brand */}
+      {allBrands.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Brand</p>
+          <div className="flex flex-col gap-2">
+            {allBrands.map(b => (
+              <label key={b.id} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedBrands.has(b.id)}
+                  onChange={() => toggleBrand(b.id)}
+                  className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
+                />
+                {b.name}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Availability */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Availability</p>
+        <div className="flex flex-col gap-2">
+          {AVAILABILITY_OPTIONS.map(({ key, label }) => (
+            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
+              <input
+                type="checkbox"
+                checked={selectedAvail.has(key)}
+                onChange={() => toggleAvail(key)}
+                className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </div>
 
       {/* Sort */}
       <div>
