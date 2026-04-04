@@ -150,16 +150,21 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
               min={globalMin} max={globalMax} step={1}
               value={priceMin}
               onChange={e => setPriceMin(Math.min(Number(e.target.value), priceMax))}
-              className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer
+              className="absolute w-full h-1.5 appearance-none bg-transparent
+                pointer-events-none
+                [&::-webkit-slider-thumb]:pointer-events-auto
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4
                 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full
                 [&::-webkit-slider-thumb]:bg-[#6B3D8F] [&::-webkit-slider-thumb]:border-2
                 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-moz-range-thumb]:pointer-events-auto
                 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
                 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#6B3D8F]
                 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white
+                [&::-moz-range-thumb]:cursor-pointer
                 [&::-moz-range-track]:bg-transparent"
-              style={{ zIndex: pct(priceMin) > 90 ? 5 : 3 }}
+              style={{ zIndex: 5 }}
             />
             {/* Max handle */}
             <input
@@ -167,14 +172,19 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
               min={globalMin} max={globalMax} step={1}
               value={priceMax}
               onChange={e => setPriceMax(Math.max(Number(e.target.value), priceMin))}
-              className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer
+              className="absolute w-full h-1.5 appearance-none bg-transparent
+                pointer-events-none
+                [&::-webkit-slider-thumb]:pointer-events-auto
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4
                 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full
                 [&::-webkit-slider-thumb]:bg-[#6B3D8F] [&::-webkit-slider-thumb]:border-2
                 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-moz-range-thumb]:pointer-events-auto
                 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
                 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#6B3D8F]
                 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white
+                [&::-moz-range-thumb]:cursor-pointer
                 [&::-moz-range-track]:bg-transparent"
               style={{ zIndex: 4 }}
             />
