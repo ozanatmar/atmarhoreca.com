@@ -324,14 +324,23 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
                 href={productUrl(p)}
                 className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
               >
-                <div className="relative aspect-square bg-gray-50">
+                <div className="relative aspect-square bg-gray-50 overflow-hidden">
                   <Image
                     src={p.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'}
                     alt={p.name}
                     fill
-                    className="object-contain p-3 group-hover:scale-105 transition-transform"
+                    className={`object-contain p-3 transition-opacity duration-300 ${p.images[1] ? 'group-hover:opacity-0' : 'group-hover:scale-105 transition-transform'}`}
                     unoptimized
                   />
+                  {p.images[1] && (
+                    <Image
+                      src={p.images[1]}
+                      alt={p.name}
+                      fill
+                      className="object-contain p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      unoptimized
+                    />
+                  )}
                 </div>
                 <div className="p-4 flex flex-col flex-1 gap-1.5">
                   <div className="flex items-center gap-2">
