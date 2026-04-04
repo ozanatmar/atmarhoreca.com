@@ -46,7 +46,7 @@ export async function POST() {
   const col = (name: string) => header.indexOf(name)
 
   // Validate header columns
-  const REQUIRED_COLS = ['name', 'sku', 'brand', 'price', 'weight_kg', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
+  const REQUIRED_COLS = ['name', 'sku', 'brand', 'price', 'stock_status', 'requires_confirmation', 'shipping_inefficient', 'active']
   for (const colName of REQUIRED_COLS) {
     if (col(colName) === -1) {
       return NextResponse.json({ error: `Missing column "${colName}" in header row (row 2)` }, { status: 422 })
@@ -88,8 +88,8 @@ export async function POST() {
     }
 
     const weightStr = get('weight_kg')
-    if (!weightStr || isNaN(parseFloat(weightStr)) || parseFloat(weightStr) < 0) {
-      return NextResponse.json({ error: `Invalid weight_kg in ${cellRef(col('weight_kg'), rowNum)}` }, { status: 422 })
+    if (weightStr && (isNaN(parseFloat(weightStr)) || parseFloat(weightStr) < 0)) {
+      return NextResponse.json({ error: `Invalid weight_kg in ${cellRef(col('weight_kg'), rowNum)} — must be a positive number or left empty` }, { status: 422 })
     }
 
     const stockStatus = get('stock_status')
@@ -140,7 +140,7 @@ export async function POST() {
       brand_id: brandMap.get(get('brand').toLowerCase())!,
       description: get('description') || null,
       price: parseFloat(get('price')),
-      weight_kg: parseFloat(get('weight_kg')),
+      weight_kg: get('weight_kg') ? parseFloat(get('weight_kg')) : null,
       stock_status: get('stock_status') as 'in_stock' | 'out_of_stock' | 'unknown',
       martellato_url: get('martellato_url') || null,
       images: imagesRaw ? imagesRaw.split('|').map((u) => u.trim()).filter(Boolean) : [],

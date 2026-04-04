@@ -35,7 +35,7 @@ export async function POST() {
         sku: row[col('sku')] || null,
         description: row[col('description')] || null,
         price: parseFloat(row[col('price')]),
-        weight_kg: parseFloat(row[col('weight_kg')]),
+        weight_kg: row[col('weight_kg')] ? parseFloat(row[col('weight_kg')]) : null,
         stock_status: (row[col('stock_status')] || 'unknown') as 'in_stock' | 'out_of_stock' | 'unknown',
         martellato_url: row[col('martellato_url')] || null,
         images: row[col('images')] ? row[col('images')].split('|').filter(Boolean) : [],

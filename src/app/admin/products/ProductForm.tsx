@@ -65,7 +65,7 @@ export default function ProductForm({ product, brands }: Props) {
       sku: sku || null,
       description: description || null,
       price: parseFloat(price),
-      weight_kg: parseFloat(weightKg),
+      weight_kg: weightKg ? parseFloat(weightKg) : null,
       requires_confirmation: requiresConfirmation,
       stock_status: stockStatus,
       martellato_url: martellatoUrl || null,
@@ -133,7 +133,7 @@ export default function ProductForm({ product, brands }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <Input label="Price (EUR excl. VAT)" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
-        <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} required />
+        <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} hint="Optional — used for manual shipping quotes" />
       </div>
 
       <Select
