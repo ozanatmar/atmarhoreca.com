@@ -7,6 +7,7 @@ import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
 
 type SortKey = 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc'
+type AvailabilityKey = 'in_stock' | 'on_request' | 'out_of_stock'
 
 interface Product {
   id: string
@@ -24,6 +25,20 @@ interface Product {
 interface Props {
   products: Product[]
   initialQuery: string
+}
+
+const AVAILABILITY_OPTIONS: { key: AvailabilityKey; label: string }[] = [
+  { key: 'in_stock',    label: 'In Stock' },
+  { key: 'on_request', label: 'On Request' },
+  { key: 'out_of_stock', label: 'Out of Stock' },
+]
+
+function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean {
+  if (filters.size === 0) return true
+  if (filters.has('in_stock')     && p.stock_status === 'in_stock'     && !p.requires_confirmation) return true
+  if (filters.has('on_request')   && p.requires_confirmation)                                       return true
+  if (filters.has('out_of_stock') && p.stock_status === 'out_of_stock')                             return true
+  return false
 }
 
 export default function SearchResultsClient({ products, initialQuery }: Props) {
@@ -45,12 +60,13 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
     return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))]
   }, [products])
 
-  const [text, setText] = useState('')
-  const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set())
-  const [priceMin, setPriceMin] = useState(() => globalMin)
-  const [priceMax, setPriceMax] = useState(() => globalMax)
-  const [sort, setSort] = useState<SortKey>('name_asc')
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [text, setText]                         = useState('')
+  const [selectedBrands, setSelectedBrands]     = useState<Set<string>>(new Set())
+  const [selectedAvail, setSelectedAvail]       = useState<Set<AvailabilityKey>>(new Set())
+  const [priceMin, setPriceMin]                 = useState(() => globalMin)
+  const [priceMax, setPriceMax]                 = useState(() => globalMax)
+  const [sort, setSort]                         = useState<SortKey>('name_asc')
+  const [filtersOpen, setFiltersOpen]           = useState(false)
 
   const filtered = useMemo(() => {
     let result = products
@@ -67,6 +83,10 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
       result = result.filter(p => p.brand_id && selectedBrands.has(p.brand_id))
     }
 
+    if (selectedAvail.size > 0) {
+      result = result.filter(p => matchesAvailability(p, selectedAvail))
+    }
+
     result = result.filter(p => Number(p.price) >= priceMin && Number(p.price) <= priceMax)
 
     return [...result].sort((a, b) => {
@@ -78,7 +98,7 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
         default:           return 0
       }
     })
-  }, [products, text, selectedBrands, priceMin, priceMax, sort])
+  }, [products, text, selectedBrands, selectedAvail, priceMin, priceMax, sort])
 
   function toggleBrand(id: string) {
     setSelectedBrands(prev => {
@@ -88,9 +108,18 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
     })
   }
 
+  function toggleAvail(key: AvailabilityKey) {
+    setSelectedAvail(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
   const activeFilterCount =
     (text.trim() ? 1 : 0) +
     selectedBrands.size +
+    selectedAvail.size +
     (priceMin > globalMin || priceMax < globalMax ? 1 : 0)
 
   const pct = (v: number) =>
@@ -98,7 +127,7 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
 
   const FiltersPanel = (
     <div className="flex flex-col gap-6">
-      {/* Name / SKU text filter */}
+      {/* Name / SKU */}
       <div>
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Name / SKU
@@ -112,8 +141,8 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
         />
       </div>
 
-      {/* Brand checkboxes */}
-      {allBrands.length > 1 && (
+      {/* Brand */}
+      {allBrands.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Brand</p>
           <div className="flex flex-col gap-2">
@@ -132,22 +161,37 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
         </div>
       )}
 
-      {/* Price range slider */}
+      {/* Availability */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Availability</p>
+        <div className="flex flex-col gap-2">
+          {AVAILABILITY_OPTIONS.map(({ key, label }) => (
+            <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
+              <input
+                type="checkbox"
+                checked={selectedAvail.has(key)}
+                onChange={() => toggleAvail(key)}
+                className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Price range */}
       {globalMin < globalMax && (
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Price range</p>
           <div className="relative flex items-center h-5 mb-3">
-            {/* Track */}
             <div className="absolute w-full h-1.5 bg-gray-200 rounded-full pointer-events-none">
               <div
                 className="absolute h-full bg-[#6B3D8F] rounded-full"
                 style={{ left: `${pct(priceMin)}%`, right: `${100 - pct(priceMax)}%` }}
               />
             </div>
-            {/* Min handle */}
             <input
-              type="range"
-              min={globalMin} max={globalMax} step={1}
+              type="range" min={globalMin} max={globalMax} step={1}
               value={priceMin}
               onChange={e => setPriceMin(Math.min(Number(e.target.value), priceMax))}
               className="absolute w-full h-1.5 appearance-none bg-transparent
@@ -166,10 +210,8 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
                 [&::-moz-range-track]:bg-transparent"
               style={{ zIndex: 5 }}
             />
-            {/* Max handle */}
             <input
-              type="range"
-              min={globalMin} max={globalMax} step={1}
+              type="range" min={globalMin} max={globalMax} step={1}
               value={priceMax}
               onChange={e => setPriceMax(Math.max(Number(e.target.value), priceMin))}
               className="absolute w-full h-1.5 appearance-none bg-transparent
@@ -211,12 +253,13 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
         </select>
       </div>
 
-      {/* Clear filters */}
+      {/* Clear */}
       {activeFilterCount > 0 && (
         <button
           onClick={() => {
             setText('')
             setSelectedBrands(new Set())
+            setSelectedAvail(new Set())
             setPriceMin(globalMin)
             setPriceMax(globalMax)
             setSort('name_asc')
