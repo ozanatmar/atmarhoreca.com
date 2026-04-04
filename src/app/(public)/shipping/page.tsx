@@ -73,15 +73,15 @@ export default function ShippingPage() {
         </p>
         <p>
           For non-EU destinations, shipping costs are calculated individually and will be confirmed
-          before your order is dispatched. You will have the option to accept the shipping cost or
-          cancel the order for a full refund.
+          before your order is dispatched. No payment is taken until you receive and accept the
+          proforma invoice. You may cancel the order at any point before payment.
         </p>
         <p>
           <strong>Pre-set free shipping applies to mainland destinations only.</strong> Deliveries to
           islands (including but not limited to Greek islands, the Canary Islands, the Balearic Islands,
           and other offshore territories) may incur additional carrier surcharges. If your delivery
           address is on an island, we will contact you before dispatch to confirm any additional
-          cost. You will have the option to accept the surcharge or cancel the order for a full refund.
+          cost. No payment is taken until you accept the final proforma invoice. You may cancel the order at any point before payment.
         </p>
       </Section>
 
