@@ -37,6 +37,7 @@ export interface Product {
   meta_title: string | null
   meta_description: string | null
   shipping_inefficient: boolean
+  specs: Array<{ key: string; value: string }>
   active: boolean
   created_at: string
   // joined

@@ -286,13 +286,32 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
 
-        {product.description && (
-          <div className="mt-12">
-            <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Product Description</h2>
-            <div
-              className="prose prose-sm max-w-none text-gray-700"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
+        {(product.description || product.specs?.length > 0) && (
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            {product.description && (
+              <div>
+                <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Product Description</h2>
+                <div
+                  className="prose prose-sm max-w-none text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </div>
+            )}
+            {product.specs?.length > 0 && (
+              <div>
+                <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Technical Specifications</h2>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {product.specs.map((s, i) => (
+                      <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <td className="py-2 px-3 font-medium text-gray-700 w-2/5 rounded-l">{s.key}</td>
+                        <td className="py-2 px-3 text-gray-600 rounded-r">{s.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

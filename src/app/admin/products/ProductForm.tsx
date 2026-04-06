@@ -36,6 +36,7 @@ export default function ProductForm({ product, brands }: Props) {
   const [images, setImages] = useState<string[]>(product?.images ?? [''])
   const [shippingInefficient, setShippingInefficient] = useState(product?.shipping_inefficient ?? false)
   const [active, setActive] = useState(product?.active ?? true)
+  const [specs, setSpecs] = useState<{ key: string; value: string }[]>(product?.specs ?? [])
   const [metaTitle, setMetaTitle] = useState(product?.meta_title ?? '')
   const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
@@ -166,6 +167,7 @@ export default function ProductForm({ product, brands }: Props) {
       images: images.filter(Boolean),
       meta_title: metaTitle || null,
       meta_description: metaDescription || null,
+      specs: specs.filter(s => s.key.trim()),
       shipping_inefficient: shippingInefficient,
       active,
     }
@@ -244,6 +246,41 @@ export default function ProductForm({ product, brands }: Props) {
               rows={8}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
             />
+          </div>
+
+          {/* Technical Specs */}
+          <div>
+            <label className="text-sm font-medium text-[#1A1A5E] block mb-2">Technical Specifications</label>
+            {specs.map((spec, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={spec.key}
+                  onChange={e => {
+                    const next = [...specs]
+                    next[i] = { ...next[i], key: e.target.value }
+                    setSpecs(next)
+                  }}
+                  placeholder="e.g. Power"
+                  className="w-2/5 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                <input
+                  type="text"
+                  value={spec.value}
+                  onChange={e => {
+                    const next = [...specs]
+                    next[i] = { ...next[i], value: e.target.value }
+                    setSpecs(next)
+                  }}
+                  placeholder="e.g. 1500W"
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                <button type="button" onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm shrink-0">Remove</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])} className="text-sm text-[#6B3D8F] hover:underline">
+              + Add spec
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
