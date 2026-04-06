@@ -67,7 +67,6 @@ export default async function BrandPage({ params }: Props) {
           {brand.description && <p className="text-sm text-gray-500 max-w-xl mt-0.5">{brand.description}</p>}
           {brand.lead_time_note && <p className="text-xs text-gray-400 mt-0.5">{brand.lead_time_note}</p>}
         </div>
-        <span className="ml-auto text-sm text-gray-400 shrink-0">{products?.length ?? 0} products</span>
       </div>
 
       <SearchResultsClient
