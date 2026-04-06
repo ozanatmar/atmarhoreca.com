@@ -120,6 +120,14 @@ export interface BlogPost {
   created_at: string
 }
 
+export interface ProductDocument {
+  id: string
+  product_id: string
+  name: string
+  file_path: string
+  created_at: string
+}
+
 export interface ScrapeLog {
   id: string
   brand_id: string

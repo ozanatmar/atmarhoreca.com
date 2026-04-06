@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
 import { slugify, productUrl } from '@/lib/utils'
-import type { Product } from '@/types'
+import type { Product, ProductDocument } from '@/types'
 
 type RelatedProduct = { id: string; name: string; sku: string | null }
 
@@ -41,6 +41,9 @@ export default function ProductForm({ product, brands }: Props) {
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
   const [relSearch, setRelSearch] = useState('')
   const [relResults, setRelResults] = useState<RelatedProduct[]>([])
+  const [documents, setDocuments] = useState<ProductDocument[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -77,6 +80,58 @@ export default function ProductForm({ product, brands }: Props) {
     }, 300)
     return () => clearTimeout(timer)
   }, [relSearch, product?.id, relatedProducts])
+
+  // Load existing documents
+  useEffect(() => {
+    if (!product?.id) return
+    createClient()
+      .from('product_documents')
+      .select('*')
+      .eq('product_id', product.id)
+      .order('created_at')
+      .then(({ data }) => setDocuments(data ?? []))
+  }, [product?.id])
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !product?.id) return
+    if (file.type !== 'application/pdf') { setUploadError('Only PDF files are supported.'); return }
+
+    setUploading(true)
+    setUploadError('')
+
+    const brandName = brands.find(b => b.id === brandId)?.name ?? 'unknown'
+    const safeBrand = brandName.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const safeFile = file.name.replace(/[^a-zA-Z0-9-_.]/g, '_')
+    const filePath = `${safeBrand}/${product.id}-${Date.now()}-${safeFile}`
+
+    const supabase = createClient()
+    const { error: storageError } = await supabase.storage
+      .from('product-documents')
+      .upload(filePath, file, { contentType: 'application/pdf' })
+
+    if (storageError) { setUploadError(storageError.message); setUploading(false); return }
+
+    const displayName = file.name.replace(/\.pdf$/i, '')
+    const { data: doc, error: dbError } = await supabase
+      .from('product_documents')
+      .insert({ product_id: product.id, name: displayName, file_path: filePath })
+      .select()
+      .single()
+
+    if (dbError) { setUploadError(dbError.message); setUploading(false); return }
+
+    setDocuments(prev => [...prev, doc])
+    setUploading(false)
+  }
+
+  async function handleDeleteDocument(doc: ProductDocument) {
+    const supabase = createClient()
+    await supabase.storage.from('product-documents').remove([doc.file_path])
+    await supabase.from('product_documents').delete().eq('id', doc.id)
+    setDocuments(prev => prev.filter(d => d.id !== doc.id))
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -303,6 +358,37 @@ export default function ProductForm({ product, brands }: Props) {
               </ul>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Documents (edit only) */}
+      {product && (
+        <div className="pt-2 border-t border-gray-100">
+          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Documents</label>
+          <p className="text-xs text-gray-400 mb-3">PDF files shown as downloads on the product page.</p>
+
+          {documents.length > 0 && (
+            <ul className="flex flex-col gap-1 mb-3">
+              {documents.map(doc => (
+                <li key={doc.id} className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="text-gray-400">📄</span>
+                  <span className="flex-1 truncate">{doc.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDocument(doc)}
+                    className="text-xs text-red-500 hover:underline shrink-0"
+                  >Remove</button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <label className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : 'border-gray-300 hover:border-[#6B3D8F] text-gray-600 hover:text-[#6B3D8F]'}`}>
+            <span>{uploading ? 'Uploading…' : '+ Upload PDF'}</span>
+            <input type="file" accept="application/pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
+          </label>
+
+          {uploadError && <p className="text-xs text-red-500 mt-2">{uploadError}</p>}
         </div>
       )}
 

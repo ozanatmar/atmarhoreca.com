@@ -63,6 +63,18 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug)
   if (!product) notFound()
 
+  // Product documents
+  let documents: Array<{ id: string; name: string; file_path: string }> = []
+  {
+    const supabase = createStaticClient()
+    const { data } = await supabase
+      .from('product_documents')
+      .select('id, name, file_path')
+      .eq('product_id', product.id)
+      .order('created_at')
+    documents = data ?? []
+  }
+
   // Explicit related products (manually set in admin)
   let explicitRelated: Array<{ id: string; name: string; slug: string; sku: string | null; price: number; images: string[] }> = []
   {
@@ -187,6 +199,27 @@ export default async function ProductPage({ params }: Props) {
               <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 text-sm text-amber-800">
                 <span className="mt-0.5">⚠️</span>
                 <span>Orders containing this product are <strong>not eligible for free EU delivery</strong> due to its size or weight.</span>
+              </div>
+            )}
+
+            {documents.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-[#1A1A5E] mb-2">Documents</p>
+                <ul className="flex flex-col gap-1.5">
+                  {documents.map(doc => (
+                    <li key={doc.id}>
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-documents/${doc.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="inline-flex items-center gap-2 text-sm text-[#6B3D8F] hover:underline"
+                      >
+                        <span>📄</span>{doc.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
