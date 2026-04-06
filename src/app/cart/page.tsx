@@ -30,7 +30,7 @@ export default function CartPage() {
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
         {items.map((item, i) => (
           <div
-            key={item.product_id}
+            key={item.cart_key ?? item.product_id}
             className={`flex gap-4 p-4 items-center ${i > 0 ? 'border-t border-gray-100' : ''}`}
           >
             {/* Image */}
@@ -52,13 +52,16 @@ export default function CartPage() {
               >
                 {item.name}
               </Link>
+              {item.selected_options?.length ? (
+                <p className="text-xs text-gray-400 mt-0.5">{item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</p>
+              ) : null}
               <p className="text-xs text-gray-500 mt-0.5">{formatPrice(item.price)} each</p>
             </div>
 
             {/* Qty controls */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => updateQty(item.product_id, item.qty - 1)}
+                onClick={() => updateQty(item.cart_key ?? item.product_id, item.qty - 1)}
                 disabled={item.qty <= 1}
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40"
               >
@@ -66,7 +69,7 @@ export default function CartPage() {
               </button>
               <span className="w-8 text-center text-sm font-semibold">{item.qty}</span>
               <button
-                onClick={() => updateQty(item.product_id, item.qty + 1)}
+                onClick={() => updateQty(item.cart_key ?? item.product_id, item.qty + 1)}
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
               >
                 <Plus className="w-3 h-3" />
@@ -80,7 +83,7 @@ export default function CartPage() {
 
             {/* Remove */}
             <button
-              onClick={() => removeItem(item.product_id)}
+              onClick={() => removeItem(item.cart_key ?? item.product_id)}
               className="p-1.5 text-gray-400 hover:text-[#C0392B] transition-colors"
               aria-label="Remove"
             >

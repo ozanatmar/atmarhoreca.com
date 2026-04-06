@@ -3,6 +3,17 @@
 // ============================================================
 
 export type StockStatus = 'in_stock' | 'out_of_stock' | 'unknown'
+
+export interface ProductOptionGroup {
+  name: string
+  options: Array<{ label: string; price_modifier: number }>
+}
+
+export interface SelectedOption {
+  group: string
+  label: string
+  price_modifier: number
+}
 export type OrderType = 'A' | 'B'
 export type OrderStatus = 'pending_approval' | 'awaiting_payment' | 'paid' | 'fulfilled' | 'cancelled'
 export type ScrapeStatus = 'success' | 'failed'
@@ -38,6 +49,7 @@ export interface Product {
   meta_description: string | null
   shipping_inefficient: boolean
   specs: Array<{ key: string; value: string }>
+  option_groups: ProductOptionGroup[]
   active: boolean
   created_at: string
   // joined
@@ -72,6 +84,7 @@ export interface OrderItem {
   qty: number
   unit_price: number
   weight_kg: number
+  selected_options?: SelectedOption[]
 }
 
 export interface Order {
@@ -143,6 +156,7 @@ export interface ScrapeLog {
 // ============================================================
 
 export interface CartItem {
+  cart_key: string
   product_id: string
   brand_id: string | null
   brand_name: string | null
@@ -156,6 +170,7 @@ export interface CartItem {
   requires_confirmation: boolean
   shipping_inefficient: boolean
   stock_status: StockStatus
+  selected_options?: SelectedOption[]
 }
 
 // ============================================================

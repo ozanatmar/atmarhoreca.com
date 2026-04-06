@@ -42,6 +42,7 @@ export default function StepPayment(props: StepProps) {
           qty: i.qty,
           unit_price: i.price,
           weight_kg: i.weight_kg,
+          ...(i.selected_options?.length ? { selected_options: i.selected_options } : {}),
         })),
         subtotal,
         shipping_cost: shippingCost,

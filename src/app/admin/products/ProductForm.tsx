@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
 import { slugify, productUrl } from '@/lib/utils'
-import type { Product, ProductDocument } from '@/types'
+import type { Product, ProductDocument, ProductOptionGroup } from '@/types'
 
 type RelatedProduct = { id: string; name: string; slug: string; sku: string | null }
 
@@ -37,6 +37,7 @@ export default function ProductForm({ product, brands }: Props) {
   const [shippingInefficient, setShippingInefficient] = useState(product?.shipping_inefficient ?? false)
   const [active, setActive] = useState(product?.active ?? true)
   const [specs, setSpecs] = useState<{ key: string; value: string }[]>(product?.specs ?? [])
+  const [optionGroups, setOptionGroups] = useState<ProductOptionGroup[]>(product?.option_groups ?? [])
   const [metaTitle, setMetaTitle] = useState(product?.meta_title ?? '')
   const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
@@ -168,6 +169,7 @@ export default function ProductForm({ product, brands }: Props) {
       meta_title: metaTitle || null,
       meta_description: metaDescription || null,
       specs: specs.filter(s => s.key.trim()),
+      option_groups: optionGroups.filter(g => g.name.trim()),
       shipping_inefficient: shippingInefficient,
       active,
     }
@@ -331,6 +333,69 @@ export default function ProductForm({ product, brands }: Props) {
             ))}
             <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])} className="text-sm text-[#6B3D8F] hover:underline text-left">
               + Add spec
+            </button>
+          </div>
+
+          {/* Option Groups */}
+          <div className="flex flex-col gap-3 pt-1 border-t border-gray-100">
+            <label className="text-sm font-medium text-[#1A1A5E] block">Product Options</label>
+            {optionGroups.map((group, gi) => (
+              <div key={gi} className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={group.name}
+                    onChange={e => {
+                      const next = [...optionGroups]
+                      next[gi] = { ...next[gi], name: e.target.value }
+                      setOptionGroups(next)
+                    }}
+                    placeholder="e.g. Size, Color…"
+                    className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                  />
+                  <button type="button" onClick={() => setOptionGroups(optionGroups.filter((_, i) => i !== gi))} className="text-xs text-red-500 hover:underline shrink-0">Remove group</button>
+                </div>
+                {group.options.map((opt, oi) => (
+                  <div key={oi} className="flex gap-2 items-center pl-3">
+                    <input
+                      type="text"
+                      value={opt.label}
+                      onChange={e => {
+                        const next = [...optionGroups]
+                        next[gi].options[oi] = { ...next[gi].options[oi], label: e.target.value }
+                        setOptionGroups(next)
+                      }}
+                      placeholder="Option label"
+                      className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={opt.price_modifier}
+                      onChange={e => {
+                        const next = [...optionGroups]
+                        next[gi].options[oi] = { ...next[gi].options[oi], price_modifier: parseFloat(e.target.value) || 0 }
+                        setOptionGroups(next)
+                      }}
+                      placeholder="±€"
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                    />
+                    <button type="button" onClick={() => {
+                      const next = [...optionGroups]
+                      next[gi].options = next[gi].options.filter((_, i) => i !== oi)
+                      setOptionGroups(next)
+                    }} className="text-[#C0392B] text-sm shrink-0">×</button>
+                  </div>
+                ))}
+                <button type="button" onClick={() => {
+                  const next = [...optionGroups]
+                  next[gi].options = [...next[gi].options, { label: '', price_modifier: 0 }]
+                  setOptionGroups(next)
+                }} className="text-xs text-[#6B3D8F] hover:underline text-left pl-3">+ Add option</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setOptionGroups([...optionGroups, { name: '', options: [] }])} className="text-sm text-[#6B3D8F] hover:underline text-left">
+              + Add option group
             </button>
           </div>
 

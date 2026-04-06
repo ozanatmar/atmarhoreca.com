@@ -48,9 +48,14 @@ export default function StepReview({
       <div className="bg-white rounded-2xl shadow-sm p-5 mb-4">
         <h3 className="font-semibold text-[#1A1A5E] mb-3">Items</h3>
         {items.map((item) => (
-          <div key={item.product_id} className="flex justify-between text-sm py-1.5 border-b border-gray-100 last:border-0">
-            <span className="text-gray-700">{item.name} × {item.qty}</span>
-            <span className="font-semibold text-[#1A1A5E]">{formatPrice(item.price * item.qty)}</span>
+          <div key={item.cart_key ?? item.product_id} className="flex justify-between text-sm py-1.5 border-b border-gray-100 last:border-0 gap-2">
+            <span className="text-gray-700">
+              {item.name} × {item.qty}
+              {item.selected_options?.length ? (
+                <span className="block text-xs text-gray-400">{item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</span>
+              ) : null}
+            </span>
+            <span className="font-semibold text-[#1A1A5E] shrink-0">{formatPrice(item.price * item.qty)}</span>
           </div>
         ))}
       </div>

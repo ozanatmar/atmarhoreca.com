@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
 import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
-import AddToCartButton from '@/components/product/AddToCartButton'
+import ProductPurchaseSection from '@/components/product/ProductPurchaseSection'
 import ImageGallery from '@/components/product/ImageGallery'
 import type { Product } from '@/types'
 
@@ -172,15 +172,6 @@ export default async function ProductPage({ params }: Props) {
               <h1 className="text-3xl font-bold text-[#1A1A5E]">{product.name}</h1>
             </div>
 
-            {/* Price */}
-            <div>
-              <span className="text-3xl font-bold text-[#1A1A5E]">
-                {formatPrice(product.price)}
-              </span>
-              <span className="ml-2 text-sm text-gray-500">excl. VAT</span>
-              <p className="text-xs text-gray-400 mt-1">VAT calculated at checkout</p>
-            </div>
-
             {/* Stock badge */}
             <StockBadge
               stockStatus={product.stock_status}
@@ -192,8 +183,7 @@ export default async function ProductPage({ params }: Props) {
               <p className="text-sm text-gray-600">{brand.lead_time_note}</p>
             )}
 
-            {/* CTA */}
-            <AddToCartButton product={product} />
+            <ProductPurchaseSection product={product} />
 
             {product.shipping_inefficient && (
               <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 text-sm text-amber-800">

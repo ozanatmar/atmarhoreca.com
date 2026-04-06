@@ -65,9 +65,12 @@ function itemsTable(items: EmailOrderItem[], siteUrl: string): string {
     const url = item.sku
       ? `${siteUrl}/products/${encodeURIComponent(item.sku)}/${item.slug}`
       : item.slug ? `${siteUrl}/products/${item.slug}` : null
+    const optionsText = item.selected_options?.length
+      ? `<br><span style="font-size:12px;color:#888;">${item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</span>`
+      : ''
     const nameCell = url
-      ? `<a href="${url}" style="color:#6B3D8F;text-decoration:none;font-weight:500;">${item.name}</a>`
-      : item.name
+      ? `<a href="${url}" style="color:#6B3D8F;text-decoration:none;font-weight:500;">${item.name}</a>${optionsText}`
+      : `${item.name}${optionsText}`
     return `
     <tr>
       <td style="padding:10px 0;border-bottom:1px solid #eee;">${nameCell}</td>

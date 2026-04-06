@@ -5,8 +5,8 @@ import type { CartItem } from '@/types'
 interface CartStore {
   items: CartItem[]
   addItem: (item: CartItem) => void
-  updateQty: (productId: string, qty: number) => void
-  removeItem: (productId: string) => void
+  updateQty: (cartKey: string, qty: number) => void
+  removeItem: (cartKey: string) => void
   clearCart: () => void
 }
 
@@ -16,11 +16,12 @@ export const useCartStore = create<CartStore>()(
       items: [],
 
       addItem(item) {
-        const existing = get().items.find((i) => i.product_id === item.product_id)
+        const key = item.cart_key
+        const existing = get().items.find((i) => (i.cart_key ?? i.product_id) === key)
         if (existing) {
           set((s) => ({
             items: s.items.map((i) =>
-              i.product_id === item.product_id
+              (i.cart_key ?? i.product_id) === key
                 ? { ...i, qty: i.qty + item.qty }
                 : i,
             ),
@@ -30,17 +31,17 @@ export const useCartStore = create<CartStore>()(
         }
       },
 
-      updateQty(productId, qty) {
+      updateQty(cartKey, qty) {
         if (qty < 1) return
         set((s) => ({
           items: s.items.map((i) =>
-            i.product_id === productId ? { ...i, qty } : i,
+            (i.cart_key ?? i.product_id) === cartKey ? { ...i, qty } : i,
           ),
         }))
       },
 
-      removeItem(productId) {
-        set((s) => ({ items: s.items.filter((i) => i.product_id !== productId) }))
+      removeItem(cartKey) {
+        set((s) => ({ items: s.items.filter((i) => (i.cart_key ?? i.product_id) !== cartKey) }))
       },
 
       clearCart() {
