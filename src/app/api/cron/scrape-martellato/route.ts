@@ -12,6 +12,21 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient()
 
+  // Check frequency setting against last successful run
+  const [{ data: freqSetting }, { data: lastLog }] = await Promise.all([
+    supabase.from('settings').select('value').eq('key', 'scrape_frequency').single(),
+    supabase.from('scrape_logs').select('ran_at').eq('status', 'success').order('ran_at', { ascending: false }).limit(1).single(),
+  ])
+
+  if (lastLog?.ran_at) {
+    const freq = freqSetting?.value ?? 'weekly'
+    const minHours = freq === 'daily' ? 23 : freq === 'monthly' ? 27 * 24 : 6 * 24
+    const hoursSinceLast = (Date.now() - new Date(lastLog.ran_at).getTime()) / 36e5
+    if (hoursSinceLast < minHours) {
+      return NextResponse.json({ skipped: true, reason: `frequency is ${freq}, only ${Math.round(hoursSinceLast)}h since last run` })
+    }
+  }
+
   // Get Martellato brand ID
   const { data: brand } = await supabase
     .from('brands')

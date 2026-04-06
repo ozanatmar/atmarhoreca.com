@@ -6,14 +6,26 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import type { ScrapeLog } from '@/types'
 
+type Frequency = 'daily' | 'weekly' | 'monthly'
+
 interface Props {
   logs: (ScrapeLog & { brand?: { name: string } })[]
+  frequency: Frequency
 }
 
-export default function ScrapingPanel({ logs }: Props) {
+const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [
+  { value: 'daily',   label: 'Daily' },
+  { value: 'weekly',  label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+]
+
+export default function ScrapingPanel({ logs, frequency: initialFrequency }: Props) {
   const router = useRouter()
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState('')
+  const [frequency, setFrequency] = useState<Frequency>(initialFrequency)
+  const [savingFreq, setSavingFreq] = useState(false)
+  const [freqSaved, setFreqSaved] = useState(false)
 
   const latest = logs[0]
 
@@ -21,16 +33,56 @@ export default function ScrapingPanel({ logs }: Props) {
     setRunning(true)
     setResult('')
     const res = await fetch('/api/cron/scrape-martellato', {
-      headers: { 'x-cron-secret': '' }, // Will be handled via admin auth
+      headers: { 'x-cron-secret': '' },
     })
     const json = await res.json()
-    setResult(res.ok ? `Done — ${json.products_updated} products updated` : `Failed: ${json.error}`)
+    if (json.skipped) {
+      setResult(`Skipped — ${json.reason}`)
+    } else {
+      setResult(res.ok ? `Done — ${json.products_updated} products updated` : `Failed: ${json.error}`)
+    }
     setRunning(false)
     router.refresh()
   }
 
+  async function handleSaveFrequency() {
+    setSavingFreq(true)
+    setFreqSaved(false)
+    await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ key: 'scrape_frequency', value: frequency }),
+    })
+    setSavingFreq(false)
+    setFreqSaved(true)
+    setTimeout(() => setFreqSaved(false), 2000)
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Frequency */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="font-bold text-[#1A1A5E] mb-1">Scrape Frequency</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          The cron runs daily — this setting controls how often it actually scrapes.
+        </p>
+        <div className="flex items-center gap-3">
+          <select
+            value={frequency}
+            onChange={e => { setFrequency(e.target.value as Frequency); setFreqSaved(false) }}
+            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]/30 bg-white"
+          >
+            {FREQUENCY_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <Button size="sm" onClick={handleSaveFrequency} disabled={savingFreq}>
+            {savingFreq ? 'Saving…' : 'Save'}
+          </Button>
+          {freqSaved && <span className="text-sm text-[#7AB648]">Saved</span>}
+        </div>
+      </div>
+
       {/* Status */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <h2 className="font-bold text-[#1A1A5E] mb-3">Last Scrape Run</h2>
@@ -61,13 +113,14 @@ export default function ScrapingPanel({ logs }: Props) {
         )}
       </div>
 
+      {/* Run now */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <h2 className="font-bold text-[#1A1A5E] mb-2">Run Scrape Now</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Automated scraping runs every Monday at 06:00 UTC. Click below to run immediately.
+          Triggers the scrape immediately, ignoring the frequency setting.
         </p>
         <Button onClick={handleRetry} disabled={running}>
-          {running ? 'Running...' : 'Retry Now'}
+          {running ? 'Running...' : 'Run Now'}
         </Button>
         {result && <p className="text-sm text-[#7AB648] mt-3">{result}</p>}
       </div>
