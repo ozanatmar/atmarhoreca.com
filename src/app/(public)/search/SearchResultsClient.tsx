@@ -26,6 +26,7 @@ interface Props {
   products: Product[]
   fallbackProducts: Product[]
   initialQuery: string
+  hideBrandFilter?: boolean
 }
 
 const AVAILABILITY_OPTIONS: { key: AvailabilityKey; label: string }[] = [
@@ -42,7 +43,7 @@ function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean
   return false
 }
 
-export default function SearchResultsClient({ products, fallbackProducts, initialQuery }: Props) {
+export default function SearchResultsClient({ products, fallbackProducts, initialQuery, hideBrandFilter }: Props) {
   const allBrands = useMemo(() => {
     const map = new Map<string, string>()
     for (const p of products) {
@@ -202,7 +203,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       )}
 
       {/* Brand */}
-      {allBrands.length > 0 && (
+      {!hideBrandFilter && allBrands.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Brand</p>
           <div className="flex flex-col gap-2">

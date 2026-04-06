@@ -57,8 +57,8 @@ export default async function BrandPage({ params }: Props) {
       {/* Brand header */}
       <div className="flex items-center gap-6 mb-10 pb-8 border-b border-gray-200">
         {brand.logo_url && (
-          <div className="w-24 h-24 shrink-0 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center p-3">
-            <Image src={brand.logo_url} alt={brand.name} width={80} height={80} className="object-contain" unoptimized />
+          <div className="w-28 shrink-0">
+            <Image src={brand.logo_url} alt={brand.name} width={112} height={112} className="object-contain w-full h-auto" unoptimized />
           </div>
         )}
         <div>
@@ -80,6 +80,7 @@ export default async function BrandPage({ params }: Props) {
         products={products ?? []}
         fallbackProducts={[]}
         initialQuery=""
+        hideBrandFilter
       />
     </div>
   )

@@ -64,14 +64,14 @@ export default async function LandingPage() {
                     href={href}
                     className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                   >
-                    <div className="h-32 bg-gray-50 flex items-center justify-center p-6">
+                    <div className="aspect-square bg-gray-50 flex items-center justify-center p-8">
                       {brand.logo_url ? (
                         <Image
                           src={brand.logo_url}
                           alt={brand.name}
-                          width={180}
-                          height={72}
-                          className="object-contain max-h-16 group-hover:scale-105 transition-transform"
+                          width={200}
+                          height={200}
+                          className="object-contain w-full h-full group-hover:scale-105 transition-transform"
                           unoptimized
                         />
                       ) : (
