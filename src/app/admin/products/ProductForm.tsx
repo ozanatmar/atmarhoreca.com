@@ -211,199 +211,219 @@ export default function ProductForm({ product, brands }: Props) {
     router.refresh()
   }
 
+  const selectedBrandName = brands.find(b => b.id === brandId)?.name ?? ''
+  const showMartellatoUrl = !!martellatoUrl || selectedBrandName.toLowerCase() === 'martellato'
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-4">
-      {product && (
-        <div>
-          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">ID</label>
-          <p className="text-sm text-gray-500 font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 select-all">{product.id}</p>
-        </div>
-      )}
-      <Input label="Product Name" value={name} onChange={(e) => setName(e.target.value)} required />
-      <div>
-        <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required hint="Brand or internal SKU — used in the product URL" />
-        <p className="text-xs text-gray-400 mt-1 font-mono">
-          atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : '[sku]/'}{name ? slugify(name) : '[product-name]'}
-        </p>
-      </div>
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
 
-      <Select
-        label="Brand"
-        value={brandId}
-        onChange={(e) => setBrandId(e.target.value)}
-        options={brands.map((s) => ({ value: s.id, label: s.name }))}
-        required
-      />
-
-      <div>
-        <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Description (HTML supported)</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={6}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Input label="Price (EUR excl. VAT)" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
-        <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} hint="Optional — used for manual shipping quotes" />
-      </div>
-
-      <Select
-        label="Stock Status"
-        value={stockStatus}
-        onChange={(e) => setStockStatus(e.target.value as 'in_stock' | 'out_of_stock' | 'unknown')}
-        options={STOCK_OPTIONS}
-      />
-
-      <Input
-        label="Martellato URL"
-        value={martellatoUrl}
-        onChange={(e) => setMartellatoUrl(e.target.value)}
-        hint="Full URL from Martellato's site or sitemap"
-      />
-
-      {/* Images */}
-      <div>
-        <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Images (URLs)</label>
-        {images.map((img, i) => (
-          <div key={i} className="flex gap-2 mb-2">
-            <input
-              type="url"
-              value={img}
-              onChange={(e) => {
-                const next = [...images]
-                next[i] = e.target.value
-                setImages(next)
-              }}
-              placeholder="https://atmar.bg/..."
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-            />
-            <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm">Remove</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => setImages([...images, ''])} className="text-sm text-[#6B3D8F] hover:underline">
-          + Add image URL
-        </button>
-      </div>
-
-      <Input label="Meta Title (SEO)" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} />
-      <Input label="Meta Description (SEO)" value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} />
-
-      {/* Toggles */}
-      <div className="flex flex-col gap-4 pt-2 border-t border-gray-100">
-        <Toggle
-          label="Requires Confirmation"
-          hint="Check this for made-to-order products, items with uncertain stock, or anything that needs manual review before the order is confirmed. Orders for this product will always be Type B (proforma invoice) — the customer pays only after you confirm availability and price."
-          checked={requiresConfirmation}
-          onChange={setRequiresConfirmation}
-        />
-        <Toggle
-          label="Shipping Inefficient"
-          hint="Check this for products that are oversized, very heavy, or require special freight (e.g. pallets, fragile large items). The shipping cost cannot be calculated automatically — it will be quoted manually in the proforma invoice. The product page will show a note about this."
-          checked={shippingInefficient}
-          onChange={setShippingInefficient}
-        />
-        <Toggle
-          label="Active (visible on site)"
-          hint="Uncheck to hide this product from search results and its product page, without deleting it. Useful for products that are temporarily unavailable or not yet ready to publish."
-          checked={active}
-          onChange={setActive}
-        />
-      </div>
-
-      {/* Related products picker (edit only) */}
-      {product && (
-        <div className="pt-2 border-t border-gray-100">
-          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Related Products</label>
-          <p className="text-xs text-gray-400 mb-3">Manually linked products shown on the product page (e.g. spare parts, accessories).</p>
-
-          {relatedProducts.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {relatedProducts.map(p => (
-                <span key={p.id} className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs rounded-full px-3 py-1">
-                  {p.name}{p.sku ? ` (${p.sku})` : ''}
-                  <button
-                    type="button"
-                    onClick={() => setRelatedProducts(prev => prev.filter(x => x.id !== p.id))}
-                    className="text-gray-400 hover:text-red-500 leading-none"
-                  >×</button>
-                </span>
-              ))}
+        {/* ── Column 1: core product info ── */}
+        <div className="flex flex-col gap-4">
+          {product && (
+            <div>
+              <label className="text-sm font-medium text-[#1A1A5E] block mb-1">ID</label>
+              <p className="text-sm text-gray-500 font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 select-all">{product.id}</p>
             </div>
           )}
 
-          <div className="relative">
-            <input
-              type="text"
-              value={relSearch}
-              onChange={e => setRelSearch(e.target.value)}
-              placeholder="Search by name or SKU…"
+          <Input label="Product Name" value={name} onChange={(e) => setName(e.target.value)} required />
+
+          <div>
+            <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required hint="Brand or internal SKU — used in the product URL" />
+            <p className="text-xs text-gray-400 mt-1 font-mono">
+              atmarhoreca.com/products/{sku ? `${encodeURIComponent(sku)}/` : '[sku]/'}{name ? slugify(name) : '[product-name]'}
+            </p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Description (HTML supported)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={8}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
             />
-            {relResults.length > 0 && (
-              <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-md text-sm divide-y divide-gray-100 max-h-48 overflow-y-auto">
-                {relResults.map(p => (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
-                      onClick={() => {
-                        setRelatedProducts(prev => [...prev, p])
-                        setRelSearch('')
-                        setRelResults([])
-                      }}
-                    >
-                      <span className="font-medium text-[#1A1A5E]">{p.name}</span>
-                      {p.sku && <span className="ml-2 text-gray-400 font-mono">{p.sku}</span>}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input label="Price (EUR excl. VAT)" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
+            <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} hint="Optional — used for manual shipping quotes" />
+          </div>
+
+          <Select
+            label="Stock Status"
+            value={stockStatus}
+            onChange={(e) => setStockStatus(e.target.value as 'in_stock' | 'out_of_stock' | 'unknown')}
+            options={STOCK_OPTIONS}
+          />
+
+          {/* Images */}
+          <div>
+            <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Images (URLs)</label>
+            {images.map((img, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input
+                  type="url"
+                  value={img}
+                  onChange={(e) => {
+                    const next = [...images]
+                    next[i] = e.target.value
+                    setImages(next)
+                  }}
+                  placeholder="https://atmar.bg/..."
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                <button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm">Remove</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setImages([...images, ''])} className="text-sm text-[#6B3D8F] hover:underline">
+              + Add image URL
+            </button>
+          </div>
+
+          <Input label="Meta Title (SEO)" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} />
+          <Input label="Meta Description (SEO)" value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} />
         </div>
-      )}
 
-      {/* Documents (edit only) */}
-      {product && (
-        <div className="pt-2 border-t border-gray-100">
-          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Documents</label>
-          <p className="text-xs text-gray-400 mb-3">PDF files shown as downloads on the product page.</p>
+        {/* ── Column 2: settings, relations, docs ── */}
+        <div className="flex flex-col gap-5">
+          <Select
+            label="Brand"
+            value={brandId}
+            onChange={(e) => setBrandId(e.target.value)}
+            options={brands.map((s) => ({ value: s.id, label: s.name }))}
+            required
+          />
 
-          {documents.length > 0 && (
-            <ul className="flex flex-col gap-1 mb-3">
-              {documents.map(doc => (
-                <li key={doc.id} className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="text-gray-400">📄</span>
-                  <span className="flex-1 truncate">{doc.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteDocument(doc)}
-                    className="text-xs text-red-500 hover:underline shrink-0"
-                  >Remove</button>
-                </li>
-              ))}
-            </ul>
+          {showMartellatoUrl && (
+            <Input
+              label="Martellato URL"
+              value={martellatoUrl}
+              onChange={(e) => setMartellatoUrl(e.target.value)}
+              hint="Full URL from Martellato's site or sitemap"
+            />
           )}
 
-          <label className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : 'border-gray-300 hover:border-[#6B3D8F] text-gray-600 hover:text-[#6B3D8F]'}`}>
-            <span>{uploading ? 'Uploading…' : '+ Upload PDF'}</span>
-            <input type="file" accept="application/pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
-          </label>
+          {/* Toggles */}
+          <div className="flex flex-col gap-4 pt-1 border-t border-gray-100">
+            <Toggle
+              label="Requires Confirmation"
+              hint="Orders for this product will always be Type B (proforma invoice) — the customer pays only after you confirm availability and price."
+              checked={requiresConfirmation}
+              onChange={setRequiresConfirmation}
+            />
+            <Toggle
+              label="Shipping Inefficient"
+              hint="Oversized or very heavy product — shipping cost will be quoted manually in the proforma invoice."
+              checked={shippingInefficient}
+              onChange={setShippingInefficient}
+            />
+            <Toggle
+              label="Active (visible on site)"
+              hint="Uncheck to hide this product from search results and its product page without deleting it."
+              checked={active}
+              onChange={setActive}
+            />
+          </div>
 
-          {uploadError && <p className="text-xs text-red-500 mt-2">{uploadError}</p>}
+          {/* Related products picker (edit only) */}
+          {product && (
+            <div className="flex flex-col gap-3 pt-1 border-t border-gray-100">
+              <div>
+                <label className="text-sm font-medium text-[#1A1A5E] block mb-0.5">Related Products</label>
+                <p className="text-xs text-gray-400">Spare parts, accessories, etc.</p>
+              </div>
+
+              {relatedProducts.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {relatedProducts.map(p => (
+                    <span key={p.id} className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs rounded-full px-3 py-1">
+                      {p.name}{p.sku ? ` (${p.sku})` : ''}
+                      <button
+                        type="button"
+                        onClick={() => setRelatedProducts(prev => prev.filter(x => x.id !== p.id))}
+                        className="text-gray-400 hover:text-red-500 leading-none"
+                      >×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={relSearch}
+                  onChange={e => setRelSearch(e.target.value)}
+                  placeholder="Search by name or SKU…"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                {relResults.length > 0 && (
+                  <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-md text-sm divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                    {relResults.map(p => (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                          onClick={() => {
+                            setRelatedProducts(prev => [...prev, p])
+                            setRelSearch('')
+                            setRelResults([])
+                          }}
+                        >
+                          <span className="font-medium text-[#1A1A5E]">{p.name}</span>
+                          {p.sku && <span className="ml-2 text-gray-400 font-mono">{p.sku}</span>}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Documents (edit only) */}
+          {product && (
+            <div className="flex flex-col gap-3 pt-1 border-t border-gray-100">
+              <div>
+                <label className="text-sm font-medium text-[#1A1A5E] block mb-0.5">Documents</label>
+                <p className="text-xs text-gray-400">PDF files shown as downloads on the product page.</p>
+              </div>
+
+              {documents.length > 0 && (
+                <ul className="flex flex-col gap-1">
+                  {documents.map(doc => (
+                    <li key={doc.id} className="flex items-center gap-2 text-sm text-gray-700">
+                      <span className="text-gray-400">📄</span>
+                      <span className="flex-1 truncate">{doc.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDocument(doc)}
+                        className="text-xs text-red-500 hover:underline shrink-0"
+                      >Remove</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <label className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : 'border-gray-300 hover:border-[#6B3D8F] text-gray-600 hover:text-[#6B3D8F]'}`}>
+                <span>{uploading ? 'Uploading…' : '+ Upload PDF'}</span>
+                <input type="file" accept="application/pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
+              </label>
+
+              {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+            </div>
+          )}
+
+          {product?.last_scraped_at && (
+            <p className="text-xs text-gray-400 pt-1 border-t border-gray-100">Last scraped: {new Date(product.last_scraped_at).toLocaleString()}</p>
+          )}
         </div>
-      )}
-
-      {product?.last_scraped_at && (
-        <p className="text-xs text-gray-400">Last scraped: {new Date(product.last_scraped_at).toLocaleString()}</p>
-      )}
+      </div>
 
       {error && <p className="text-sm text-[#C0392B]">{error}</p>}
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3">
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
         <Button type="submit" disabled={saving}>
           {saving ? 'Saving...' : product ? 'Save Changes' : 'Create Product'}
