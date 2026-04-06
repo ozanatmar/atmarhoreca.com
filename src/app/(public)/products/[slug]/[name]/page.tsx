@@ -47,8 +47,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return {}
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
+  const brandName = Array.isArray(product.brand) ? product.brand[0]?.name : (product.brand as { name: string } | null)?.name
   const title = product.meta_title ?? product.name
-  const description = product.meta_description ?? ''
+  const autoDescription = [
+    brandName,
+    product.name,
+    product.description ? product.description.slice(0, 120).replace(/\s+\S*$/, '') + '…' : null,
+  ].filter(Boolean).join(' — ')
+  const description = product.meta_description || autoDescription
   const image = product.images[0]
   const url = `${siteUrl}${productUrl(product)}`
 
@@ -179,14 +185,18 @@ export default async function ProductPage({ params }: Props) {
       '@type': 'Offer',
       price: product.price.toString(),
       priceCurrency: 'EUR',
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability:
         product.stock_status === 'in_stock'
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
+      url,
       seller: { '@type': 'Organization', name: 'Atmar Horeca EOOD' },
     },
     url,
   }
+
+  const brandSlug = Array.isArray(brand) ? brand[0]?.slug : (brand as { slug?: string } | null)?.slug
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -194,7 +204,7 @@ export default async function ProductPage({ params }: Props) {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
       { '@type': 'ListItem', position: 2, name: 'Brands', item: `${siteUrl}/brands` },
-      ...(brandName ? [{ '@type': 'ListItem', position: 3, name: brandName }] : []),
+      ...(brandName ? [{ '@type': 'ListItem', position: 3, name: brandName, ...(brandSlug && { item: `${siteUrl}/brands/${brandSlug}` }) }] : []),
       { '@type': 'ListItem', position: brandName ? 4 : 3, name: product.name, item: url },
     ],
   }

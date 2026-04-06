@@ -40,8 +40,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return {}
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
+  const brandName = Array.isArray(product.brand) ? product.brand[0]?.name : (product.brand as { name: string } | null)?.name
   const title = product.meta_title ?? product.name
-  const description = product.meta_description ?? ''
+  const autoDescription = [
+    brandName,
+    product.name,
+    product.description ? product.description.slice(0, 120).replace(/\s+\S*$/, '') + '…' : null,
+  ].filter(Boolean).join(' — ')
+  const description = product.meta_description || autoDescription
   const image = product.images[0]
 
   return {
