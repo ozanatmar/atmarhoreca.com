@@ -317,14 +317,14 @@ export default function ProductForm({ product, brands }: Props) {
                   value={spec.key}
                   onChange={e => { const next = [...specs]; next[i] = { ...next[i], key: e.target.value }; setSpecs(next) }}
                   placeholder="e.g. Power"
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                  className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
                 />
                 <input
                   type="text"
                   value={spec.value}
                   onChange={e => { const next = [...specs]; next[i] = { ...next[i], value: e.target.value }; setSpecs(next) }}
                   placeholder="e.g. 1500W"
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                  className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
                 />
                 <button type="button" onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm shrink-0">×</button>
               </div>
