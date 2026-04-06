@@ -24,6 +24,7 @@ interface Product {
 
 interface Props {
   products: Product[]
+  fallbackProducts: Product[]
   initialQuery: string
 }
 
@@ -41,7 +42,7 @@ function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean
   return false
 }
 
-export default function SearchResultsClient({ products, initialQuery }: Props) {
+export default function SearchResultsClient({ products, fallbackProducts, initialQuery }: Props) {
   const allBrands = useMemo(() => {
     const map = new Map<string, string>()
     for (const p of products) {
@@ -309,8 +310,56 @@ export default function SearchResultsClient({ products, initialQuery }: Props) {
           {initialQuery && <> for &ldquo;{initialQuery}&rdquo;</>}
         </p>
 
-        {filtered.length === 0 && (
-          <p className="text-gray-500">No products match your filters.</p>
+        {filtered.length === 0 && fallbackProducts.length === 0 && (
+          <p className="text-gray-500">No products found.</p>
+        )}
+
+        {filtered.length === 0 && fallbackProducts.length > 0 && (
+          <div>
+            <p className="text-gray-500 mb-6">
+              We don&apos;t carry <strong>&ldquo;{initialQuery}&rdquo;</strong>, but you might be interested in these:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {fallbackProducts.map(p => {
+                const brandName = p.brand
+                  ? Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name
+                  : null
+                return (
+                  <Link
+                    key={p.id}
+                    href={productUrl(p)}
+                    className="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                  >
+                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                      <Image
+                        src={p.images[0] ?? 'https://atmar.bg/atmar_horeca_logo_512x512.jpg'}
+                        alt={p.name}
+                        fill
+                        className="object-contain p-3 group-hover:scale-105 transition-transform"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="p-4 flex flex-col flex-1 gap-1.5">
+                      <div className="flex items-center gap-2">
+                        {brandName && (
+                          <span className="text-xs font-semibold text-[#6B3D8F] uppercase tracking-wide">{brandName}</span>
+                        )}
+                        {p.sku && <span className="text-xs text-gray-400 font-mono">{p.sku}</span>}
+                      </div>
+                      <h2 className="text-sm font-semibold text-[#1A1A5E] line-clamp-2 flex-1">{p.name}</h2>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-sm font-bold text-[#1A1A5E]">{formatPrice(Number(p.price))}</span>
+                        <StockBadge
+                          stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'}
+                          requiresConfirmation={p.requires_confirmation}
+                        />
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
