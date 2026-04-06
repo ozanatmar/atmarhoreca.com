@@ -39,6 +39,7 @@ export default function AddToCartButton({ product }: Props) {
     const brandName = brand?.name ?? null
     const requiresConfirmation = product.requires_confirmation || (brand?.default_requires_confirmation ?? false)
     addItem({
+      cart_key: product.id,
       product_id: product.id,
       brand_id: product.brand_id ?? null,
       brand_name: brandName,
