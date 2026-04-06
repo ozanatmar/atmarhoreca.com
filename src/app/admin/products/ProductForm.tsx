@@ -317,7 +317,7 @@ export default function ProductForm({ product, brands }: Props) {
                   value={spec.key}
                   onChange={e => { const next = [...specs]; next[i] = { ...next[i], key: e.target.value }; setSpecs(next) }}
                   placeholder="e.g. Power"
-                  className="w-2/5 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
                 />
                 <input
                   type="text"
