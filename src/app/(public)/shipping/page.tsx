@@ -72,6 +72,12 @@ export default function ShippingPage() {
           Deliveries to Cyprus and Malta require a shipping quote due to the additional cost of island freight.
         </p>
         <p>
+          <strong>Oversized or heavy products</strong> are not eligible for free EU delivery.
+          These products are marked on their product page, and orders containing them will have
+          shipping costs calculated individually and confirmed in your proforma invoice.
+          No payment is taken until you accept the final quote. You may cancel at any point before payment.
+        </p>
+        <p>
           For non-EU destinations, shipping costs are calculated individually and will be confirmed
           before your order is dispatched. No payment is taken until you receive and accept the
           proforma invoice. You may cancel the order at any point before payment.

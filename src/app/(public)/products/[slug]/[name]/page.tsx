@@ -226,9 +226,9 @@ export default async function ProductPage({ params }: Props) {
             <AddToCartButton product={product} />
 
             {product.shipping_inefficient && (
-              <div className="bg-[#FFF8E1] border border-[#F0A500] rounded-lg p-4 text-sm text-gray-700">
-                Note: Due to the size or weight of this product, shipping costs will be
-                calculated individually and confirmed in your proforma invoice.
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 text-sm text-amber-800">
+                <span className="mt-0.5">⚠️</span>
+                <span>Orders containing this product are <strong>not eligible for free EU delivery</strong> due to its size or weight.</span>
               </div>
             )}
           </div>
