@@ -55,25 +55,20 @@ export default async function BrandPage({ params }: Props) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Brand header */}
-      <div className="flex items-center gap-6 mb-10 pb-8 border-b border-gray-200">
+      <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
         {brand.logo_url && (
-          <div className="w-28 shrink-0">
-            <Image src={brand.logo_url} alt={brand.name} width={112} height={112} className="object-contain w-full h-auto" unoptimized />
-          </div>
+          <Image src={brand.logo_url} alt={brand.name} width={64} height={64} className="object-contain w-16 h-16 shrink-0" unoptimized />
         )}
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-3xl font-bold text-[#1A1A5E]">{brand.name}</h1>
-            <CountryFlag code={brand.country_code} className="text-2xl" />
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-[#1A1A5E]">{brand.name}</h1>
+            <CountryFlag code={brand.country_code} />
           </div>
-          {brand.description && <p className="text-gray-500 max-w-xl">{brand.description}</p>}
-          {brand.lead_time_note && <p className="text-sm text-gray-400 mt-1">{brand.lead_time_note}</p>}
+          {brand.description && <p className="text-sm text-gray-500 max-w-xl mt-0.5">{brand.description}</p>}
+          {brand.lead_time_note && <p className="text-xs text-gray-400 mt-0.5">{brand.lead_time_note}</p>}
         </div>
+        <span className="ml-auto text-sm text-gray-400 shrink-0">{products?.length ?? 0} products</span>
       </div>
-
-      <h2 className="text-xl font-bold text-[#1A1A5E] mb-6">
-        {products?.length ?? 0} Products
-      </h2>
 
       <SearchResultsClient
         key={brand.id}
