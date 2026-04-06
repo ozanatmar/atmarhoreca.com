@@ -11,7 +11,7 @@ export default async function AdminScrapingPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-[#1A1A5E] mb-6">Scraping Status</h1>
+      <h1 className="text-2xl font-bold text-[#1A1A5E] mb-6">Scraping: Martellato</h1>
       <ScrapingPanel logs={logs ?? []} />
     </div>
   )
