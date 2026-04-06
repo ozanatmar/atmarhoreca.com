@@ -211,10 +211,18 @@ export default async function ProductPage({ params }: Props) {
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <nav className="text-xs text-gray-400 mb-6 flex items-center gap-1.5">
-          <span>Home</span>
+          <Link href="/" className="hover:text-gray-600">Home</Link>
           <span>›</span>
-          <span>Brands</span>
-          {brandName && <><span>›</span><span>{brandName}</span></>}
+          <Link href="/brands" className="hover:text-gray-600">Brands</Link>
+          {brandName && (
+            <>
+              <span>›</span>
+              {(Array.isArray(brand) ? brand[0]?.slug : brand?.slug)
+                ? <Link href={`/brands/${Array.isArray(brand) ? brand[0]?.slug : brand?.slug}`} className="hover:text-gray-600">{brandName}</Link>
+                : <span>{brandName}</span>
+              }
+            </>
+          )}
           <span>›</span>
           <span className="text-gray-500 truncate">{product.name}</span>
         </nav>
