@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 import { slugify, productUrl } from '@/lib/utils'
 import type { Product, ProductDocument } from '@/types'
 
-type RelatedProduct = { id: string; name: string; sku: string | null }
+type RelatedProduct = { id: string; name: string; slug: string; sku: string | null }
 
 interface Props {
   product: Product | null
@@ -58,7 +58,7 @@ export default function ProductForm({ product, brands }: Props) {
       .then(({ data }) => {
         if (!data?.length) return
         const ids = data.map(r => r.product_id === product.id ? r.related_product_id : r.product_id)
-        supabase.from('products').select('id, name, sku').in('id', ids).then(({ data: products }) => {
+        supabase.from('products').select('id, name, slug, sku').in('id', ids).then(({ data: products }) => {
           setRelatedProducts(products ?? [])
         })
       })
@@ -71,7 +71,7 @@ export default function ProductForm({ product, brands }: Props) {
       const supabase = createClient()
       const { data } = await supabase
         .from('products')
-        .select('id, name, sku')
+        .select('id, name, slug, sku')
         .or(`name.ilike.%${relSearch.trim()}%,sku.ilike.%${relSearch.trim()}%`)
         .neq('id', product.id)
         .limit(8)
@@ -195,12 +195,17 @@ export default function ProductForm({ product, brands }: Props) {
       }
     }
 
-    // Trigger ISR revalidation for the correct product URL
-    await fetch('/api/revalidate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: productUrl({ sku: sku || null, slug }) }),
-    })
+    // Revalidate this product + all related products
+    await Promise.all([
+      { sku: sku || null, slug },
+      ...relatedProducts.map(r => ({ sku: r.sku, slug: r.slug })),
+    ].map(p =>
+      fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: productUrl(p) }),
+      })
+    ))
 
     router.push('/admin/products')
     router.refresh()
