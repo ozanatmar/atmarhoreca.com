@@ -108,7 +108,7 @@ export default async function ProductPage({ params }: Props) {
     url: `${siteUrl}/products/${slug}`,
   }
 
-  const productUrl = `${siteUrl}/products/${slug}`
+  const canonicalUrl = `${siteUrl}/products/${slug}`
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: Props) {
       { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
       { '@type': 'ListItem', position: 2, name: 'Brands', item: `${siteUrl}/brands` },
       ...(brandName ? [{ '@type': 'ListItem', position: 3, name: brandName }] : []),
-      { '@type': 'ListItem', position: brandName ? 4 : 3, name: product.name, item: productUrl },
+      { '@type': 'ListItem', position: brandName ? 4 : 3, name: product.name, item: canonicalUrl },
     ],
   }
 
