@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { createStaticClient } from '@/lib/supabase/static'
 import SearchResultsClient from '@/app/(public)/search/SearchResultsClient'
+import CountryFlag from '@/components/ui/CountryFlag'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -10,9 +11,6 @@ interface Props {
 
 export const revalidate = 3600
 
-function countryFlag(code: string) {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E0 + c.charCodeAt(0) - 65)).join('')
-}
 
 export async function generateStaticParams() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return []
@@ -66,7 +64,7 @@ export default async function BrandPage({ params }: Props) {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-3xl font-bold text-[#1A1A5E]">{brand.name}</h1>
-            <span className="text-2xl" title={brand.country_code}>{countryFlag(brand.country_code)}</span>
+            <CountryFlag code={brand.country_code} className="text-2xl" />
           </div>
           {brand.description && <p className="text-gray-500 max-w-xl">{brand.description}</p>}
           {brand.lead_time_note && <p className="text-sm text-gray-400 mt-1">{brand.lead_time_note}</p>}

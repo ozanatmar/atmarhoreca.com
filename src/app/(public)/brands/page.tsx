@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createStaticClient } from '@/lib/supabase/static'
+import CountryFlag from '@/components/ui/CountryFlag'
 
 export const metadata: Metadata = {
   title: 'Brands',
@@ -10,9 +11,6 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-function countryFlag(code: string) {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E0 + c.charCodeAt(0) - 65)).join('')
-}
 
 export default async function BrandsPage() {
   const supabase = createStaticClient()
@@ -71,7 +69,7 @@ export default async function BrandsPage() {
               <div className="p-5 flex-1 flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-[#1A1A5E]">{brand.name}</span>
-                  <span className="text-lg" title={brand.country_code}>{countryFlag(brand.country_code)}</span>
+                  <CountryFlag code={brand.country_code} />
                 </div>
                 {brand.description && (
                   <p className="text-sm text-gray-500 line-clamp-2">{brand.description}</p>
