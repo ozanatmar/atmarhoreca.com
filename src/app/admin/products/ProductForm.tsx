@@ -248,41 +248,6 @@ export default function ProductForm({ product, brands }: Props) {
             />
           </div>
 
-          {/* Technical Specs */}
-          <div>
-            <label className="text-sm font-medium text-[#1A1A5E] block mb-2">Technical Specifications</label>
-            {specs.map((spec, i) => (
-              <div key={i} className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={spec.key}
-                  onChange={e => {
-                    const next = [...specs]
-                    next[i] = { ...next[i], key: e.target.value }
-                    setSpecs(next)
-                  }}
-                  placeholder="e.g. Power"
-                  className="w-2/5 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                />
-                <input
-                  type="text"
-                  value={spec.value}
-                  onChange={e => {
-                    const next = [...specs]
-                    next[i] = { ...next[i], value: e.target.value }
-                    setSpecs(next)
-                  }}
-                  placeholder="e.g. 1500W"
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                />
-                <button type="button" onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm shrink-0">Remove</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])} className="text-sm text-[#6B3D8F] hover:underline">
-              + Add spec
-            </button>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <Input label="Price (EUR excl. VAT)" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
             <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} hint="Optional — used for manual shipping quotes" />
@@ -341,6 +306,33 @@ export default function ProductForm({ product, brands }: Props) {
               hint="Full URL from Martellato's site or sitemap"
             />
           )}
+
+          {/* Technical Specs */}
+          <div className="flex flex-col gap-2 pt-1 border-t border-gray-100">
+            <label className="text-sm font-medium text-[#1A1A5E] block">Technical Specifications</label>
+            {specs.map((spec, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  type="text"
+                  value={spec.key}
+                  onChange={e => { const next = [...specs]; next[i] = { ...next[i], key: e.target.value }; setSpecs(next) }}
+                  placeholder="e.g. Power"
+                  className="w-2/5 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                <input
+                  type="text"
+                  value={spec.value}
+                  onChange={e => { const next = [...specs]; next[i] = { ...next[i], value: e.target.value }; setSpecs(next) }}
+                  placeholder="e.g. 1500W"
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                />
+                <button type="button" onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="text-[#C0392B] text-sm shrink-0">×</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])} className="text-sm text-[#6B3D8F] hover:underline text-left">
+              + Add spec
+            </button>
+          </div>
 
           {/* Toggles */}
           <div className="flex flex-col gap-4 pt-1 border-t border-gray-100">

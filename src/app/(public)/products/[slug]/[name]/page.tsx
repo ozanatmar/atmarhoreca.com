@@ -286,8 +286,8 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
 
-        {(product.description || product.specs?.length > 0) && (
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+        {(product.description || product.specs?.length > 0 || explicitRelated.length > 0) && (
+          <div className={`mt-12 ${(product.description && (product.specs?.length > 0 || explicitRelated.length > 0)) ? 'grid grid-cols-1 lg:grid-cols-2 gap-10 items-start' : ''}`}>
             {product.description && (
               <div>
                 <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Product Description</h2>
@@ -297,46 +297,49 @@ export default async function ProductPage({ params }: Props) {
                 />
               </div>
             )}
-            {product.specs?.length > 0 && (
-              <div>
-                <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Technical Specifications</h2>
-                <table className="w-full text-sm">
-                  <tbody>
-                    {product.specs.map((s, i) => (
-                      <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
-                        <td className="py-2 px-3 font-medium text-gray-700 w-2/5 rounded-l">{s.key}</td>
-                        <td className="py-2 px-3 text-gray-600 rounded-r">{s.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {(product.specs?.length > 0 || explicitRelated.length > 0) && (
+              <div className="flex flex-col gap-10">
+                {product.specs?.length > 0 && (
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Technical Specifications</h2>
+                    <table className="w-full text-sm">
+                      <tbody>
+                        {product.specs.map((s, i) => (
+                          <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
+                            <td className="py-2 px-3 font-medium text-gray-700 w-2/5 rounded-l">{s.key}</td>
+                            <td className="py-2 px-3 text-gray-600 rounded-r">{s.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {explicitRelated.length > 0 && (
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Related Products</h2>
+                    <ul className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden">
+                      {explicitRelated.map(p => (
+                        <li key={p.id}>
+                          <a
+                            href={productUrl(p)}
+                            className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                          >
+                            {p.images[0] && (
+                              <img src={p.images[0]} alt={p.name} className="w-12 h-12 object-contain rounded shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-[#1A1A5E] truncate">{p.name}</p>
+                              {p.sku && <p className="text-xs text-gray-400 font-mono">{p.sku}</p>}
+                            </div>
+                            <span className="text-sm font-bold text-[#1A1A5E] shrink-0">{formatPrice(p.price)}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-
-        {explicitRelated.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Related Products</h2>
-            <ul className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden">
-              {explicitRelated.map(p => (
-                <li key={p.id}>
-                  <a
-                    href={productUrl(p)}
-                    className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    {p.images[0] && (
-                      <img src={p.images[0]} alt={p.name} className="w-12 h-12 object-contain rounded shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1A1A5E] truncate">{p.name}</p>
-                      {p.sku && <p className="text-xs text-gray-400 font-mono">{p.sku}</p>}
-                    </div>
-                    <span className="text-sm font-bold text-[#1A1A5E] shrink-0">{formatPrice(p.price)}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         )}
 
