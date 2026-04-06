@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
-import { slugify } from '@/lib/utils'
+import { slugify, productUrl } from '@/lib/utils'
 import type { Product } from '@/types'
 
 type RelatedProduct = { id: string; name: string; sku: string | null }
@@ -140,11 +140,11 @@ export default function ProductForm({ product, brands }: Props) {
       }
     }
 
-    // Trigger ISR revalidation
+    // Trigger ISR revalidation for the correct product URL
     await fetch('/api/revalidate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug }),
+      body: JSON.stringify({ path: productUrl({ sku: sku || null, slug }) }),
     })
 
     router.push('/admin/products')
