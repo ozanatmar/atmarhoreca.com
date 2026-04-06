@@ -86,7 +86,7 @@ export default async function SearchPage({ searchParams }: Props) {
       <h1 className="text-2xl font-bold text-[#1A1A5E] mb-6">
         {query ? `Results for "${query}"` : 'All Products'}
       </h1>
-      <SearchResultsClient products={products} fallbackProducts={fallbackProducts} initialQuery={query} />
+      <SearchResultsClient key={query} products={products} fallbackProducts={fallbackProducts} initialQuery={query} />
     </div>
   )
 }
