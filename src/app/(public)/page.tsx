@@ -64,7 +64,7 @@ export default async function LandingPage() {
                     href={href}
                     className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                   >
-                    <div className="aspect-square bg-gray-50 flex items-center justify-center p-8">
+                    <div className="aspect-square flex items-center justify-center p-8">
                       {brand.logo_url ? (
                         <Image
                           src={brand.logo_url}
