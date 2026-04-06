@@ -21,12 +21,15 @@ export type ScrapeStatus = 'success' | 'failed'
 export interface Brand {
   id: string
   name: string
+  slug: string | null
   country_code: string
   lead_time_note: string | null
   handling_days: number
   default_requires_confirmation: boolean
   contact_email: string | null
   minimum_order_amount: number | null
+  logo_url: string | null
+  description: string | null
   active: boolean
   created_at: string
 }

@@ -13,12 +13,15 @@ interface Props {
 
 const EMPTY: Partial<Brand> = {
   name: '',
+  slug: '',
   country_code: '',
   lead_time_note: '',
   handling_days: 5,
   default_requires_confirmation: false,
   contact_email: '',
   minimum_order_amount: null,
+  logo_url: '',
+  description: '',
   active: true,
 }
 
@@ -59,7 +62,13 @@ export default function BrandList({ brands }: Props) {
         <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col gap-4 border-2 border-[#6B3D8F]">
           <h2 className="font-bold text-[#1A1A5E]">{editing.id ? 'Edit Brand' : 'New Brand'}</h2>
           <Input label="Name" value={editing.name ?? ''} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required />
+          <Input label="Slug (used in URL, e.g. martellato)" value={editing.slug ?? ''} onChange={(e) => setEditing({ ...editing, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })} required />
           <Input label="Country Code (ISO alpha-2)" value={editing.country_code ?? ''} onChange={(e) => setEditing({ ...editing, country_code: e.target.value.toUpperCase().slice(0, 2) })} required maxLength={2} />
+          <Input label="Logo URL" value={editing.logo_url ?? ''} onChange={(e) => setEditing({ ...editing, logo_url: e.target.value || null })} hint="Shown on brand cards on homepage and brand directory" />
+          <div>
+            <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Description</label>
+            <textarea rows={3} value={editing.description ?? ''} onChange={(e) => setEditing({ ...editing, description: e.target.value || null })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]" />
+          </div>
           <Input label="Lead Time Note" value={editing.lead_time_note ?? ''} onChange={(e) => setEditing({ ...editing, lead_time_note: e.target.value })} />
           <Input label="Handling Days" type="number" min={0} value={String(editing.handling_days ?? 5)} onChange={(e) => setEditing({ ...editing, handling_days: parseInt(e.target.value) })} />
           <Input label="Contact Email" type="email" value={editing.contact_email ?? ''} onChange={(e) => setEditing({ ...editing, contact_email: e.target.value })} />
