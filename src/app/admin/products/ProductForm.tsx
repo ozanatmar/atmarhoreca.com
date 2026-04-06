@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Input from '@/components/ui/Input'
@@ -8,6 +8,8 @@ import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
 import { slugify } from '@/lib/utils'
 import type { Product } from '@/types'
+
+type RelatedProduct = { id: string; name: string; sku: string | null }
 
 interface Props {
   product: Product | null
@@ -36,8 +38,45 @@ export default function ProductForm({ product, brands }: Props) {
   const [active, setActive] = useState(product?.active ?? true)
   const [metaTitle, setMetaTitle] = useState(product?.meta_title ?? '')
   const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
+  const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
+  const [relSearch, setRelSearch] = useState('')
+  const [relResults, setRelResults] = useState<RelatedProduct[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Load existing relations for this product
+  useEffect(() => {
+    if (!product?.id) return
+    const supabase = createClient()
+    supabase
+      .from('product_relations')
+      .select('product_id, related_product_id')
+      .or(`product_id.eq.${product.id},related_product_id.eq.${product.id}`)
+      .then(({ data }) => {
+        if (!data?.length) return
+        const ids = data.map(r => r.product_id === product.id ? r.related_product_id : r.product_id)
+        supabase.from('products').select('id, name, sku').in('id', ids).then(({ data: products }) => {
+          setRelatedProducts(products ?? [])
+        })
+      })
+  }, [product?.id])
+
+  // Debounced search for related product picker
+  useEffect(() => {
+    if (!relSearch.trim() || !product?.id) { setRelResults([]); return }
+    const timer = setTimeout(async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('products')
+        .select('id, name, sku')
+        .or(`name.ilike.%${relSearch.trim()}%,sku.ilike.%${relSearch.trim()}%`)
+        .neq('id', product.id)
+        .limit(8)
+      const existing = new Set(relatedProducts.map(p => p.id))
+      setRelResults((data ?? []).filter(p => !existing.has(p.id)))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [relSearch, product?.id, relatedProducts])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -84,6 +123,21 @@ export default function ProductForm({ product, brands }: Props) {
       setError(dbError.message)
       setSaving(false)
       return
+    }
+
+    // Save related product relations (edit only)
+    if (product?.id) {
+      const supabase2 = createClient()
+      await supabase2.from('product_relations')
+        .delete()
+        .or(`product_id.eq.${product.id},related_product_id.eq.${product.id}`)
+      if (relatedProducts.length > 0) {
+        const rows = relatedProducts.map(rel => {
+          const [a, b] = product.id < rel.id ? [product.id, rel.id] : [rel.id, product.id]
+          return { product_id: a, related_product_id: b }
+        })
+        await supabase2.from('product_relations').insert(rows)
+      }
     }
 
     // Trigger ISR revalidation
@@ -198,6 +252,59 @@ export default function ProductForm({ product, brands }: Props) {
           onChange={setActive}
         />
       </div>
+
+      {/* Related products picker (edit only) */}
+      {product && (
+        <div className="pt-2 border-t border-gray-100">
+          <label className="text-sm font-medium text-[#1A1A5E] block mb-1">Related Products</label>
+          <p className="text-xs text-gray-400 mb-3">Manually linked products shown on the product page (e.g. spare parts, accessories).</p>
+
+          {relatedProducts.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {relatedProducts.map(p => (
+                <span key={p.id} className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs rounded-full px-3 py-1">
+                  {p.name}{p.sku ? ` (${p.sku})` : ''}
+                  <button
+                    type="button"
+                    onClick={() => setRelatedProducts(prev => prev.filter(x => x.id !== p.id))}
+                    className="text-gray-400 hover:text-red-500 leading-none"
+                  >×</button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="relative">
+            <input
+              type="text"
+              value={relSearch}
+              onChange={e => setRelSearch(e.target.value)}
+              placeholder="Search by name or SKU…"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+            />
+            {relResults.length > 0 && (
+              <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-md text-sm divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                {relResults.map(p => (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                      onClick={() => {
+                        setRelatedProducts(prev => [...prev, p])
+                        setRelSearch('')
+                        setRelResults([])
+                      }}
+                    >
+                      <span className="font-medium text-[#1A1A5E]">{p.name}</span>
+                      {p.sku && <span className="ml-2 text-gray-400 font-mono">{p.sku}</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       {product?.last_scraped_at && (
         <p className="text-xs text-gray-400">Last scraped: {new Date(product.last_scraped_at).toLocaleString()}</p>

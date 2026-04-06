@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createStaticClient } from '@/lib/supabase/static'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
 import AddToCartButton from '@/components/product/AddToCartButton'
 import ImageGallery from '@/components/product/ImageGallery'
@@ -62,6 +62,25 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params
   const product = await getProduct(slug)
   if (!product) notFound()
+
+  // Explicit related products (manually set in admin)
+  let explicitRelated: Array<{ id: string; name: string; slug: string; sku: string | null; price: number; images: string[] }> = []
+  {
+    const supabase = createStaticClient()
+    const { data: relationRows } = await supabase
+      .from('product_relations')
+      .select('product_id, related_product_id')
+      .or(`product_id.eq.${product.id},related_product_id.eq.${product.id}`)
+    if (relationRows?.length) {
+      const ids = relationRows.map(r => r.product_id === product.id ? r.related_product_id : r.product_id)
+      const { data } = await supabase
+        .from('products')
+        .select('id, name, slug, sku, price, images')
+        .in('id', ids)
+        .eq('active', true)
+      explicitRelated = data ?? []
+    }
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
   const brand = product.brand
@@ -164,11 +183,10 @@ export default async function ProductPage({ params }: Props) {
             {/* CTA */}
             <AddToCartButton product={product} />
 
-            {/* Shipping inefficiency warning */}
             {product.shipping_inefficient && (
-              <div className="bg-[#FFF8E1] border border-[#F0A500] rounded-lg p-4 text-sm text-gray-700">
-                Note: Due to the size or weight of this product, shipping costs will be
-                calculated individually and confirmed in your proforma invoice.
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 text-sm text-amber-800">
+                <span className="mt-0.5">⚠️</span>
+                <span>Orders containing this product are <strong>not eligible for free EU delivery</strong> due to its size or weight.</span>
               </div>
             )}
           </div>
@@ -182,6 +200,31 @@ export default async function ProductPage({ params }: Props) {
               className="prose prose-sm max-w-none text-gray-700"
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
+          </div>
+        )}
+
+        {explicitRelated.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-bold text-[#1A1A5E] mb-4">Related Products</h2>
+            <ul className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden">
+              {explicitRelated.map(p => (
+                <li key={p.id}>
+                  <a
+                    href={productUrl(p)}
+                    className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    {p.images[0] && (
+                      <img src={p.images[0]} alt={p.name} className="w-12 h-12 object-contain rounded shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#1A1A5E] truncate">{p.name}</p>
+                      {p.sku && <p className="text-xs text-gray-400 font-mono">{p.sku}</p>}
+                    </div>
+                    <span className="text-sm font-bold text-[#1A1A5E] shrink-0">{formatPrice(p.price)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
