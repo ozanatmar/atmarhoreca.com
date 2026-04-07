@@ -35,6 +35,7 @@ export default function ProductForm({ product, brands }: Props) {
   const [martellatoUrl, setMartellatoUrl] = useState(product?.martellato_url ?? '')
   const [images, setImages] = useState<string[]>(product?.images ?? [''])
   const [shippingInefficient, setShippingInefficient] = useState(product?.shipping_inefficient ?? false)
+  const [packSize, setPackSize] = useState(product?.pack_size ? String(product.pack_size) : '')
   const [active, setActive] = useState(product?.active ?? true)
   const [specs, setSpecs] = useState<{ key: string; value: string }[]>(product?.specs ?? [])
   const [optionGroups, setOptionGroups] = useState<ProductOptionGroup[]>(product?.option_groups ?? [])
@@ -171,6 +172,7 @@ export default function ProductForm({ product, brands }: Props) {
       specs: specs.filter(s => s.key.trim()),
       option_groups: optionGroups.filter(g => g.name.trim()),
       shipping_inefficient: shippingInefficient,
+      pack_size: packSize ? parseInt(packSize) : null,
       active,
     }
 
@@ -257,6 +259,7 @@ export default function ProductForm({ product, brands }: Props) {
             <Input label="Price (EUR excl. VAT)" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
             <Input label="Weight (kg)" type="number" step="0.001" min="0" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} hint="Optional — used for manual shipping quotes" />
           </div>
+          <Input label="Pack Size" type="number" step="1" min="1" value={packSize} onChange={(e) => setPackSize(e.target.value)} hint="Units per pack (e.g. 24). If set, cart price = unit price × pack size." />
 
           <Select
             label="Stock Status"

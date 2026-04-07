@@ -52,7 +52,10 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
               {item.selected_options?.length ? (
                 <p className="text-xs text-gray-400">{item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</p>
               ) : null}
-              <p className="text-xs text-gray-500">{formatPrice(item.price)} each</p>
+              {item.pack_size && (
+                <p className="text-xs text-[#6B3D8F] font-medium">Pack of {item.pack_size}</p>
+              )}
+              <p className="text-xs text-gray-500">{formatPrice(item.price)} {item.pack_size ? 'per pack' : 'each'}</p>
             </div>
             <div className="flex items-center gap-1.5">
               <button onClick={() => updateQty(item.cart_key ?? item.product_id, item.qty - 1)} disabled={item.qty <= 1} className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40">

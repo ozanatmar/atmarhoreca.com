@@ -36,6 +36,8 @@ export default function ProductPurchaseSection({ product }: Props) {
 
   const totalModifier = Object.values(selections).reduce((sum, o) => sum + o.price_modifier, 0)
   const computedPrice = product.price + totalModifier
+  const packSize = product.pack_size ?? null
+  const packTotal = packSize ? computedPrice * packSize : null
 
   const brandObj = Array.isArray(product.brand) ? product.brand[0] : product.brand
   const isTypeB =
@@ -73,12 +75,13 @@ export default function ProductPurchaseSection({ product }: Props) {
       name: product.name,
       slug: product.slug,
       sku: product.sku ?? null,
-      price: computedPrice,
+      price: packTotal ?? computedPrice,
       weight_kg: product.weight_kg,
       qty: 1,
       images: product.images,
       requires_confirmation: requiresConfirmation,
       shipping_inefficient: product.shipping_inefficient,
+      pack_size: packSize ?? undefined,
       stock_status: product.stock_status,
       selected_options: selectedOptions.length ? selectedOptions : undefined,
     })
@@ -90,7 +93,12 @@ export default function ProductPurchaseSection({ product }: Props) {
       {/* Price */}
       <div>
         <span className="text-3xl font-bold text-[#1A1A5E]">{formatPrice(computedPrice)}</span>
-        <span className="ml-2 text-sm text-gray-500">excl. VAT</span>
+        <span className="ml-2 text-sm text-gray-500">excl. VAT per unit</span>
+        {packTotal && (
+          <p className="text-sm font-semibold text-[#6B3D8F] mt-1">
+            Pack of {packSize} — {formatPrice(packTotal)} per pack
+          </p>
+        )}
         <p className="text-xs text-gray-400 mt-1">VAT calculated at checkout</p>
       </div>
 

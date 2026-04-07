@@ -54,6 +54,9 @@ export default function StepReview({
               {item.selected_options?.length ? (
                 <span className="block text-xs text-gray-400">{item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</span>
               ) : null}
+              {item.pack_size ? (
+                <span className="block text-xs text-[#6B3D8F]">Pack of {item.pack_size}</span>
+              ) : null}
             </span>
             <span className="font-semibold text-[#1A1A5E] shrink-0">{formatPrice(item.price * item.qty)}</span>
           </div>

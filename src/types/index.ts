@@ -51,6 +51,7 @@ export interface Product {
   meta_title: string | null
   meta_description: string | null
   shipping_inefficient: boolean
+  pack_size: number | null
   specs: Array<{ key: string; value: string }>
   option_groups: ProductOptionGroup[]
   active: boolean
@@ -172,6 +173,7 @@ export interface CartItem {
   images: string[]
   requires_confirmation: boolean
   shipping_inefficient: boolean
+  pack_size?: number | null
   stock_status: StockStatus
   selected_options?: SelectedOption[]
 }
