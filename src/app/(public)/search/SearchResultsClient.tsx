@@ -19,7 +19,7 @@ interface Product {
   stock_status: string
   requires_confirmation: boolean
   brand_id: string | null
-  brand: { name: string } | { name: string }[] | null
+  brand: { name: string; default_requires_confirmation?: boolean } | { name: string; default_requires_confirmation?: boolean }[] | null
 }
 
 interface Props {
@@ -35,11 +35,17 @@ const AVAILABILITY_OPTIONS: { key: AvailabilityKey; label: string }[] = [
   { key: 'out_of_stock', label: 'Out of Stock' },
 ]
 
+function effectiveRequiresConfirmation(p: Product): boolean {
+  const b = Array.isArray(p.brand) ? p.brand[0] : p.brand
+  return p.requires_confirmation || (b?.default_requires_confirmation ?? false)
+}
+
 function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean {
   if (filters.size === 0) return true
-  if (filters.has('in_stock')     && p.stock_status === 'in_stock'     && !p.requires_confirmation) return true
-  if (filters.has('on_request')   && p.requires_confirmation)                                       return true
-  if (filters.has('out_of_stock') && p.stock_status === 'out_of_stock')                             return true
+  const onRequest = effectiveRequiresConfirmation(p)
+  if (filters.has('in_stock')     && p.stock_status === 'in_stock'     && !onRequest) return true
+  if (filters.has('on_request')   && onRequest)                                       return true
+  if (filters.has('out_of_stock') && p.stock_status === 'out_of_stock')               return true
   return false
 }
 
@@ -352,7 +358,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
                         <span className="text-sm font-bold text-[#1A1A5E]">{formatPrice(Number(p.price))}</span>
                         <StockBadge
                           stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'}
-                          requiresConfirmation={p.requires_confirmation}
+                          requiresConfirmation={effectiveRequiresConfirmation(p)}
                         />
                       </div>
                     </div>
@@ -408,7 +414,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
                     <span className="text-sm font-bold text-[#1A1A5E]">{formatPrice(Number(p.price))}</span>
                     <StockBadge
                       stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'}
-                      requiresConfirmation={p.requires_confirmation}
+                      requiresConfirmation={effectiveRequiresConfirmation(p)}
                     />
                   </div>
                 </div>

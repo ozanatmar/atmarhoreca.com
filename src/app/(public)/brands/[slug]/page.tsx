@@ -47,7 +47,7 @@ export default async function BrandPage({ params }: Props) {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, brand:brands(name)')
+    .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, brand:brands(name, default_requires_confirmation)')
     .eq('brand_id', brand.id)
     .eq('active', true)
     .limit(200)
