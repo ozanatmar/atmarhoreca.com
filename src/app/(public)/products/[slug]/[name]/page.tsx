@@ -381,7 +381,15 @@ export default async function ProductPage({ params }: Props) {
                     <p className="text-xs font-semibold text-[#1A1A5E] line-clamp-2 flex-1">{p.name}</p>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-sm font-bold text-[#1A1A5E]">{formatPrice(p.price)}</span>
-                      <StockBadge stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'} requiresConfirmation={p.requires_confirmation} />
+                      <StockBadge
+                        stockStatus={p.stock_status as 'in_stock' | 'out_of_stock' | 'unknown'}
+                        requiresConfirmation={
+                          p.requires_confirmation ||
+                          (Array.isArray(product.brand)
+                            ? (product.brand[0]?.default_requires_confirmation ?? false)
+                            : (product.brand?.default_requires_confirmation ?? false))
+                        }
+                      />
                     </div>
                   </div>
                 </Link>
