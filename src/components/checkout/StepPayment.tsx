@@ -135,7 +135,7 @@ export default function StepPayment(props: StepProps) {
 
   if (orderType === 'B') {
     const hasProductTypeB = items.some(i => i.requires_confirmation || i.stock_status !== 'in_stock')
-    const needsShippingQuote = !props.shippingResult
+    const needsShippingQuote = !props.shippingResult || items.some(i => i.shipping_inefficient)
 
     let typeBMessage: string
     if (needsShippingQuote && hasProductTypeB) {

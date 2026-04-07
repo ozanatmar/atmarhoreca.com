@@ -20,7 +20,7 @@ export default function StepReview({
 }: StepProps) {
   const destAddress = sameShipping ? address : shippingAddress
   const hasProductTypeB = orderType === 'B' && items.some(i => i.requires_confirmation || i.stock_status !== 'in_stock')
-  const needsShippingQuote = orderType === 'B' && !shippingResult
+  const needsShippingQuote = orderType === 'B' && (!shippingResult || items.some(i => i.shipping_inefficient))
 
   function getOrderTypeLabel() {
     if (orderType === 'A') return 'Direct Order'
@@ -66,7 +66,7 @@ export default function StepReview({
         <div className="flex flex-col gap-2 text-sm">
           <Row label="Subtotal (excl. VAT)" value={formatPrice(subtotal)} />
 
-          {shippingResult ? (
+          {shippingResult && orderType === 'A' ? (
             <Row label="Shipping" value="Free" />
           ) : (
             <div className="flex justify-between">

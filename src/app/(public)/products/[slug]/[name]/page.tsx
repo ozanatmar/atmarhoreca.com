@@ -257,7 +257,12 @@ export default async function ProductPage({ params }: Props) {
 
             <StockBadge
               stockStatus={product.stock_status}
-              requiresConfirmation={product.requires_confirmation}
+              requiresConfirmation={
+                product.requires_confirmation ||
+                (Array.isArray(product.brand)
+                  ? (product.brand[0]?.default_requires_confirmation ?? false)
+                  : (product.brand?.default_requires_confirmation ?? false))
+              }
             />
 
             {brand?.lead_time_note && (
