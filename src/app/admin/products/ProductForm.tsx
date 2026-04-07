@@ -13,7 +13,7 @@ type RelatedProduct = { id: string; name: string; slug: string; sku: string | nu
 
 interface Props {
   product: Product | null
-  brands: { id: string; name: string }[]
+  brands: { id: string; name: string; slug: string | null }[]
 }
 
 const STOCK_OPTIONS = [
@@ -199,15 +199,18 @@ export default function ProductForm({ product, brands }: Props) {
       }
     }
 
-    // Revalidate this product + all related products
-    await Promise.all([
-      { sku: sku || null, slug },
-      ...relatedProducts.map(r => ({ sku: r.sku, slug: r.slug })),
-    ].map(p =>
+    // Revalidate this product + all related products + brand page
+    const revalidatePaths: string[] = [
+      productUrl({ sku: sku || null, slug }),
+      ...relatedProducts.map(r => productUrl({ sku: r.sku, slug: r.slug })),
+    ]
+    const brandSlug = brands.find(b => b.id === brandId)?.slug
+    if (brandSlug) revalidatePaths.push(`/brands/${brandSlug}`)
+    await Promise.all(revalidatePaths.map(path =>
       fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: productUrl(p) }),
+        body: JSON.stringify({ path }),
       })
     ))
 
