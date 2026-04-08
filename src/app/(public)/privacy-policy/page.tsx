@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import PrivacyContactForm from './PrivacyContactForm'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -96,9 +97,7 @@ export default function PrivacyPolicyPage() {
           <li><strong>Right to withdraw consent:</strong> withdraw analytics consent at any time without affecting prior processing.</li>
         </ul>
         <p className="mt-2">
-          To exercise any of these rights, contact us at{' '}
-          <a href="mailto:privacy@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">privacy@atmarhoreca.com</a>.
-          We will respond within 30 days.
+          To exercise any of these rights, use the contact form at the bottom of this page. We will respond within 30 days.
         </p>
       </Section>
 
@@ -126,6 +125,14 @@ export default function PrivacyPolicyPage() {
           Continued use of our site after changes constitutes acceptance of the updated policy.
         </p>
       </Section>
+
+      <section className="mb-8" id="privacy-request">
+        <h2 className="text-lg font-bold text-[#1A1A5E] mb-1">11. Submit a Privacy Request</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Use this form to exercise your rights under GDPR or to ask any privacy-related question. We will respond within 30 days.
+        </p>
+        <PrivacyContactForm />
+      </section>
     </div>
   )
 }

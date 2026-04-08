@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import ReturnForm from './ReturnForm'
 
 export const metadata: Metadata = {
   title: 'Return & Refund Policy',
@@ -57,8 +58,8 @@ export default function ReturnsPage() {
 
         <p className="font-semibold text-gray-800 mt-3">How to return:</p>
         <ol className="list-decimal pl-5 space-y-1 mt-1">
-          <li>Email <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">returns@atmarhoreca.com</a> with your order number and reason for return before the 14-day deadline.</li>
-          <li>We will confirm your return request and provide return instructions within 2 business days.</li>
+          <li>Submit the return request form below before the 14-day deadline.</li>
+          <li>We will confirm your request and provide return instructions within 2 business days.</li>
           <li>Pack the item securely in its original packaging and ship it back using a tracked service.</li>
           <li>Return shipping costs are at your expense for change-of-mind returns.</li>
         </ol>
@@ -80,7 +81,7 @@ export default function ReturnsPage() {
           <li>Inspect the packaging and goods upon delivery in the presence of the carrier.</li>
           <li>If damage is visible, <strong>note it on the carrier&apos;s delivery document</strong> before signing. This protocol is required to support any claim.</li>
           <li>Photograph both the damaged packaging and the damaged item.</li>
-          <li>Contact us at <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">returns@atmarhoreca.com</a> with your order number, photos, and a copy of the carrier protocol.</li>
+          <li>Submit the return request form below with your order number, photos, and a description of the damage.</li>
         </ul>
 
         <p className="mt-2">
@@ -116,14 +117,13 @@ export default function ReturnsPage() {
         </p>
       </Section>
 
-      <Section title="7. Contact">
-        <p>
-          For all return and refund requests:{' '}
-          <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
-            returns@atmarhoreca.com
-          </a>
+      <section className="mb-8" id="return-form">
+        <h2 className="text-lg font-bold text-[#1A1A5E] mb-1">7. Submit a Return Request</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Fill in the form below. We will review your request and respond within 2 business days.
         </p>
-      </Section>
+        <ReturnForm />
+      </section>
     </div>
   )
 }

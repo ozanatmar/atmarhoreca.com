@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import CookieContactForm from './CookieContactForm'
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
@@ -119,14 +120,13 @@ export default function CookiePolicyPage() {
         </p>
       </Section>
 
-      <Section title="6. Contact">
-        <p>
-          For questions about our use of cookies, contact us at{' '}
-          <a href="mailto:privacy@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
-            privacy@atmarhoreca.com
-          </a>.
+      <section className="mb-8" id="cookie-contact">
+        <h2 className="text-lg font-bold text-[#1A1A5E] mb-1">6. Contact</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Questions about our use of cookies? Use this form to get in touch.
         </p>
-      </Section>
+        <CookieContactForm />
+      </section>
     </div>
   )
 }
