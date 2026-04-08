@@ -72,21 +72,7 @@ export async function POST(request: NextRequest) {
       const verificationEmail = emailVerificationEmail(data)
       to = data.email
       try {
-        const body: Record<string, unknown> = {
-          sender: { name: 'Atmar Horeca', email: 'emailverification@atmarhoreca.com' },
-          to: [{ email: to }],
-          subject: verificationEmail.subject,
-          htmlContent: verificationEmail.html,
-        }
-        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: { 'api-key': process.env.BREVO_API_KEY!, 'content-type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) {
-          const text = await res.text()
-          throw new Error(`Brevo error ${res.status}: ${text}`)
-        }
+        await sendEmail(to, verificationEmail.subject, verificationEmail.html)
         return NextResponse.json({ sent: true })
       } catch (err) {
         console.error('Email send error:', err)
