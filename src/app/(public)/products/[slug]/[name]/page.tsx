@@ -19,7 +19,7 @@ async function getProduct(sku: string, name: string): Promise<Product | null> {
   const { data } = await supabase
     .from('products')
     .select('*, brand:brands(*)')
-    .eq('sku', decodeURIComponent(sku))
+    .eq('sku', sku)
     .eq('slug', name)
     .eq('active', true)
     .single()
@@ -35,7 +35,7 @@ export async function generateStaticParams() {
       .select('sku, slug')
       .eq('active', true)
       .not('sku', 'is', null)
-    return (data ?? []).map((p) => ({ slug: encodeURIComponent(p.sku!), name: p.slug }))
+    return (data ?? []).map((p) => ({ slug: p.sku!, name: p.slug }))
   } catch {
     return []
   }
