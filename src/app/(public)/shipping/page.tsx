@@ -112,12 +112,12 @@ export default function ShippingPage() {
           <li>
             <strong>Damaged on delivery:</strong> inspect the goods in the presence of the carrier and
             note any visible damage on the carrier&apos;s delivery document before signing. Photograph
-            both the outer packaging and the damaged item. Report to us at{' '}
-            <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
-              returns@atmarhoreca.com
+            both the outer packaging and the damaged item. Submit a return request via our{' '}
+            <a href="/returns#return-form" className="text-[#6B3D8F] hover:underline">
+              returns page
             </a>{' '}
-            by the <strong>next business day after delivery</strong>, including photos and the carrier
-            protocol.
+            by the <strong>next business day after delivery</strong>, including photos and a description
+            of the damage.
           </li>
           <li>
             <strong>Lost shipment:</strong> if your order has not arrived by the estimated delivery date,
