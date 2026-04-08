@@ -39,6 +39,11 @@ export default function BrandList({ brands }: Props) {
     } else {
       await supabase.from('brands').insert(editing)
     }
+    // Revalidate public pages that show brand listings
+    await Promise.all([
+      fetch('/api/revalidate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: '/' }) }),
+      fetch('/api/revalidate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: '/brands' }) }),
+    ])
     setSaving(false)
     setEditing(null)
     router.refresh()
