@@ -143,14 +143,6 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="9. Contact">
-        <p>
-          For shipping enquiries:{' '}
-          <a href="mailto:returns@atmarhoreca.com" className="text-[#6B3D8F] hover:underline">
-            returns@atmarhoreca.com
-          </a>
-        </p>
-      </Section>
     </div>
   )
 }
