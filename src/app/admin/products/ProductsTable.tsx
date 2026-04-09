@@ -28,7 +28,7 @@ interface Product {
   brand: { name: string } | { name: string }[] | null
 }
 
-type SortCol = 'name' | 'sku' | 'brand' | 'price' | 'weight_kg' | 'stock_status' | 'active'
+type SortCol = 'name' | 'sku' | 'brand' | 'price' | 'stock_status' | 'active'
 
 function getBrandName(brand: Product['brand']): string {
   if (!brand) return ''
@@ -88,7 +88,6 @@ export default function ProductsTable({ products }: { products: Product[] }) {
       else if (sortCol === 'sku') { av = a.sku ?? ''; bv = b.sku ?? '' }
       else if (sortCol === 'brand') { av = getBrandName(a.brand); bv = getBrandName(b.brand) }
       else if (sortCol === 'price') { av = a.price; bv = b.price }
-      else if (sortCol === 'weight_kg') { av = a.weight_kg; bv = b.weight_kg }
       else if (sortCol === 'stock_status') { av = a.stock_status; bv = b.stock_status }
       else if (sortCol === 'active') { av = a.active ? 1 : 0; bv = b.active ? 1 : 0 }
       if (av < bv) return sortDir === 'asc' ? -1 : 1
@@ -134,7 +133,6 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               <Th col="sku" className="text-left">SKU</Th>
               <Th col="brand" className="text-left">Brand</Th>
               <Th col="price" className="text-right">Price</Th>
-              <Th col="weight_kg" className="text-right">Weight</Th>
               <Th col="stock_status" className="text-left">Stock</Th>
               <Th col="active" className="text-left">Active</Th>
               <th className="px-4 py-3" />
@@ -162,7 +160,6 @@ export default function ProductsTable({ products }: { products: Product[] }) {
                   <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.sku ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-600">{getBrandName(p.brand)}</td>
                   <td className="px-4 py-3 text-right">{p.price.toFixed(2)} €</td>
-                  <td className="px-4 py-3 text-right">{p.weight_kg} kg</td>
                   <td className="px-4 py-3">
                     <Badge variant={stock.variant}>{stock.label}</Badge>
                   </td>
@@ -185,7 +182,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-400 text-sm">No products match your filter.</td>
               </tr>
             )}
           </tbody>
