@@ -32,15 +32,9 @@ export default function ScrapingPanel({ logs, frequency: initialFrequency }: Pro
   async function handleRetry() {
     setRunning(true)
     setResult('')
-    const res = await fetch('/api/cron/scrape-martellato', {
-      headers: { 'x-cron-secret': '' },
-    })
+    const res = await fetch('/api/admin/scrape-now', { method: 'POST' })
     const json = await res.json()
-    if (json.skipped) {
-      setResult(`Skipped — ${json.reason}`)
-    } else {
-      setResult(res.ok ? `Done — ${json.products_updated} products updated` : `Failed: ${json.error}`)
-    }
+    setResult(res.ok ? `Done — ${json.products_updated} products updated` : `Failed: ${json.error}`)
     setRunning(false)
     router.refresh()
   }
