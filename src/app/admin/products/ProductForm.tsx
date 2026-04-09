@@ -345,62 +345,121 @@ export default function ProductForm({ product, brands }: Props) {
           {/* Option Groups */}
           <div className="flex flex-col gap-3 pt-1 border-t border-gray-100">
             <label className="text-sm font-medium text-[#1A1A5E] block">Product Options</label>
-            {optionGroups.map((group, gi) => (
-              <div key={gi} className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={group.name}
-                    onChange={e => {
-                      const next = [...optionGroups]
-                      next[gi] = { ...next[gi], name: e.target.value }
-                      setOptionGroups(next)
-                    }}
-                    placeholder="e.g. Size, Color…"
-                    className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                  />
-                  <button type="button" onClick={() => setOptionGroups(optionGroups.filter((_, i) => i !== gi))} className="text-xs text-red-500 hover:underline shrink-0">Remove group</button>
-                </div>
-                {group.options.map((opt, oi) => (
-                  <div key={oi} className="flex gap-2 items-center pl-3">
+            {optionGroups.map((group, gi) => {
+              const groupType = group.type ?? 'select'
+              return (
+                <div key={gi} className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
+                  <div className="flex gap-2 items-center">
                     <input
                       type="text"
-                      value={opt.label}
+                      value={group.name}
                       onChange={e => {
                         const next = [...optionGroups]
-                        next[gi].options[oi] = { ...next[gi].options[oi], label: e.target.value }
+                        next[gi] = { ...next[gi], name: e.target.value }
                         setOptionGroups(next)
                       }}
-                      placeholder="Option label"
+                      placeholder="e.g. Size, Color…"
                       className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
                     />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={opt.price_modifier}
+                    <select
+                      value={groupType}
                       onChange={e => {
                         const next = [...optionGroups]
-                        next[gi].options[oi] = { ...next[gi].options[oi], price_modifier: parseFloat(e.target.value) || 0 }
+                        next[gi] = { ...next[gi], type: e.target.value as 'select' | 'text_input' }
                         setOptionGroups(next)
                       }}
-                      placeholder="±€"
-                      className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
-                    />
-                    <button type="button" onClick={() => {
-                      const next = [...optionGroups]
-                      next[gi].options = next[gi].options.filter((_, i) => i !== oi)
-                      setOptionGroups(next)
-                    }} className="text-[#C0392B] text-sm shrink-0">×</button>
+                      className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#6B3D8F] bg-white"
+                    >
+                      <option value="select">Dropdown</option>
+                      <option value="text_input">Text input</option>
+                    </select>
+                    <button type="button" onClick={() => setOptionGroups(optionGroups.filter((_, i) => i !== gi))} className="text-xs text-red-500 hover:underline shrink-0">Remove</button>
                   </div>
-                ))}
-                <button type="button" onClick={() => {
-                  const next = [...optionGroups]
-                  next[gi].options = [...next[gi].options, { label: '', price_modifier: 0 }]
-                  setOptionGroups(next)
-                }} className="text-xs text-[#6B3D8F] hover:underline text-left pl-3">+ Add option</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setOptionGroups([...optionGroups, { name: '', options: [] }])} className="text-sm text-[#6B3D8F] hover:underline text-left">
+
+                  {groupType === 'text_input' ? (
+                    <div className="flex flex-col gap-2 pl-3">
+                      <div className="flex gap-2 items-center">
+                        <span className="text-xs text-gray-500 shrink-0">Price modifier (€)</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={group.text_price_modifier ?? 0}
+                          onChange={e => {
+                            const next = [...optionGroups]
+                            next[gi] = { ...next[gi], text_price_modifier: parseFloat(e.target.value) || 0 }
+                            setOptionGroups(next)
+                          }}
+                          className="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={group.text_placeholder ?? ''}
+                        onChange={e => {
+                          const next = [...optionGroups]
+                          next[gi] = { ...next[gi], text_placeholder: e.target.value }
+                          setOptionGroups(next)
+                        }}
+                        placeholder="Placeholder (e.g. RAL 1000)"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                      />
+                      <input
+                        type="text"
+                        value={group.text_pattern ?? ''}
+                        onChange={e => {
+                          const next = [...optionGroups]
+                          next[gi] = { ...next[gi], text_pattern: e.target.value }
+                          setOptionGroups(next)
+                        }}
+                        placeholder="Validation regex (e.g. ^RAL [0-9]{4}$)"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {group.options.map((opt, oi) => (
+                        <div key={oi} className="flex gap-2 items-center pl-3">
+                          <input
+                            type="text"
+                            value={opt.label}
+                            onChange={e => {
+                              const next = [...optionGroups]
+                              next[gi].options[oi] = { ...next[gi].options[oi], label: e.target.value }
+                              setOptionGroups(next)
+                            }}
+                            placeholder="Option label"
+                            className="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={opt.price_modifier}
+                            onChange={e => {
+                              const next = [...optionGroups]
+                              next[gi].options[oi] = { ...next[gi].options[oi], price_modifier: parseFloat(e.target.value) || 0 }
+                              setOptionGroups(next)
+                            }}
+                            placeholder="±€"
+                            className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]"
+                          />
+                          <button type="button" onClick={() => {
+                            const next = [...optionGroups]
+                            next[gi].options = next[gi].options.filter((_, i) => i !== oi)
+                            setOptionGroups(next)
+                          }} className="text-[#C0392B] text-sm shrink-0">×</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => {
+                        const next = [...optionGroups]
+                        next[gi].options = [...next[gi].options, { label: '', price_modifier: 0 }]
+                        setOptionGroups(next)
+                      }} className="text-xs text-[#6B3D8F] hover:underline text-left pl-3">+ Add option</button>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+            <button type="button" onClick={() => setOptionGroups([...optionGroups, { name: '', type: 'select', options: [] }])} className="text-sm text-[#6B3D8F] hover:underline text-left">
               + Add option group
             </button>
           </div>

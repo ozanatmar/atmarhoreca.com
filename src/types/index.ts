@@ -6,7 +6,12 @@ export type StockStatus = 'in_stock' | 'out_of_stock' | 'unknown'
 
 export interface ProductOptionGroup {
   name: string
+  type?: 'select' | 'text_input'
   options: Array<{ label: string; price_modifier: number }>
+  // text_input type only:
+  text_price_modifier?: number
+  text_placeholder?: string
+  text_pattern?: string
 }
 
 export interface SelectedOption {
