@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -35,12 +35,37 @@ function getBrandName(brand: Product['brand']): string {
   return Array.isArray(brand) ? (brand[0]?.name ?? '') : brand.name
 }
 
+const STORAGE_KEY = 'admin_products_list_state'
+
+function loadState(): { filter: string; sortCol: SortCol | null; sortDir: SortDir } {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  return { filter: '', sortCol: null, sortDir: null }
+}
+
 export default function ProductsTable({ products }: { products: Product[] }) {
   const router = useRouter()
   const [filter, setFilter] = useState('')
   const [sortCol, setSortCol] = useState<SortCol | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Restore persisted state on mount
+  useEffect(() => {
+    const s = loadState()
+    setFilter(s.filter)
+    setSortCol(s.sortCol)
+    setSortDir(s.sortDir)
+  }, [])
+
+  // Persist whenever filter/sort changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ filter, sortCol, sortDir }))
+    } catch {}
+  }, [filter, sortCol, sortDir])
 
   async function handleDelete(id: string, name: string) {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
