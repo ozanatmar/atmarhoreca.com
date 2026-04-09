@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
@@ -39,6 +40,26 @@ export default function ProductForm({ product, brands }: Props) {
   const [active, setActive] = useState(product?.active ?? true)
   const [specs, setSpecs] = useState<{ key: string; value: string }[]>(product?.specs ?? [])
   const [optionGroups, setOptionGroups] = useState<ProductOptionGroup[]>(product?.option_groups ?? [])
+  const dragGroup = useRef<number | null>(null)
+  const dragOption = useRef<{ gi: number; oi: number } | null>(null)
+
+  function moveGroup(gi: number, dir: -1 | 1) {
+    const next = [...optionGroups]
+    const target = gi + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[gi], next[target]] = [next[target], next[gi]]
+    setOptionGroups(next)
+  }
+
+  function moveOption(gi: number, oi: number, dir: -1 | 1) {
+    const next = [...optionGroups]
+    const opts = [...next[gi].options]
+    const target = oi + dir
+    if (target < 0 || target >= opts.length) return
+    ;[opts[oi], opts[target]] = [opts[target], opts[oi]]
+    next[gi] = { ...next[gi], options: opts }
+    setOptionGroups(next)
+  }
   const [metaTitle, setMetaTitle] = useState(product?.meta_title ?? '')
   const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([])
@@ -348,8 +369,33 @@ export default function ProductForm({ product, brands }: Props) {
             {optionGroups.map((group, gi) => {
               const groupType = group.type ?? 'select'
               return (
-                <div key={gi} className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
-                  <div className="flex gap-2 items-center">
+                <div
+                  key={gi}
+                  draggable
+                  onDragStart={() => { dragGroup.current = gi }}
+                  onDragOver={e => { e.preventDefault() }}
+                  onDrop={() => {
+                    const from = dragGroup.current
+                    if (from === null || from === gi) return
+                    const next = [...optionGroups]
+                    const [moved] = next.splice(from, 1)
+                    next.splice(gi, 0, moved)
+                    setOptionGroups(next)
+                    dragGroup.current = null
+                  }}
+                  className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2 bg-white"
+                >
+                  {/* Group header row */}
+                  <div className="flex gap-1 items-center">
+                    <GripVertical className="w-4 h-4 text-gray-300 cursor-grab shrink-0" />
+                    <div className="flex flex-col gap-0.5 shrink-0">
+                      <button type="button" onClick={() => moveGroup(gi, -1)} disabled={gi === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-20">
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button type="button" onClick={() => moveGroup(gi, 1)} disabled={gi === optionGroups.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-20">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={group.name}
@@ -377,7 +423,7 @@ export default function ProductForm({ product, brands }: Props) {
                   </div>
 
                   {groupType === 'text_input' ? (
-                    <div className="flex flex-col gap-2 pl-3">
+                    <div className="flex flex-col gap-2 pl-8">
                       <div className="flex gap-2 items-center">
                         <span className="text-xs text-gray-500 shrink-0">Price modifier (€)</span>
                         <input
@@ -418,7 +464,34 @@ export default function ProductForm({ product, brands }: Props) {
                   ) : (
                     <>
                       {group.options.map((opt, oi) => (
-                        <div key={oi} className="flex gap-2 items-center pl-3">
+                        <div
+                          key={oi}
+                          draggable
+                          onDragStart={e => { e.stopPropagation(); dragOption.current = { gi, oi } }}
+                          onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
+                          onDrop={e => {
+                            e.stopPropagation()
+                            const from = dragOption.current
+                            if (!from || from.gi !== gi || from.oi === oi) return
+                            const opts = [...group.options]
+                            const [moved] = opts.splice(from.oi, 1)
+                            opts.splice(oi, 0, moved)
+                            const next = [...optionGroups]
+                            next[gi] = { ...next[gi], options: opts }
+                            setOptionGroups(next)
+                            dragOption.current = null
+                          }}
+                          className="flex gap-1 items-center pl-2"
+                        >
+                          <GripVertical className="w-4 h-4 text-gray-300 cursor-grab shrink-0" />
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                            <button type="button" onClick={() => moveOption(gi, oi, -1)} disabled={oi === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-20">
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button type="button" onClick={() => moveOption(gi, oi, 1)} disabled={oi === group.options.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-20">
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                           <input
                             type="text"
                             value={opt.label}
@@ -453,7 +526,7 @@ export default function ProductForm({ product, brands }: Props) {
                         const next = [...optionGroups]
                         next[gi].options = [...next[gi].options, { label: '', price_modifier: 0 }]
                         setOptionGroups(next)
-                      }} className="text-xs text-[#6B3D8F] hover:underline text-left pl-3">+ Add option</button>
+                      }} className="text-xs text-[#6B3D8F] hover:underline text-left pl-8">+ Add option</button>
                     </>
                   )}
                 </div>
