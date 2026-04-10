@@ -2,28 +2,53 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Globe, FileText, Package, Search } from 'lucide-react'
 import { createStaticClient } from '@/lib/supabase/static'
+import { createServiceClient } from '@/lib/supabase/server'
 import CountryFlag from '@/components/ui/CountryFlag'
+import { formatPrice } from '@/lib/utils'
 
 export const revalidate = 3600
 
 
 export default async function LandingPage() {
   const supabase = createStaticClient()
+  const serviceSupabase = createServiceClient()
 
-  const { data: brands } = await supabase
-    .from('brands')
-    .select('id, name, slug, country_code, logo_url, description')
-    .eq('active', true)
-    .order('name')
-
-  const { data: counts } = await supabase
-    .from('products')
-    .select('brand_id')
-    .eq('active', true)
+  const [
+    { data: brands },
+    { data: counts },
+    { data: topViews },
+  ] = await Promise.all([
+    supabase
+      .from('brands')
+      .select('id, name, slug, country_code, logo_url, description')
+      .eq('active', true)
+      .order('name'),
+    supabase
+      .from('products')
+      .select('brand_id')
+      .eq('active', true),
+    serviceSupabase.rpc('get_best_seller_ids', { limit_n: 8, days_back: 30 }),
+  ])
 
   const countMap: Record<string, number> = {}
   for (const p of counts ?? []) {
     if (p.brand_id) countMap[p.brand_id] = (countMap[p.brand_id] ?? 0) + 1
+  }
+
+  let bestSellers: Array<{ id: string; name: string; slug: string; price: number; images: string[] }> = []
+  if (topViews?.length) {
+    const topIds = (topViews as Array<{ product_id: string }>).map(v => v.product_id)
+    const { data: products } = await serviceSupabase
+      .from('products')
+      .select('id, name, slug, price, images')
+      .in('id', topIds)
+      .eq('active', true)
+    if (products?.length) {
+      // Preserve view-count ranking order
+      bestSellers = topIds
+        .map(id => products.find(p => p.id === id))
+        .filter((p): p is NonNullable<typeof p> => !!p)
+    }
   }
 
   return (
@@ -47,6 +72,44 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Best Sellers */}
+      {bestSellers.length > 0 && (
+        <section className="bg-white py-16 px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-2">Best Sellers</h2>
+            <p className="text-gray-500 mb-8">Our most visited products this month.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {bestSellers.map(product => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="group bg-[#F5F5F5] border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                >
+                  <div className="aspect-square flex items-center justify-center p-4 bg-white">
+                    {product.images[0] ? (
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        width={200}
+                        height={200}
+                        className="object-contain w-full h-full group-hover:scale-105 transition-transform"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 rounded-xl" />
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <p className="text-sm font-semibold text-[#1A1A5E] line-clamp-2">{product.name}</p>
+                    <p className="text-sm font-bold text-[#6B3D8F]">{formatPrice(product.price)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Brands showcase */}
       {brands && brands.length > 0 && (
