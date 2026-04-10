@@ -164,7 +164,7 @@ function ProductSearch({
   const [results, setResults] = useState<Product[]>([])
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
