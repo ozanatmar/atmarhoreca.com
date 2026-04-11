@@ -11,6 +11,8 @@ import type { StepProps } from './types'
 export default function StepCart({ items, subtotal, setStep }: StepProps) {
   const { updateQty, removeItem } = useCartStore()
   const [minimumErrors, setMinimumErrors] = useState<string[]>([])
+  const [oosNames, setOosNames] = useState<string[]>([])
+  const [stockChecking, setStockChecking] = useState(false)
 
   useEffect(() => {
     const brandIds = [...new Set(items.map((i) => i.brand_id).filter(Boolean))] as string[]
@@ -35,6 +37,26 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
         }
         setMinimumErrors(errors)
       })
+  }, [items])
+
+  useEffect(() => {
+    const productIds = items.map((i) => i.product_id)
+    if (!productIds.length) return
+    setStockChecking(true)
+    fetch('/api/products/check-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productIds }),
+    })
+      .then((r) => r.json())
+      .then((results: Record<string, string>) => {
+        const oos = items
+          .filter((i) => results[i.product_id] === 'out_of_stock')
+          .map((i) => i.name)
+        setOosNames(oos)
+      })
+      .catch(() => { /* silent — don't block checkout on network error */ })
+      .finally(() => setStockChecking(false))
   }, [items])
 
   return (
@@ -82,13 +104,25 @@ export default function StepCart({ items, subtotal, setStep }: StepProps) {
         </div>
       )}
 
+      {oosNames.length > 0 && (
+        <div className="bg-red-50 border border-red-300 rounded-xl p-4 mb-4">
+          <p className="text-sm font-semibold text-red-700 mb-1">The following item(s) are no longer available:</p>
+          <ul className="list-disc list-inside">
+            {oosNames.map((name, i) => (
+              <li key={i} className="text-sm text-red-600">{name}</li>
+            ))}
+          </ul>
+          <p className="text-xs text-red-500 mt-2">Please remove them from your cart to continue.</p>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between mb-6">
         <div>
           <p className="text-sm text-gray-600">Subtotal (excl. VAT &amp; shipping)</p>
           <p className="text-lg font-bold text-[#1A1A5E]">{formatPrice(subtotal)}</p>
         </div>
-        <Button size="lg" onClick={() => setStep(2)} disabled={minimumErrors.length > 0}>
-          Continue
+        <Button size="lg" onClick={() => setStep(2)} disabled={minimumErrors.length > 0 || oosNames.length > 0 || stockChecking}>
+          {stockChecking ? 'Checking stock…' : 'Continue'}
         </Button>
       </div>
     </div>
