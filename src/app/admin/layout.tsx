@@ -30,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <NavLink href="/admin/scraping" icon={<IconScraping />}>Scraping: Martellato</NavLink>
           <NavLink href="/admin/blog" icon={<IconBlog />}>Blog</NavLink>
           <NavLink href="/admin/redirects" icon={<IconRedirects />}>Redirects</NavLink>
+          <NavLink href="/admin/martellato" icon={<IconMartellato />}>Martellato</NavLink>
         </nav>
 
         <div className="p-2 border-t border-purple-700 flex flex-col gap-0.5 shrink-0">
@@ -154,6 +155,15 @@ function IconViewSite({ className }: { className?: string }) {
       <path d="M11 3h6v6" />
       <path d="M17 3L9 11" />
       <path d="M9 5H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-5" />
+    </svg>
+  )
+}
+
+function IconMartellato() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+      <circle cx="10" cy="10" r="7" />
+      <path d="M7 10l2 2 4-4" />
     </svg>
   )
 }

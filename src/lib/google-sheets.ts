@@ -4,6 +4,7 @@ import crypto from 'crypto'
 const SHEET_ID = '1_c8JN3ZwJlGPqNsJ-vC2TwGTAibQBB_JaUGDwdHgjU8'
 export const EDIT_SHEET = 'Atmar Horeca Edit Products'
 export const ADD_SHEET = 'Atmar Horeca Add Products'
+export const TEMP_ADD_SHEET = 'TEMP Atmar Horeca Add Products'
 
 function base64url(input: string | Buffer): string {
   const buf = typeof input === 'string' ? Buffer.from(input) : input
@@ -87,6 +88,26 @@ export async function readFromSheet(sheetName = EDIT_SHEET): Promise<string[][]>
   if (!res.ok) throw new Error(`Sheets read failed: ${await res.text()}`)
   const data = await res.json()
   return data.values ?? []
+}
+
+export async function updateSheetCells(
+  sheetName: string,
+  updates: Array<{ range: string; value: string }>
+): Promise<void> {
+  const token = await getAccessToken()
+  const data = updates.map(u => ({
+    range: `${sheetName}!${u.range}`,
+    values: [[u.value]],
+  }))
+  const res = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchUpdate`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ valueInputOption: 'RAW', data }),
+    }
+  )
+  if (!res.ok) throw new Error(`Sheets batchUpdate failed: ${await res.text()}`)
 }
 
 export async function clearSheetData(sheetName = EDIT_SHEET, startRow = 2): Promise<void> {
