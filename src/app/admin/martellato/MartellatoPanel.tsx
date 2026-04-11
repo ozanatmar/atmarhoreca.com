@@ -25,15 +25,16 @@ export default function MartellatoPanel({
   initialRows: string[][]
   sheetError: string | null
 }) {
-  const inStockRows: SheetRow[] = initialRows
-    .map((row, idx) => ({
-      sheetRowNumber: idx + 1,
-      row,
-      sku: row[1] ?? '',
-      name: row[0] ?? '',
-      url: row[7] ?? '',
-    }))
-    .filter(r => r.row[6] === 'in_stock' && (r.url.startsWith('http')))
+  const allMapped: SheetRow[] = initialRows.map((row, idx) => ({
+    sheetRowNumber: idx + 1,
+    row,
+    sku: row[1] ?? '',
+    name: row[0] ?? '',
+    url: row[7] ?? '',
+  }))
+
+  const inStockRows = allMapped.filter(r => r.row[6] === 'in_stock' && r.url.startsWith('http'))
+  const imageRows = inStockRows.filter(r => !(r.row[8] ?? '').trim())
 
   const [states, setStates] = useState<Record<number, RowState>>(() => {
     const s: Record<number, RowState> = {}
@@ -81,7 +82,7 @@ export default function MartellatoPanel({
   async function runImageUploader() {
     stopRef.current = false
     setRunningImages(true)
-    for (const r of inStockRows) {
+    for (const r of imageRows) {
       if (stopRef.current) break
       setImageStatus(r.sheetRowNumber, 'running')
       try {
@@ -91,11 +92,19 @@ export default function MartellatoPanel({
           body: JSON.stringify({ rowNumber: r.sheetRowNumber, row: r.row }),
         })
         const json = await res.json()
-        if (json.skipped) setImageStatus(r.sheetRowNumber, 'skipped', json.reason)
-        else if (!res.ok || json.error) setImageStatus(r.sheetRowNumber, 'error', json.error)
-        else setImageStatus(r.sheetRowNumber, 'done', `${json.count} image(s) · ${json.type}`)
+        if (json.skipped) {
+          setImageStatus(r.sheetRowNumber, 'skipped', json.reason)
+        } else if (!res.ok || json.error) {
+          setImageStatus(r.sheetRowNumber, 'error', json.error)
+          stopRef.current = true
+          break
+        } else {
+          setImageStatus(r.sheetRowNumber, 'done', `${json.count} image(s) · ${json.type}`)
+        }
       } catch (e) {
         setImageStatus(r.sheetRowNumber, 'error', (e as Error).message)
+        stopRef.current = true
+        break
       }
     }
     setRunningImages(false)
@@ -164,10 +173,10 @@ export default function MartellatoPanel({
           </p>
           <button
             onClick={runImageUploader}
-            disabled={isRunning || inStockRows.length === 0}
+            disabled={isRunning || imageRows.length === 0}
             className="bg-[#F0A500] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#d4930a] disabled:opacity-50 transition-colors"
           >
-            {runningImages ? 'Running…' : `Run for ${inStockRows.length} rows`}
+            {runningImages ? 'Running…' : `Run for ${imageRows.length} rows`}
           </button>
         </div>
       </div>
