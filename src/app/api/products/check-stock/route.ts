@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { checkMartellatoStock } from '@/lib/martellato-stock'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -9,10 +10,9 @@ export async function POST(req: Request) {
   const { productIds }: { productIds: string[] } = await req.json()
   if (!productIds?.length) return NextResponse.json({})
 
-  // Fetch martellato_url for requested products
   const { data: products } = await supabase
     .from('products')
-    .select('id, martellato_url')
+    .select('id, sku, martellato_url')
     .in('id', productIds)
 
   if (!products?.length) return NextResponse.json({})
@@ -22,30 +22,12 @@ export async function POST(req: Request) {
 
   await Promise.all(
     products.map(async (p) => {
-      if (!p.martellato_url) {
-        results[p.id] = 'out_of_stock'
-        nowOos.push(p.id)
-        return
-      }
-      try {
-        const res = await fetch(p.martellato_url, {
-          method: 'HEAD',
-          signal: AbortSignal.timeout(8000),
-        })
-        if (res.ok) {
-          results[p.id] = 'in_stock'
-        } else {
-          results[p.id] = 'out_of_stock'
-          nowOos.push(p.id)
-        }
-      } catch {
-        results[p.id] = 'out_of_stock'
-        nowOos.push(p.id)
-      }
+      const status = await checkMartellatoStock(p.martellato_url, p.sku)
+      results[p.id] = status
+      if (status === 'out_of_stock') nowOos.push(p.id)
     })
   )
 
-  // Update stock_status in DB for newly discovered OOS products
   if (nowOos.length) {
     const service = createServiceClient()
     await service
