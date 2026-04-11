@@ -2,19 +2,28 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { updateSheetCells, TEMP_ADD_SHEET } from '@/lib/google-sheets'
 
-// Mirrors the Google Sheets formula in column Q:
-// =LOWER(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(B&"-"&A," Ø","-")," |","-")," ","-"))
-function buildFilename(sku: string, name: string): string {
-  return (sku + '-' + name)
+function sanitizeFilename(raw: string): string {
+  return raw
     .replace(/ Ø/gi, '-')
     .replace(/ \|/g, '-')
     .replace(/ /g, '-')
     .toLowerCase()
-    .replace(/é/g, 'e')
-    .replace(/è/g, 'e')
+    .replace(/[àáâãäå]/g, 'a')
+    .replace(/[èéêë]/g, 'e')
+    .replace(/[ìíîï]/g, 'i')
+    .replace(/[òóôõö]/g, 'o')
+    .replace(/[ùúûü]/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .replace(/[ñ]/g, 'n')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+// Mirrors the Google Sheets formula in column Q:
+// =LOWER(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(B&"-"&A," Ø","-")," |","-")," ","-"))
+function buildFilename(sku: string, name: string): string {
+  return sanitizeFilename(sku + '-' + name)
 }
 
 export async function POST(req: Request) {
@@ -27,7 +36,7 @@ export async function POST(req: Request) {
   const { rowNumber, row }: { rowNumber: number; row: string[] } = await req.json()
   const martellatoUrl = (row[7] ?? '').trim()
   const sku = (row[1] ?? '').trim()
-  const filename = (row[16] ?? '').trim() || buildFilename(sku, row[0] ?? '')
+  const filename = sanitizeFilename((row[16] ?? '').trim() || (sku + '-' + (row[0] ?? '')))
 
   if (!martellatoUrl) {
     return NextResponse.json({ error: 'No URL in column H' }, { status: 400 })
@@ -54,12 +63,20 @@ export async function POST(req: Request) {
       const variants = JSON.parse(variantsMatch[1]) as Array<{ image?: string }>
       const allImages = [...new Set(variants.map(v => v.image).filter((u): u is string => !!u))]
       if (allImages.length > 0) {
-        // Get image whose URL contains this product's SKU
-        const skuImages = sku
-          ? allImages.filter(url => url.toLowerCase().includes(sku.toLowerCase()))
-          : []
-        images = skuImages.length > 0 ? skuImages : allImages
-        type = 'variants'
+        if (!sku) {
+          images = allImages
+          type = 'variants'
+        } else {
+          const skuImages = allImages.filter(url => url.toLowerCase().includes(sku.toLowerCase()))
+          if (skuImages.length > 0) {
+            images = skuImages
+            type = 'variants'
+          } else {
+            // SKU not present in page variants → this variation no longer exists
+            await updateSheetCells(TEMP_ADD_SHEET, [{ range: `G${rowNumber}`, value: 'out_of_stock' }])
+            return NextResponse.json({ skipped: true, reason: 'SKU not found in product variants — marked out_of_stock' })
+          }
+        }
       }
     } catch { /* fall through to gallery */ }
   }
