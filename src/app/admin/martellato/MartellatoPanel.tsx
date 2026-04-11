@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 type RowStatus = 'idle' | 'running' | 'done' | 'skipped' | 'error'
 
@@ -45,6 +45,7 @@ export default function MartellatoPanel({
 
   const [runningContent, setRunningContent] = useState(false)
   const [runningImages, setRunningImages] = useState(false)
+  const stopRef = useRef(false)
 
   function setContentStatus(rowNumber: number, status: RowStatus, msg = '') {
     setStates(prev => ({ ...prev, [rowNumber]: { ...prev[rowNumber], contentStatus: status, contentMsg: msg } }))
@@ -55,8 +56,10 @@ export default function MartellatoPanel({
   }
 
   async function runContentWriter() {
+    stopRef.current = false
     setRunningContent(true)
     for (const r of inStockRows) {
+      if (stopRef.current) break
       setContentStatus(r.sheetRowNumber, 'running')
       try {
         const res = await fetch('/api/admin/martellato/process-content', {
@@ -76,8 +79,10 @@ export default function MartellatoPanel({
   }
 
   async function runImageUploader() {
+    stopRef.current = false
     setRunningImages(true)
     for (const r of inStockRows) {
+      if (stopRef.current) break
       setImageStatus(r.sheetRowNumber, 'running')
       try {
         const res = await fetch('/api/admin/martellato/process-images', {
@@ -109,13 +114,23 @@ export default function MartellatoPanel({
             {inStockRows.length} in_stock rows with URL in TEMP sheet
           </p>
         </div>
-        <button
-          onClick={() => window.location.reload()}
-          disabled={isRunning}
-          className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 disabled:opacity-50"
-        >
-          Refresh sheet
-        </button>
+        <div className="flex gap-2">
+          {isRunning && (
+            <button
+              onClick={() => { stopRef.current = true }}
+              className="text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              Stop
+            </button>
+          )}
+          <button
+            onClick={() => window.location.reload()}
+            disabled={isRunning}
+            className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 disabled:opacity-50"
+          >
+            Refresh sheet
+          </button>
+        </div>
       </div>
 
       {sheetError && (
