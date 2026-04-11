@@ -67,7 +67,18 @@ export async function POST(req: Request) {
           images = allImages
           type = 'variants'
         } else {
-          const skuImages = allImages.filter(url => url.toLowerCase().includes(sku.toLowerCase()))
+          // SKU may contain '/' which appears as '%3A' (colon-encoded) or ':' in image URLs
+          const skuLower = sku.toLowerCase()
+          const skuVariants = [
+            skuLower,
+            skuLower.replace(/\//g, ':'),    // SILICOPAT7/R → SILICOPAT7:R
+            skuLower.replace(/\//g, '%3a'),  // SILICOPAT7/R → SILICOPAT7%3AR
+            skuLower.replace(/\//g, '%2f'),  // SILICOPAT7/R → SILICOPAT7%2FR
+          ]
+          const skuImages = allImages.filter(url => {
+            const urlLower = url.toLowerCase()
+            return skuVariants.some(v => urlLower.includes(v))
+          })
           if (skuImages.length > 0) {
             images = skuImages
             type = 'variants'
