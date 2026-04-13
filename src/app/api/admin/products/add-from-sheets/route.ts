@@ -62,7 +62,7 @@ export async function POST() {
     const row = dataRows[i]
     const rowNum = i + 3 // 1-based: row 1 = instructions, row 2 = headers, data starts at row 3
 
-    const get = (name: string) => row[col(name)]?.trim() ?? ''
+    const get = (name: string) => (row[col(name)]?.trim() ?? '').replace(/\u0000/g, '')
 
     const name = get('name')
     if (!name) {
@@ -129,8 +129,11 @@ export async function POST() {
   }
 
   // All rows valid — insert
+  // Strip null bytes and other control chars that PostgreSQL rejects in text columns
+  const sanitize = (s: string) => s.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+
   const products = dataRows.map((row) => {
-    const get = (name: string) => row[col(name)]?.trim() ?? ''
+    const get = (name: string) => sanitize(row[col(name)]?.trim() ?? '')
     const name = get('name')
     const imagesRaw = get('images')
     return {

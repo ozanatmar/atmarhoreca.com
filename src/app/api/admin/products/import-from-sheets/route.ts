@@ -24,23 +24,26 @@ export async function POST() {
   const [header, ...dataRows] = rows
   const col = (name: string) => header.indexOf(name)
 
+  // Strip null bytes and control chars that PostgreSQL rejects in text columns
+  const sanitize = (s: string) => s.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+
   const updates = dataRows
     .filter((row) => row[col('id')]?.trim())
     .map((row) => {
-      const name = row[col('name')] ?? ''
+      const name = sanitize(row[col('name')] ?? '')
       return {
         id: row[col('id')].trim(),
         name,
         slug: slugify(name),
         sku: row[col('sku')] || null,
-        description: row[col('description')] || null,
+        description: row[col('description')] ? sanitize(row[col('description')]) : null,
         price: parseFloat(row[col('price')]),
         weight_kg: row[col('weight_kg')] ? parseFloat(row[col('weight_kg')]) : null,
         stock_status: (row[col('stock_status')] || 'unknown') as 'in_stock' | 'out_of_stock' | 'unknown',
         martellato_url: row[col('martellato_url')] || null,
         images: row[col('images')] ? row[col('images')].split('|').filter(Boolean) : [],
-        meta_title: row[col('meta_title')] || null,
-        meta_description: row[col('meta_description')] || null,
+        meta_title: row[col('meta_title')] ? sanitize(row[col('meta_title')]) : null,
+        meta_description: row[col('meta_description')] ? sanitize(row[col('meta_description')]) : null,
         requires_confirmation: row[col('requires_confirmation')]?.toLowerCase() === 'true',
         shipping_inefficient: row[col('shipping_inefficient')]?.toLowerCase() === 'true',
         active: row[col('active')]?.toLowerCase() === 'true',
