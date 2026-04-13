@@ -85,8 +85,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url), { status: 301 })
   }
 
-  // Count product page views (fire-and-forget, never awaited to block response)
-  if (pathname.startsWith('/products/')) {
+  // Count product page views — skip prefetch requests (Next.js sets this header automatically)
+  if (pathname.startsWith('/products/') && !request.headers.get('next-router-prefetch')) {
     recordProductView(pathname)
   }
 
