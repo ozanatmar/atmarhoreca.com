@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatPrice, productUrl } from '@/lib/utils'
@@ -87,6 +88,12 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     return Array.from(set).sort()
   }, [products])
 
+  const pathname = usePathname()
+  const storageKey = `search-filters:${pathname}`
+  // Tracks restoration so the save effect skips one stale run after mount
+  const restoreGen = useRef(0)
+  const saveGen    = useRef(0)
+
   const [text, setText]                         = useState('')
   const [selectedBrands, setSelectedBrands]     = useState<Set<string>>(new Set())
   const [selectedAvail, setSelectedAvail]       = useState<Set<AvailabilityKey>>(new Set())
@@ -97,6 +104,41 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   const [filtersOpen, setFiltersOpen]           = useState(false)
   const [page, setPage]                         = useState(1)
   const [perPage, setPerPage]                   = useState(18)
+
+  // Restore filter state from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(storageKey)
+      if (!saved) return
+      const s = JSON.parse(saved) as Record<string, unknown>
+      restoreGen.current++
+      if (typeof s.text === 'string') setText(s.text)
+      if (Array.isArray(s.brands)) setSelectedBrands(new Set(s.brands as string[]))
+      if (Array.isArray(s.avail))  setSelectedAvail(new Set(s.avail as AvailabilityKey[]))
+      if (Array.isArray(s.tags))   setSelectedTags(new Set(s.tags as string[]))
+      if (typeof s.sort === 'string') setSort(s.sort as SortKey)
+      if (typeof s.page === 'number') setPage(s.page)
+      if (typeof s.perPage === 'number') setPerPage(s.perPage)
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist filter state to sessionStorage (skips the first stale run after restoration)
+  useEffect(() => {
+    if (saveGen.current < restoreGen.current) {
+      saveGen.current = restoreGen.current
+      return
+    }
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify({
+        text,
+        brands: Array.from(selectedBrands),
+        avail:  Array.from(selectedAvail),
+        tags:   Array.from(selectedTags),
+        sort, page, perPage,
+      }))
+    } catch {}
+  }, [storageKey, text, selectedBrands, selectedAvail, selectedTags, sort, page, perPage])
 
   // Step 1: filter by everything except price — used to derive dynamic price bounds
   const filteredWithoutPrice = useMemo(() => {
