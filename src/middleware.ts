@@ -41,10 +41,8 @@ export async function middleware(request: NextRequest) {
   // Check DB-driven redirects for old Wix product-page paths
   if (pathname.startsWith('/product-page/')) {
     const map = await getRedirectMap()
-    const dest = map[pathname]
-    if (dest) {
-      return NextResponse.redirect(new URL(dest, request.url), { status: 301 })
-    }
+    const dest = map[pathname] ?? '/'
+    return NextResponse.redirect(new URL(dest, request.url), { status: 301 })
   }
 
   return updateSession(request)
