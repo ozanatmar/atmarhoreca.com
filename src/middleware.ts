@@ -36,14 +36,16 @@ async function getRedirectMap(): Promise<Record<string, string>> {
 }
 
 async function recordProductView(pathname: string) {
-  // Extract slug from /products/[slug]
-  const slug = pathname.replace('/products/', '')
-  if (!slug || slug.includes('/')) return
+  // URL pattern is either /products/[sku]/[name] or /products/[slug]
+  const parts = pathname.replace('/products/', '').split('/')
+  const isTwoSegment = parts.length >= 2
+  const column = isTwoSegment ? 'sku' : 'slug'
+  const value = decodeURIComponent(parts[0])
+  if (!value) return
 
   try {
-    // Lookup product id by slug
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products?select=id&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products?select=id&${column}=eq.${encodeURIComponent(value)}&limit=1`,
       {
         headers: {
           apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
