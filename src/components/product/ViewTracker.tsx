@@ -7,6 +7,7 @@ export default function ViewTracker({ productId }: { productId: string }) {
     createClient()
       .from('product_views')
       .insert({ product_id: productId, session_id: 'n/a' })
+      .then()
   }, [productId])
 
   return null
