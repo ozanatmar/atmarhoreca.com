@@ -132,13 +132,26 @@ export async function POST() {
   // Strip null bytes and other control chars that PostgreSQL rejects in text columns
   const sanitize = (s: string) => s.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 
+  // Load existing slugs to avoid unique constraint violations
+  const { data: existingProducts } = await supabase.from('products').select('slug')
+  const takenSlugs = new Set((existingProducts ?? []).map((p) => p.slug))
+
+  function uniqueSlug(base: string): string {
+    if (!takenSlugs.has(base)) { takenSlugs.add(base); return base }
+    let n = 2
+    while (takenSlugs.has(`${base}-${n}`)) n++
+    const s = `${base}-${n}`
+    takenSlugs.add(s)
+    return s
+  }
+
   const products = dataRows.map((row) => {
     const get = (name: string) => sanitize(row[col(name)]?.trim() ?? '')
     const name = get('name')
     const imagesRaw = get('images')
     return {
       name,
-      slug: slugify(name),
+      slug: uniqueSlug(slugify(name)),
       sku: get('sku'),
       brand_id: brandMap.get(get('brand').toLowerCase())!,
       description: get('description') || null,
