@@ -87,9 +87,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url), { status: 301 })
   }
 
-  // Count product page views — skip prefetch requests (Next.js sets this header automatically)
-  if (pathname.startsWith('/products/') && !request.headers.get('next-router-prefetch')) {
-    recordProductView(pathname)
+  // Count product page views only on real user navigations:
+  // - Hard navigate: browser sets sec-fetch-dest: document
+  // - SPA click (App Router RSC request): rsc: 1 without next-router-prefetch
+  // Excludes: prefetches, ISR revalidation, bots, crawlers
+  if (pathname.startsWith('/products/')) {
+    const isHardNav = request.headers.get('sec-fetch-dest') === 'document'
+    const isSpaNav = request.headers.get('rsc') === '1' && !request.headers.get('next-router-prefetch')
+    if (isHardNav || isSpaNav) {
+      recordProductView(pathname)
+    }
   }
 
   return updateSession(request)
