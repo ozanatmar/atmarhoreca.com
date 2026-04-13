@@ -98,7 +98,8 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   const [page, setPage]                         = useState(1)
   const [perPage, setPerPage]                   = useState(18)
 
-  const filtered = useMemo(() => {
+  // Step 1: filter by everything except price — used to derive dynamic price bounds
+  const filteredWithoutPrice = useMemo(() => {
     let result = products
 
     if (text.trim()) {
@@ -121,18 +122,36 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       result = result.filter(p => (p.tags ?? []).some(t => selectedTags.has(t)))
     }
 
-    result = result.filter(p => Number(p.price) >= priceMin && Number(p.price) <= priceMax)
+    return result
+  }, [products, text, selectedBrands, selectedAvail, selectedTags])
 
-    return [...result].sort((a, b) => {
-      switch (sort) {
-        case 'price_asc':  return Number(a.price) - Number(b.price)
-        case 'price_desc': return Number(b.price) - Number(a.price)
-        case 'name_asc':   return a.name.localeCompare(b.name)
-        case 'name_desc':  return b.name.localeCompare(a.name)
-        default:           return 0
-      }
-    })
-  }, [products, text, selectedBrands, selectedAvail, selectedTags, priceMin, priceMax, sort])
+  // Dynamic price bounds derived from currently filtered products
+  const [dynamicMin, dynamicMax] = useMemo(() => {
+    if (!filteredWithoutPrice.length) return [globalMin, globalMax]
+    const prices = filteredWithoutPrice.map(p => Number(p.price))
+    return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))]
+  }, [filteredWithoutPrice, globalMin, globalMax])
+
+  // Clamp selected price range when dynamic bounds change
+  useEffect(() => {
+    setPriceMin(prev => Math.max(dynamicMin, Math.min(prev, dynamicMax)))
+    setPriceMax(prev => Math.min(dynamicMax, Math.max(prev, dynamicMin)))
+  }, [dynamicMin, dynamicMax])
+
+  // Step 2: apply price filter + sort
+  const filtered = useMemo(() => {
+    return [...filteredWithoutPrice]
+      .filter(p => Number(p.price) >= priceMin && Number(p.price) <= priceMax)
+      .sort((a, b) => {
+        switch (sort) {
+          case 'price_asc':  return Number(a.price) - Number(b.price)
+          case 'price_desc': return Number(b.price) - Number(a.price)
+          case 'name_asc':   return a.name.localeCompare(b.name)
+          case 'name_desc':  return b.name.localeCompare(a.name)
+          default:           return 0
+        }
+      })
+  }, [filteredWithoutPrice, priceMin, priceMax, sort])
 
   // Reset to page 1 whenever filters or per-page changes
   useEffect(() => { setPage(1) }, [text, selectedBrands, selectedAvail, selectedTags, priceMin, priceMax, sort, perPage])
@@ -174,10 +193,10 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     selectedBrands.size +
     selectedAvail.size +
     selectedTags.size +
-    (priceMin > globalMin || priceMax < globalMax ? 1 : 0)
+    (priceMin > dynamicMin || priceMax < dynamicMax ? 1 : 0)
 
   const pct = (v: number) =>
-    globalMax === globalMin ? 0 : ((v - globalMin) / (globalMax - globalMin)) * 100
+    dynamicMax === dynamicMin ? 0 : ((v - dynamicMin) / (dynamicMax - dynamicMin)) * 100
 
   const FiltersPanel = (
     <div className="flex flex-col gap-6">
@@ -196,7 +215,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       </div>
 
       {/* Price range */}
-      {globalMin < globalMax && (
+      {dynamicMin < dynamicMax && (
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">Price range</p>
           <div className="relative flex items-center h-5 mb-3">
@@ -207,7 +226,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
               />
             </div>
             <input
-              type="range" min={globalMin} max={globalMax} step={1}
+              type="range" min={dynamicMin} max={dynamicMax} step={1}
               value={priceMin}
               onChange={e => setPriceMin(Math.min(Number(e.target.value), priceMax))}
               className="absolute w-full h-1.5 appearance-none bg-transparent
@@ -227,7 +246,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
               style={{ zIndex: 5 }}
             />
             <input
-              type="range" min={globalMin} max={globalMax} step={1}
+              type="range" min={dynamicMin} max={dynamicMax} step={1}
               value={priceMax}
               onChange={e => setPriceMax(Math.max(Number(e.target.value), priceMin))}
               className="absolute w-full h-1.5 appearance-none bg-transparent
@@ -335,8 +354,8 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
             setSelectedBrands(new Set())
             setSelectedAvail(new Set())
             setSelectedTags(new Set())
-            setPriceMin(globalMin)
-            setPriceMax(globalMax)
+            setPriceMin(dynamicMin)
+            setPriceMax(dynamicMax)
             setSort('name_asc')
           }}
           className="text-xs text-[#6B3D8F] hover:underline text-left"
