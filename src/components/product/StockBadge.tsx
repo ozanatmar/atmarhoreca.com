@@ -14,5 +14,5 @@ export default function StockBadge({ stockStatus, requiresConfirmation }: StockB
     return <Badge variant="red">Out of Stock</Badge>
   }
   // in_stock + requires_confirmation, or unknown
-  return <Badge variant="orange">Availability on Request</Badge>
+  return <Badge variant="orange">On Request</Badge>
 }

@@ -28,10 +28,11 @@ export default async function SearchPage({ searchParams }: Props) {
     requires_confirmation: boolean
     brand_id: string | null
     tags: string[]
-    brand: { name: string } | { name: string }[] | null
+    views: number
+    brand: { name: string; default_requires_confirmation?: boolean; lead_time_note?: string | null } | { name: string; default_requires_confirmation?: boolean; lead_time_note?: string | null }[] | null
   }
 
-  const PRODUCT_SELECT = 'id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, tags, brand:brands(name, default_requires_confirmation)'
+  const PRODUCT_SELECT = 'id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, tags, views, brand:brands(name, default_requires_confirmation, lead_time_note)'
 
   let products: ProductRow[] = []
   let fallbackProducts: ProductRow[] = []

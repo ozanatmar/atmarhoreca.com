@@ -17,6 +17,12 @@ export default function Footer() {
             <p className="text-sm text-gray-300">
               Professional horeca equipment from Europe&apos;s best brands.
             </p>
+            <a
+              href="mailto:info@atmarhoreca.com"
+              className="text-sm text-gray-400 hover:text-white transition-colors mt-2 block"
+            >
+              info@atmarhoreca.com
+            </a>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-8 text-sm">
@@ -33,6 +39,12 @@ export default function Footer() {
               <ul className="space-y-1">
                 <li><Link href="/shipping" className="text-gray-400 hover:text-white transition-colors">Shipping Policy</Link></li>
                 <li><Link href="/returns" className="text-gray-400 hover:text-white transition-colors">Returns &amp; Refunds</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-white mb-2">Company</p>
+              <ul className="space-y-1">
+                <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</Link></li>
               </ul>
             </div>
           </div>

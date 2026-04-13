@@ -3,7 +3,6 @@ import Image from 'next/image'
 import { Globe, FileText, Package, Search } from 'lucide-react'
 import { createStaticClient } from '@/lib/supabase/static'
 import { createServiceClient } from '@/lib/supabase/server'
-import CountryFlag from '@/components/ui/CountryFlag'
 import { formatPrice } from '@/lib/utils'
 
 export const revalidate = 300
@@ -15,25 +14,15 @@ export default async function LandingPage() {
 
   const [
     { data: brands },
-    { data: counts },
     { data: topViews },
   ] = await Promise.all([
     supabase
       .from('brands')
-      .select('id, name, slug, country_code, logo_url, description')
+      .select('id, name, slug, logo_url')
       .eq('active', true)
       .order('name'),
-    supabase
-      .from('products')
-      .select('brand_id')
-      .eq('active', true),
     serviceSupabase.rpc('get_best_seller_ids', { limit_n: 8, days_back: 30 }),
   ])
-
-  const countMap: Record<string, number> = {}
-  for (const p of counts ?? []) {
-    if (p.brand_id) countMap[p.brand_id] = (countMap[p.brand_id] ?? 0) + 1
-  }
 
   let bestSellers: Array<{ id: string; name: string; slug: string; price: number; images: string[] }> = []
   if (topViews?.length) {
@@ -114,46 +103,31 @@ export default async function LandingPage() {
       {brands && brands.length > 0 && (
         <section className="bg-[#F5F5F5] py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-2">Our Brands</h2>
-            <p className="text-gray-500 mb-8">Click a brand to browse their full catalogue.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-6">Our Brands</h2>
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {brands.map(brand => {
                 const href = brand.slug ? `/brands/${brand.slug}` : `/search?q=${encodeURIComponent(brand.name)}`
-                const count = countMap[brand.id] ?? 0
                 return (
                   <Link
                     key={brand.id}
                     href={href}
-                    className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                    title={brand.name}
+                    className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:border-[#6B3D8F]/30 transition-all aspect-square flex items-center justify-center p-4"
                   >
-                    <div className="aspect-square flex items-center justify-center p-8">
-                      {brand.logo_url ? (
-                        <Image
-                          src={brand.logo_url}
-                          alt={brand.name}
-                          width={200}
-                          height={200}
-                          className="object-contain w-full h-full group-hover:scale-105 transition-transform"
-                          unoptimized
-                        />
-                      ) : (
-                        <span className="text-5xl font-bold text-gray-200 group-hover:text-gray-300 transition-colors">
-                          {brand.name[0]}
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-5 flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[#1A1A5E]">{brand.name}</span>
-                        <CountryFlag code={brand.country_code} />
-                      </div>
-                      {brand.description && (
-                        <p className="text-sm text-gray-500 line-clamp-2">{brand.description}</p>
-                      )}
-                      <p className="text-xs text-[#6B3D8F] font-medium mt-1">
-                        {count} product{count !== 1 ? 's' : ''} →
-                      </p>
-                    </div>
+                    {brand.logo_url ? (
+                      <Image
+                        src={brand.logo_url}
+                        alt={brand.name}
+                        width={120}
+                        height={120}
+                        className="object-contain w-full h-full group-hover:scale-105 transition-transform"
+                        unoptimized
+                      />
+                    ) : (
+                      <span className="text-2xl font-bold text-gray-300 group-hover:text-gray-400 transition-colors">
+                        {brand.name[0]}
+                      </span>
+                    )}
                   </Link>
                 )
               })}

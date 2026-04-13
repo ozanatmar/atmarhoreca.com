@@ -201,24 +201,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Nav bar */}
-      <nav className="border-t border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-1 overflow-x-auto">
-          {[
-            { href: '/search', label: 'All Products' },
-            { href: '/brands', label: 'Brands' },
-            { href: '/blog', label: 'Blog' },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="px-4 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap rounded-sm"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </nav>
     </header>
   )
 }

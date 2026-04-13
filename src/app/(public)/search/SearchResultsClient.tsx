@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { formatPrice, productUrl } from '@/lib/utils'
 import StockBadge from '@/components/product/StockBadge'
 
-type SortKey = 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc'
+type SortKey = 'popular' | 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc'
 type AvailabilityKey = 'in_stock' | 'on_request' | 'out_of_stock'
 
 interface Product {
@@ -21,7 +21,8 @@ interface Product {
   requires_confirmation: boolean
   brand_id: string | null
   tags: string[]
-  brand: { name: string; default_requires_confirmation?: boolean } | { name: string; default_requires_confirmation?: boolean }[] | null
+  views?: number
+  brand: { name: string; default_requires_confirmation?: boolean; lead_time_note?: string | null } | { name: string; default_requires_confirmation?: boolean; lead_time_note?: string | null }[] | null
 }
 
 interface Props {
@@ -54,13 +55,18 @@ function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean
 }
 
 function pageNumbers(current: number, total: number): (number | '...')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const pages: (number | '...')[] = [1]
-  if (current > 3) pages.push('...')
-  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i)
-  if (current < total - 2) pages.push('...')
-  pages.push(total)
-  return pages
+  if (total <= 9) return Array.from({ length: total }, (_, i) => i + 1)
+  const set = new Set<number>()
+  set.add(1); set.add(2)
+  set.add(total - 1); set.add(total)
+  for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) set.add(i)
+  const sorted = Array.from(set).sort((a, b) => a - b)
+  const result: (number | '...')[] = []
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('...')
+    result.push(sorted[i])
+  }
+  return result
 }
 
 export default function SearchResultsClient({ products, fallbackProducts, initialQuery, hideBrandFilter }: Props) {
@@ -100,7 +106,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   const [selectedTags, setSelectedTags]         = useState<Set<string>>(new Set())
   const [priceMin, setPriceMin]                 = useState(() => globalMin)
   const [priceMax, setPriceMax]                 = useState(() => globalMax)
-  const [sort, setSort]                         = useState<SortKey>('name_asc')
+  const [sort, setSort]                         = useState<SortKey>('popular')
   const [filtersOpen, setFiltersOpen]           = useState(false)
   const [page, setPage]                         = useState(1)
   const [perPage, setPerPage]                   = useState(18)
@@ -186,6 +192,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       .filter(p => Number(p.price) >= priceMin && Number(p.price) <= priceMax)
       .sort((a, b) => {
         switch (sort) {
+          case 'popular':    return (b.views ?? 0) - (a.views ?? 0)
           case 'price_asc':  return Number(a.price) - Number(b.price)
           case 'price_desc': return Number(b.price) - Number(a.price)
           case 'name_asc':   return a.name.localeCompare(b.name)
@@ -335,26 +342,6 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         </div>
       )}
 
-      {/* Tags — only shown if products have tags */}
-      {allTags.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Category</p>
-          <div className="flex flex-col gap-2">
-            {allTags.map(tag => (
-              <label key={tag} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
-                <input
-                  type="checkbox"
-                  checked={selectedTags.has(tag)}
-                  onChange={() => toggleTag(tag)}
-                  className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
-                />
-                {tag}
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Availability */}
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Availability</p>
@@ -381,6 +368,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
           onChange={e => setSort(e.target.value as SortKey)}
           className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B3D8F]/30 bg-white"
         >
+          <option value="popular">Most Popular</option>
           <option value="name_asc">Name A–Z</option>
           <option value="name_desc">Name Z–A</option>
           <option value="price_asc">Price: Low to High</option>
@@ -398,7 +386,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
             setSelectedTags(new Set())
             setPriceMin(dynamicMin)
             setPriceMax(dynamicMax)
-            setSort('name_asc')
+            setSort('popular')
           }}
           className="text-xs text-[#6B3D8F] hover:underline text-left"
         >
@@ -409,23 +397,30 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   )
 
   const Pagination = totalPages > 1 && (
-    <div className="flex flex-wrap items-center justify-center gap-1 mt-6">
+    <div className="flex flex-wrap items-center justify-center gap-1.5 mt-6">
       <button
         onClick={() => setPage(p => Math.max(1, p - 1))}
         disabled={safePage === 1}
-        className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block"
+      >
+        ← Previous
+      </button>
+      <button
+        onClick={() => setPage(p => Math.max(1, p - 1))}
+        disabled={safePage === 1}
+        className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed sm:hidden"
       >
         ←
       </button>
       {pageNumbers(safePage, totalPages).map((n, i) =>
         n === '...'
-          ? <span key={`ellipsis-${i}`} className="px-2 py-1.5 text-sm text-gray-400 select-none">…</span>
+          ? <span key={`ellipsis-${i}`} className="px-2 py-2 text-sm text-gray-400 select-none">…</span>
           : <button
               key={n}
               onClick={() => setPage(n)}
-              className={`min-w-[36px] px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+              className={`min-w-[40px] px-3 py-2 text-sm rounded-lg border transition-colors ${
                 n === safePage
-                  ? 'bg-[#6B3D8F] text-white border-[#6B3D8F]'
+                  ? 'bg-[#6B3D8F] text-white border-[#6B3D8F] font-semibold'
                   : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -435,7 +430,14 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       <button
         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
         disabled={safePage === totalPages}
-        className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block"
+      >
+        Next →
+      </button>
+      <button
+        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+        disabled={safePage === totalPages}
+        className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed sm:hidden"
       >
         →
       </button>
@@ -563,9 +565,9 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {paginated.map(p => {
-            const brandName = p.brand
-              ? Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name
-              : null
+            const brandObj = Array.isArray(p.brand) ? p.brand[0] : p.brand
+            const brandName = brandObj?.name ?? null
+            const leadTime = brandObj?.lead_time_note ?? null
             return (
               <Link
                 key={p.id}
@@ -609,6 +611,9 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
                       requiresConfirmation={effectiveRequiresConfirmation(p)}
                     />
                   </div>
+                  {leadTime && (
+                    <p className="text-xs text-gray-400 mt-0.5">{leadTime}</p>
+                  )}
                 </div>
               </Link>
             )

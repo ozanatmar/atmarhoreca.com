@@ -14,6 +14,7 @@ interface Props {
 
 export default function ProductPurchaseSection({ product }: Props) {
   const [loggedIn, setLoggedIn] = useState(false)
+  const [qty, setQty] = useState(1)
   const [selections, setSelections] = useState<Record<string, { label: string; price_modifier: number }>>({})
   const [textEnabled, setTextEnabled] = useState<Record<string, boolean>>({})
   const [textValues, setTextValues] = useState<Record<string, string>>({})
@@ -113,7 +114,7 @@ export default function ProductPurchaseSection({ product }: Props) {
       sku: product.sku ?? null,
       price: packTotal ?? computedPrice,
       weight_kg: product.weight_kg,
-      qty: 1,
+      qty,
       images: product.images,
       requires_confirmation: requiresConfirmation,
       shipping_inefficient: product.shipping_inefficient,
@@ -211,9 +212,32 @@ export default function ProductPurchaseSection({ product }: Props) {
         )
       })}
 
-      <Button size="lg" onClick={handleClick} className="w-full sm:w-auto">
-        {label}
-      </Button>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setQty(q => Math.max(1, q - 1))}
+            className="px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+            aria-label="Decrease quantity"
+          >
+            −
+          </button>
+          <span className="px-4 py-2 text-sm font-semibold text-gray-900 min-w-[2.5rem] text-center">
+            {qty}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQty(q => q + 1)}
+            className="px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
+        <Button size="lg" onClick={handleClick}>
+          {label}
+        </Button>
+      </div>
     </div>
   )
 }
