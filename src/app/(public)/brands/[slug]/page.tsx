@@ -50,7 +50,7 @@ export default async function BrandPage({ params }: Props) {
     .select('id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, brand:brands(name, default_requires_confirmation)')
     .eq('brand_id', brand.id)
     .eq('active', true)
-    .limit(200)
+    .limit(2000)
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

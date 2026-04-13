@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatPrice, productUrl } from '@/lib/utils'
@@ -35,6 +35,8 @@ const AVAILABILITY_OPTIONS: { key: AvailabilityKey; label: string }[] = [
   { key: 'out_of_stock', label: 'Out of Stock' },
 ]
 
+const PER_PAGE_OPTIONS = [18, 36, 72]
+
 function effectiveRequiresConfirmation(p: Product): boolean {
   const b = Array.isArray(p.brand) ? p.brand[0] : p.brand
   return p.requires_confirmation || (b?.default_requires_confirmation ?? false)
@@ -47,6 +49,16 @@ function matchesAvailability(p: Product, filters: Set<AvailabilityKey>): boolean
   if (filters.has('on_request')   && onRequest)                                       return true
   if (filters.has('out_of_stock') && p.stock_status === 'out_of_stock')               return true
   return false
+}
+
+function pageNumbers(current: number, total: number): (number | '...')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages: (number | '...')[] = [1]
+  if (current > 3) pages.push('...')
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i)
+  if (current < total - 2) pages.push('...')
+  pages.push(total)
+  return pages
 }
 
 export default function SearchResultsClient({ products, fallbackProducts, initialQuery, hideBrandFilter }: Props) {
@@ -75,6 +87,8 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   const [priceMax, setPriceMax]                 = useState(() => globalMax)
   const [sort, setSort]                         = useState<SortKey>('name_asc')
   const [filtersOpen, setFiltersOpen]           = useState(false)
+  const [page, setPage]                         = useState(1)
+  const [perPage, setPerPage]                   = useState(18)
 
   const filtered = useMemo(() => {
     let result = products
@@ -107,6 +121,17 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       }
     })
   }, [products, text, selectedBrands, selectedAvail, priceMin, priceMax, sort])
+
+  // Reset to page 1 whenever filters or per-page changes
+  useEffect(() => { setPage(1) }, [text, selectedBrands, selectedAvail, priceMin, priceMax, sort, perPage])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage))
+  const safePage = Math.min(page, totalPages)
+
+  const paginated = useMemo(() => {
+    const start = (safePage - 1) * perPage
+    return filtered.slice(start, start + perPage)
+  }, [filtered, safePage, perPage])
 
   function toggleBrand(id: string) {
     setSelectedBrands(prev => {
@@ -280,6 +305,40 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     </div>
   )
 
+  const Pagination = totalPages > 1 && (
+    <div className="flex flex-wrap items-center justify-center gap-1 mt-8">
+      <button
+        onClick={() => setPage(p => Math.max(1, p - 1))}
+        disabled={safePage === 1}
+        className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        ←
+      </button>
+      {pageNumbers(safePage, totalPages).map((n, i) =>
+        n === '...'
+          ? <span key={`ellipsis-${i}`} className="px-2 py-1.5 text-sm text-gray-400 select-none">…</span>
+          : <button
+              key={n}
+              onClick={() => setPage(n)}
+              className={`min-w-[36px] px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                n === safePage
+                  ? 'bg-[#6B3D8F] text-white border-[#6B3D8F]'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {n}
+            </button>
+      )}
+      <button
+        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+        disabled={safePage === totalPages}
+        className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        →
+      </button>
+    </div>
+  )
+
   return (
     <div className="flex gap-10 items-start">
       {/* Desktop sidebar */}
@@ -312,10 +371,34 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
           )}
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">
-          {filtered.length} product{filtered.length !== 1 ? 's' : ''}
-          {initialQuery && <> for &ldquo;{initialQuery}&rdquo;</>}
-        </p>
+        {/* Count + per-page selector */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-500">
+            {filtered.length} product{filtered.length !== 1 ? 's' : ''}
+            {initialQuery && <> for &ldquo;{initialQuery}&rdquo;</>}
+            {totalPages > 1 && (
+              <span className="ml-1 text-gray-400">
+                — page {safePage} of {totalPages}
+              </span>
+            )}
+          </p>
+          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+            <span>Show</span>
+            {PER_PAGE_OPTIONS.map(n => (
+              <button
+                key={n}
+                onClick={() => setPerPage(n)}
+                className={`px-2 py-0.5 rounded text-sm font-medium transition-colors ${
+                  perPage === n
+                    ? 'bg-[#6B3D8F] text-white'
+                    : 'text-gray-500 hover:text-[#6B3D8F]'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {filtered.length === 0 && fallbackProducts.length === 0 && (
           <p className="text-gray-500">No products found.</p>
@@ -370,7 +453,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filtered.map(p => {
+          {paginated.map(p => {
             const brandName = p.brand
               ? Array.isArray(p.brand) ? p.brand[0]?.name : p.brand.name
               : null
@@ -422,6 +505,8 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
             )
           })}
         </div>
+
+        {Pagination}
       </div>
     </div>
   )

@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: Props) {
     }
     dbQuery = dbQuery.or(orFilters.join(','))
 
-    const { data } = await dbQuery.limit(200)
+    const { data } = await dbQuery.limit(2000)
     products = data ?? []
 
     // Fallback: if no results, search by individual words
@@ -77,7 +77,7 @@ export default async function SearchPage({ searchParams }: Props) {
       .from('products')
       .select(PRODUCT_SELECT)
       .eq('active', true)
-      .limit(200)
+      .limit(2000)
     products = data ?? []
   }
 
