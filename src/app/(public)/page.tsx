@@ -78,7 +78,6 @@ export default async function LandingPage() {
         <section className="bg-white py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold text-[#1A1A5E] mb-2">Best Sellers</h2>
-            <p className="text-gray-500 mb-8">Our most visited products this month.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {bestSellers.map(product => (
                 <Link
