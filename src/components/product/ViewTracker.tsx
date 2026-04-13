@@ -1,13 +1,13 @@
 'use client'
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 export default function ViewTracker({ productId }: { productId: string }) {
   useEffect(() => {
-    createClient()
-      .from('product_views')
-      .insert({ product_id: productId, session_id: 'n/a' })
-      .then()
+    fetch('/api/products/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId }),
+    })
   }, [productId])
 
   return null
