@@ -35,6 +35,7 @@ export default function MartellatoPanel({
 
   const inStockRows = allMapped.filter(r => r.row[6] === 'in_stock' && r.url.startsWith('http'))
   const imageRows = inStockRows.filter(r => !(r.row[8] ?? '').trim())
+  const noUrlRows = allMapped.filter(r => !r.url.startsWith('http'))
 
   const [states, setStates] = useState<Record<number, RowState>>(() => {
     const s: Record<number, RowState> = {}
@@ -115,7 +116,9 @@ export default function MartellatoPanel({
   const imageDone = Object.values(states).filter(s => s.imageStatus === 'done').length
 
   return (
-    <div>
+    <div className="flex gap-6 items-start">
+      {/* Main content */}
+      <div className="flex-1 min-w-0">
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#1A1A5E]">Martellato Import Enrichment</h1>
@@ -221,6 +224,36 @@ export default function MartellatoPanel({
           No in_stock rows with a URL found in the TEMP sheet.
         </div>
       )}
+      </div>{/* end main content */}
+
+      {/* Right sidebar: items missing a Martellato URL */}
+      <div className="w-72 shrink-0">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden sticky top-6">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h2 className="font-semibold text-[#1A1A5E] text-sm">No URL</h2>
+            <p className="text-xs text-gray-400 mt-0.5">{noUrlRows.length} items — click to search on Martellato</p>
+          </div>
+          {noUrlRows.length === 0 ? (
+            <p className="px-4 py-6 text-xs text-gray-300 text-center">All items have a URL.</p>
+          ) : (
+            <ul className="max-h-[calc(100vh-12rem)] overflow-y-auto divide-y divide-gray-50">
+              {noUrlRows.map(r => (
+                <li key={r.sheetRowNumber}>
+                  <a
+                    href={`https://www.martellato.com/shop/search/${encodeURIComponent(r.sku)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col px-4 py-2.5 hover:bg-purple-50 transition-colors group"
+                  >
+                    <span className="font-mono text-xs text-[#6B3D8F] group-hover:underline">{r.sku || '—'}</span>
+                    <span className="text-xs text-gray-500 truncate mt-0.5">{r.name || <span className="text-gray-300">no name</span>}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
