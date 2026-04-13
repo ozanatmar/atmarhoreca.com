@@ -306,7 +306,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
   )
 
   const Pagination = totalPages > 1 && (
-    <div className="flex flex-wrap items-center justify-center gap-1 mt-8">
+    <div className="flex flex-wrap items-center justify-center gap-1 mt-6">
       <button
         onClick={() => setPage(p => Math.max(1, p - 1))}
         disabled={safePage === 1}
@@ -372,7 +372,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         </div>
 
         {/* Count + per-page selector */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-gray-500">
             {filtered.length} product{filtered.length !== 1 ? 's' : ''}
             {initialQuery && <> for &ldquo;{initialQuery}&rdquo;</>}
@@ -399,6 +399,12 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
             ))}
           </div>
         </div>
+
+        {totalPages > 1 && (
+          <div className="mb-4">
+            {Pagination}
+          </div>
+        )}
 
         {filtered.length === 0 && fallbackProducts.length === 0 && (
           <p className="text-gray-500">No products found.</p>
