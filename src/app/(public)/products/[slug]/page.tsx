@@ -7,7 +7,6 @@ import StockBadge from '@/components/product/StockBadge'
 import ProductPurchaseSection from '@/components/product/ProductPurchaseSection'
 import ImageGallery from '@/components/product/ImageGallery'
 import type { Product } from '@/types'
-import ViewTracker from '@/components/product/ViewTracker'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -142,7 +141,6 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <ViewTracker productId={product.id} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}

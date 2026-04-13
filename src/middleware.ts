@@ -35,6 +35,46 @@ async function getRedirectMap(): Promise<Record<string, string>> {
   return redirectCache
 }
 
+async function recordProductView(pathname: string) {
+  // Extract slug from /products/[slug]
+  const slug = pathname.replace('/products/', '')
+  if (!slug || slug.includes('/')) return
+
+  try {
+    // Lookup product id by slug
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products?select=id&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+      {
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        },
+        cache: 'no-store',
+      }
+    )
+    if (!res.ok) return
+    const rows: Array<{ id: string }> = await res.json()
+    if (!rows.length) return
+
+    await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/product_views`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ product_id: rows[0].id, session_id: 'n/a' }),
+        cache: 'no-store',
+      }
+    )
+  } catch {
+    // Never block the request
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -43,6 +83,11 @@ export async function middleware(request: NextRequest) {
     const map = await getRedirectMap()
     const dest = map[pathname] ?? '/'
     return NextResponse.redirect(new URL(dest, request.url), { status: 301 })
+  }
+
+  // Count product page views (fire-and-forget, never awaited to block response)
+  if (pathname.startsWith('/products/')) {
+    recordProductView(pathname)
   }
 
   return updateSession(request)
