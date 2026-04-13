@@ -6,7 +6,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import CountryFlag from '@/components/ui/CountryFlag'
 import { formatPrice } from '@/lib/utils'
 
-export const revalidate = 3600
+export const revalidate = 300
 
 
 export default async function LandingPage() {
