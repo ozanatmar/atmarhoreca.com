@@ -20,6 +20,7 @@ export default function ImageGallery({ images, alt }: Props) {
           src={src}
           alt={alt}
           fill
+          priority
           className="object-contain"
           unoptimized
           sizes="(max-width: 640px) 100vw, 512px"

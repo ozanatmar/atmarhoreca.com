@@ -121,6 +121,13 @@ export default function ProductPurchaseSection({ product }: Props) {
       stock_status: product.stock_status,
       selected_options: selectedOptions.length ? selectedOptions : undefined,
     })
+
+    fetch('/api/products/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: product.id }),
+    })
+
     router.push('/cart')
   }
 
