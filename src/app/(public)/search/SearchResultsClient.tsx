@@ -19,6 +19,7 @@ interface Product {
   stock_status: string
   requires_confirmation: boolean
   brand_id: string | null
+  tags: string[]
   brand: { name: string; default_requires_confirmation?: boolean } | { name: string; default_requires_confirmation?: boolean }[] | null
 }
 
@@ -80,9 +81,16 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))]
   }, [products])
 
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    for (const p of products) for (const t of (p.tags ?? [])) set.add(t)
+    return Array.from(set).sort()
+  }, [products])
+
   const [text, setText]                         = useState('')
   const [selectedBrands, setSelectedBrands]     = useState<Set<string>>(new Set())
   const [selectedAvail, setSelectedAvail]       = useState<Set<AvailabilityKey>>(new Set())
+  const [selectedTags, setSelectedTags]         = useState<Set<string>>(new Set())
   const [priceMin, setPriceMin]                 = useState(() => globalMin)
   const [priceMax, setPriceMax]                 = useState(() => globalMax)
   const [sort, setSort]                         = useState<SortKey>('name_asc')
@@ -109,6 +117,10 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       result = result.filter(p => matchesAvailability(p, selectedAvail))
     }
 
+    if (selectedTags.size > 0) {
+      result = result.filter(p => (p.tags ?? []).some(t => selectedTags.has(t)))
+    }
+
     result = result.filter(p => Number(p.price) >= priceMin && Number(p.price) <= priceMax)
 
     return [...result].sort((a, b) => {
@@ -120,10 +132,10 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         default:           return 0
       }
     })
-  }, [products, text, selectedBrands, selectedAvail, priceMin, priceMax, sort])
+  }, [products, text, selectedBrands, selectedAvail, selectedTags, priceMin, priceMax, sort])
 
   // Reset to page 1 whenever filters or per-page changes
-  useEffect(() => { setPage(1) }, [text, selectedBrands, selectedAvail, priceMin, priceMax, sort, perPage])
+  useEffect(() => { setPage(1) }, [text, selectedBrands, selectedAvail, selectedTags, priceMin, priceMax, sort, perPage])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage))
   const safePage = Math.min(page, totalPages)
@@ -141,6 +153,14 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     })
   }
 
+  function toggleTag(tag: string) {
+    setSelectedTags(prev => {
+      const next = new Set(prev)
+      next.has(tag) ? next.delete(tag) : next.add(tag)
+      return next
+    })
+  }
+
   function toggleAvail(key: AvailabilityKey) {
     setSelectedAvail(prev => {
       const next = new Set(prev)
@@ -153,6 +173,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     (text.trim() ? 1 : 0) +
     selectedBrands.size +
     selectedAvail.size +
+    selectedTags.size +
     (priceMin > globalMin || priceMax < globalMax ? 1 : 0)
 
   const pct = (v: number) =>
@@ -253,6 +274,26 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         </div>
       )}
 
+      {/* Tags — only shown if products have tags */}
+      {allTags.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Category</p>
+          <div className="flex flex-col gap-2">
+            {allTags.map(tag => (
+              <label key={tag} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedTags.has(tag)}
+                  onChange={() => toggleTag(tag)}
+                  className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
+                />
+                {tag}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Availability */}
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Availability</p>
@@ -293,6 +334,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
             setText('')
             setSelectedBrands(new Set())
             setSelectedAvail(new Set())
+            setSelectedTags(new Set())
             setPriceMin(globalMin)
             setPriceMax(globalMax)
             setSort('name_asc')

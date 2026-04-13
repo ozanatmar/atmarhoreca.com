@@ -30,7 +30,7 @@ export default async function SearchPage({ searchParams }: Props) {
     brand: { name: string } | { name: string }[] | null
   }
 
-  const PRODUCT_SELECT = 'id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, brand:brands(name, default_requires_confirmation)'
+  const PRODUCT_SELECT = 'id, name, slug, sku, price, images, stock_status, requires_confirmation, brand_id, tags, brand:brands(name, default_requires_confirmation)'
 
   let products: ProductRow[] = []
   let fallbackProducts: ProductRow[] = []
