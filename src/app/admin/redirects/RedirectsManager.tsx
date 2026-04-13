@@ -228,7 +228,7 @@ function ProductSearch({
         className="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#6B3D8F] disabled:opacity-50"
       />
       {open && results.length > 0 && (
-        <ul className="absolute z-20 left-0 top-full mt-1 w-80 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+        <ul className="absolute z-20 left-0 top-full mt-1 w-[520px] max-h-72 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
           {results.map(p => (
             <li key={p.id}>
               <button
@@ -238,7 +238,7 @@ function ProductSearch({
                 {p.images[0] && (
                   <img src={p.images[0]} alt="" className="w-8 h-8 object-contain rounded shrink-0" />
                 )}
-                <span className="truncate">{p.name}</span>
+                <span className="min-w-0">{p.name}</span>
               </button>
             </li>
           ))}
