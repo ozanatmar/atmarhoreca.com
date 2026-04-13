@@ -174,10 +174,10 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
     return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))]
   }, [filteredWithoutPrice, globalMin, globalMax])
 
-  // Clamp selected price range when dynamic bounds change
+  // Reset price range to full dynamic bounds whenever filters change the product set
   useEffect(() => {
-    setPriceMin(prev => Math.max(dynamicMin, Math.min(prev, dynamicMax)))
-    setPriceMax(prev => Math.min(dynamicMax, Math.max(prev, dynamicMin)))
+    setPriceMin(dynamicMin)
+    setPriceMax(dynamicMax)
   }, [dynamicMin, dynamicMax])
 
   // Step 2: apply price filter + sort
