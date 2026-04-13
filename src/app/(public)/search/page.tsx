@@ -27,6 +27,7 @@ export default async function SearchPage({ searchParams }: Props) {
     stock_status: string
     requires_confirmation: boolean
     brand_id: string | null
+    tags: string[]
     brand: { name: string } | { name: string }[] | null
   }
 
