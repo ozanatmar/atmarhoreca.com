@@ -73,18 +73,29 @@ export async function runMartellato(force = false): Promise<ScrapeResult> {
       return { success: true, products_updated: 0 }
     }
 
-    let updated = 0
     const now = new Date().toISOString()
+
+    // Bucket products by their new status to batch updates (avoids N sequential queries)
+    const toInStock: string[] = []
+    const toOutOfStock: string[] = []
+    const unchanged: string[] = []
 
     for (const product of products) {
       const newStatus = sitemapUrls.has(product.martellato_url!) ? 'in_stock' : 'out_of_stock'
       if (newStatus !== product.stock_status) {
-        await supabase.from('products').update({ stock_status: newStatus, last_scraped_at: now }).eq('id', product.id)
-        updated++
+        newStatus === 'in_stock' ? toInStock.push(product.id) : toOutOfStock.push(product.id)
       } else {
-        await supabase.from('products').update({ last_scraped_at: now }).eq('id', product.id)
+        unchanged.push(product.id)
       }
     }
+
+    const updates: Promise<unknown>[] = []
+    if (toInStock.length)    updates.push(supabase.from('products').update({ stock_status: 'in_stock',    last_scraped_at: now }).in('id', toInStock))
+    if (toOutOfStock.length) updates.push(supabase.from('products').update({ stock_status: 'out_of_stock', last_scraped_at: now }).in('id', toOutOfStock))
+    if (unchanged.length)    updates.push(supabase.from('products').update({ last_scraped_at: now }).in('id', unchanged))
+    await Promise.all(updates)
+
+    const updated = toInStock.length + toOutOfStock.length
 
     await supabase.from('scrape_logs').insert({ brand_id: brandId, status: 'success', products_updated: updated })
     return { success: true, products_updated: updated }
