@@ -30,6 +30,7 @@ interface Props {
   fallbackProducts: Product[]
   initialQuery: string
   hideBrandFilter?: boolean
+  showTagsFilter?: boolean
 }
 
 const AVAILABILITY_OPTIONS: { key: AvailabilityKey; label: string }[] = [
@@ -69,7 +70,7 @@ function pageNumbers(current: number, total: number): (number | '...')[] {
   return result
 }
 
-export default function SearchResultsClient({ products, fallbackProducts, initialQuery, hideBrandFilter }: Props) {
+export default function SearchResultsClient({ products, fallbackProducts, initialQuery, hideBrandFilter, showTagsFilter }: Props) {
   const allBrands = useMemo(() => {
     const map = new Map<string, string>()
     for (const p of products) {
@@ -361,7 +362,7 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
       </div>
 
       {/* Tags */}
-      {allTags.length > 0 && (
+      {showTagsFilter && allTags.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tags</p>
           <div className="flex flex-col gap-2">

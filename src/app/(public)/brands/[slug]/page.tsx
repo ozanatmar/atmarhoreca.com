@@ -85,6 +85,7 @@ export default async function BrandPage({ params }: Props) {
         fallbackProducts={[]}
         initialQuery=""
         hideBrandFilter
+        showTagsFilter
       />
     </div>
   )
