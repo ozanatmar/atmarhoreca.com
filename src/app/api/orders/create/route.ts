@@ -89,9 +89,9 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Type B: notify admin and send order received email immediately (no payment step)
-  if (type === 'B') {
-    // Fetch product slugs/skus for email links
+  // Notify admin on every order; send customer confirmation only for Type B
+  // (Type A customer email is handled by the payment webhook after payment completes)
+  {
     const productIds = items.map((i: { product_id: string }) => i.product_id)
     const { data: products } = await supabase.from('products').select('id, slug, sku').in('id', productIds)
     const productMap = Object.fromEntries((products ?? []).map((p: { id: string; slug: string; sku: string | null }) => [p.id, p]))
@@ -105,12 +105,16 @@ export async function POST(request: NextRequest) {
       phone, company_name, vat_number,
       items: enrichedItems, vat_rate, vat_amount,
       billing_address, admin_link: adminLink, order_link: orderLink,
+      type,
     })
-    await sendEmail('order_received', order.id, {
-      full_name, email: user.email, items: enrichedItems,
-      subtotal, vat_rate, vat_amount, billing_address,
-      order_link: orderLink,
-    })
+
+    if (type === 'B') {
+      await sendEmail('order_received', order.id, {
+        full_name, email: user.email, items: enrichedItems,
+        subtotal, vat_rate, vat_amount, billing_address,
+        order_link: orderLink,
+      })
+    }
   }
 
   return NextResponse.json({ orderId: order.id })
@@ -122,7 +126,8 @@ async function notifyAdmin(orderId: string, data: Record<string, any>) {
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_CHAT_ID
   if (token && chatId) {
-    const text = `New order — #${orderId.slice(0, 8).toUpperCase()}\nCustomer: ${data.full_name} (${data.email})\n${data.phone ? `Phone: ${data.phone}\n` : ''}${data.company_name ? `Company: ${data.company_name}\n` : ''}Subtotal: €${data.subtotal}\nView: ${data.admin_link}`
+    const orderTypeLabel = data.type === 'A' ? 'Type A (direct payment)' : 'Type B (requires approval)'
+  const text = `New order — #${orderId.slice(0, 8).toUpperCase()} [${orderTypeLabel}]\nCustomer: ${data.full_name} (${data.email})\n${data.phone ? `Phone: ${data.phone}\n` : ''}${data.company_name ? `Company: ${data.company_name}\n` : ''}Subtotal: €${data.subtotal}\nView: ${data.admin_link}`
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

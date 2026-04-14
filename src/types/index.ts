@@ -59,6 +59,7 @@ export interface Product {
   pack_size: number | null
   specs: Array<{ key: string; value: string }>
   option_groups: ProductOptionGroup[]
+  views: number
   active: boolean
   created_at: string
   // joined
