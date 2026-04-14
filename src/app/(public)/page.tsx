@@ -1,11 +1,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Globe, FileText, Package, Search } from 'lucide-react'
+import type { Metadata } from 'next'
+import { Globe, FileText, Package, Wrench } from 'lucide-react'
 import { createStaticClient } from '@/lib/supabase/static'
 import { createServiceClient } from '@/lib/supabase/server'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productUrl } from '@/lib/utils'
 
 export const revalidate = 300
+
+export const metadata: Metadata = {
+  title: 'Professional Horeca Equipment — Hotels, Restaurants & Cafés | Atmar Horeca',
+  description:
+    'Source professional horeca equipment from top European brands. EU-wide B2B delivery, correct VAT invoicing, and specialist sourcing on request.',
+}
 
 
 export default async function LandingPage() {
@@ -24,12 +31,12 @@ export default async function LandingPage() {
     serviceSupabase.rpc('get_best_seller_ids', { limit_n: 8, days_back: 30 }),
   ])
 
-  let bestSellers: Array<{ id: string; name: string; slug: string; price: number; images: string[] }> = []
+  let bestSellers: Array<{ id: string; name: string; slug: string; sku: string | null; price: number; images: string[] }> = []
   if (topViews?.length) {
     const topIds = (topViews as Array<{ product_id: string }>).map(v => v.product_id)
     const { data: products } = await serviceSupabase
       .from('products')
-      .select('id, name, slug, price, images')
+      .select('id, name, slug, sku, price, images')
       .in('id', topIds)
       .eq('active', true)
     if (products?.length) {
@@ -46,10 +53,10 @@ export default async function LandingPage() {
       <section className="bg-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-[#1A1A5E] mb-4">
-            Professional Horeca Equipment
+            Professional Equipment for Hotels, Restaurants & Cafés
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Top European brands, delivered across the EU. B2B invoicing, no minimums.
+            Top European brands, delivered EU-wide. Proper B2B VAT invoicing and specialist sourcing on request.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link href="/search" className="bg-[#6B3D8F] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#5a3278] transition-colors">
@@ -66,12 +73,13 @@ export default async function LandingPage() {
       {bestSellers.length > 0 && (
         <section className="bg-white py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-2">Best Sellers</h2>
+            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-1">Best Sellers</h2>
+            <p className="text-sm text-gray-500 mb-6">The products customers order most</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {bestSellers.map(product => (
                 <Link
                   key={product.id}
-                  href={`/products/${product.slug}`}
+                  href={productUrl(product)}
                   className="group bg-[#F5F5F5] border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                 >
                   <div className="aspect-square flex items-center justify-center p-4 bg-white">
@@ -103,7 +111,8 @@ export default async function LandingPage() {
       {brands && brands.length > 0 && (
         <section className="bg-[#F5F5F5] py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-6">Our Brands</h2>
+            <h2 className="text-2xl font-bold text-[#1A1A5E] mb-1">Our Brands</h2>
+            <p className="text-sm text-gray-500 mb-6">Browse by manufacturer to find the right equipment</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {brands.map(brand => {
                 const href = brand.slug ? `/brands/${brand.slug}` : `/search?q=${encodeURIComponent(brand.name)}`
@@ -155,9 +164,9 @@ export default async function LandingPage() {
             description="Proper VAT invoicing for businesses across the EU, with VAT handled correctly based on your country and registration."
           />
           <ValueCard
-            icon={<Search className="w-8 h-8 text-[#C0392B]" />}
-            title="No Minimums"
-            description="Order exactly what you need — one item or one hundred. No minimum order quantities."
+            icon={<Wrench className="w-8 h-8 text-[#C0392B]" />}
+            title="Sourcing on Request"
+            description="Can't find what you need? We source directly from our European manufacturer network — just ask."
           />
         </div>
       </section>

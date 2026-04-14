@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: '%s | Atmar Horeca',
   },
   description:
-    'Professional horeca equipment from top European brands. EU-wide delivery, B2B VAT invoicing, no minimums.',
+    'Professional horeca equipment from top European brands. EU-wide delivery, B2B VAT invoicing, and sourcing on request.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://atmarhoreca.com'),
 robots: { index: true, follow: true },
 }
