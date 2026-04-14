@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { runMartellato } from '@/lib/scrape-martellato'
 
 export async function GET(request: NextRequest) {
@@ -8,9 +9,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const result = await runMartellato(true)
+  // Respond immediately so Make.com doesn't time out — scrape runs in background
+  after(async () => {
+    await runMartellato(true)
+  })
 
-  if ('skipped' in result) return NextResponse.json(result)
-  if (!result.success) return NextResponse.json(result, { status: 500 })
-  return NextResponse.json(result)
+  return NextResponse.json({ status: 'started' })
 }
