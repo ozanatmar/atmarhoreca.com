@@ -89,11 +89,11 @@ export async function runMartellato(force = false): Promise<ScrapeResult> {
       }
     }
 
-    const updates: Promise<unknown>[] = []
-    if (toInStock.length)    updates.push(supabase.from('products').update({ stock_status: 'in_stock',    last_scraped_at: now }).in('id', toInStock))
-    if (toOutOfStock.length) updates.push(supabase.from('products').update({ stock_status: 'out_of_stock', last_scraped_at: now }).in('id', toOutOfStock))
-    if (unchanged.length)    updates.push(supabase.from('products').update({ last_scraped_at: now }).in('id', unchanged))
-    await Promise.all(updates)
+    await Promise.all([
+      toInStock.length    ? supabase.from('products').update({ stock_status: 'in_stock',    last_scraped_at: now }).in('id', toInStock)    : null,
+      toOutOfStock.length ? supabase.from('products').update({ stock_status: 'out_of_stock', last_scraped_at: now }).in('id', toOutOfStock) : null,
+      unchanged.length    ? supabase.from('products').update({ last_scraped_at: now }).in('id', unchanged)                                  : null,
+    ].filter(Boolean))
 
     const updated = toInStock.length + toOutOfStock.length
 
