@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const result = await runMartellato(false)
+  const result = await runMartellato(true)
 
   if ('skipped' in result) return NextResponse.json(result)
   if (!result.success) return NextResponse.json(result, { status: 500 })
