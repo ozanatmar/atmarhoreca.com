@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createStaticClient } from '@/lib/supabase/static'
 import SearchResultsClient from '@/app/(public)/search/SearchResultsClient'
 import CountryFlag from '@/components/ui/CountryFlag'
@@ -54,6 +55,15 @@ export default async function BrandPage({ params }: Props) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Breadcrumb */}
+      <nav className="text-xs text-gray-400 mb-6 flex items-center gap-1.5">
+        <Link href="/" className="hover:text-gray-600">Home</Link>
+        <span>›</span>
+        <Link href="/brands" className="hover:text-gray-600">Brands</Link>
+        <span>›</span>
+        <span className="text-gray-500">{brand.name}</span>
+      </nav>
+
       {/* Brand header */}
       <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
         {brand.logo_url && (

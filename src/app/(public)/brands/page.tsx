@@ -68,23 +68,23 @@ export default async function BrandsPage() {
             >
               {/* Brand panel */}
               <div className="md:w-64 flex-shrink-0 flex flex-col items-center justify-center gap-4 p-6 md:p-8 border-b md:border-b-0 md:border-r border-gray-100">
-                <div className="w-32 h-32 flex items-center justify-center">
+                <Link href={href} className="w-32 h-32 flex items-center justify-center group">
                   {brand.logo_url ? (
                     <Image
                       src={brand.logo_url}
                       alt={brand.name}
                       width={128}
                       height={128}
-                      className="object-contain w-full h-full"
+                      className="object-contain w-full h-full group-hover:scale-105 transition-transform"
                       unoptimized
                     />
                   ) : (
-                    <span className="text-5xl font-bold text-gray-200">{brand.name[0]}</span>
+                    <span className="text-5xl font-bold text-gray-200 group-hover:text-gray-300 transition-colors">{brand.name[0]}</span>
                   )}
-                </div>
+                </Link>
                 <div className="text-center flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-[#1A1A5E]">{brand.name}</span>
+                    <Link href={href} className="text-base font-bold text-[#1A1A5E] hover:text-[#6B3D8F] transition-colors">{brand.name}</Link>
                     <CountryFlag code={brand.country_code} />
                   </div>
                   {brand.description && (

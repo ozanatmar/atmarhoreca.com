@@ -360,6 +360,26 @@ export default function SearchResultsClient({ products, fallbackProducts, initia
         </div>
       </div>
 
+      {/* Tags */}
+      {allTags.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tags</p>
+          <div className="flex flex-col gap-2">
+            {allTags.map(tag => (
+              <label key={tag} className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedTags.has(tag)}
+                  onChange={() => toggleTag(tag)}
+                  className="rounded border-gray-300 text-[#6B3D8F] focus:ring-[#6B3D8F]"
+                />
+                {tag}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Sort */}
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Sort by</p>
