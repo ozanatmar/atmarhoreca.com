@@ -1,5 +1,11 @@
 # Claude Code Instructions
 
+## Keep CLAUDE.md in Sync
+
+**Any time you add, change, or remove something on the site — a feature, a route, a business rule, a field, a flow — update the relevant section, sentence, or wording in CLAUDE.md in the same commit.** CLAUDE.md must always reflect the current state of the codebase, not a past state.
+
+---
+
 ## Branch Policy
 
 - **All changes must be pushed to the `dev` branch** — never to `main` or `master` unless explicitly requested.
