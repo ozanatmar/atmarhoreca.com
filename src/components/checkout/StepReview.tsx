@@ -116,7 +116,7 @@ export default function StepReview({
           Back
         </Button>
         <Button size="lg" onClick={() => setStep(4)}>
-          Continue to Payment
+          {orderType === 'B' ? 'Place Order' : 'Continue to Payment'}
         </Button>
       </div>
     </div>

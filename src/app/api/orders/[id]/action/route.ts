@@ -219,8 +219,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         email: customer?.email,
         items: order.items,
         subtotal: orderSubtotal,
+        shipping_cost: orderShippingCost,
         vat_rate: orderVatRate,
         vat_amount: orderVatAmount,
+        total: orderTotal > 0 ? orderTotal : undefined,
+        type: order.type,
       })
       return NextResponse.json({ message: 'Order cancelled' })
     }

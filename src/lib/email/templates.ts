@@ -1,9 +1,10 @@
 import type { OrderItem } from '@/types'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com'
-// Use current deployment URL for assets (logo), so it works on dev and production
-const ASSET_URL = process.env.NEXT_PUBLIC_SITE_URL
-  ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://atmarhoreca.com')
+// Prefer VERCEL_URL for assets — always points to the live deployment regardless of custom domain DNS
+const ASSET_URL = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://atmarhoreca.com')
 const LOGO_URL = `${ASSET_URL}/logo_white_no_bg.png`
 
 const REVOLUT_IBAN = process.env.REVOLUT_EUR_IBAN ?? ''
@@ -114,7 +115,9 @@ function pricingTable(data: {
 
   const totalRow = data.total != null
     ? `<tr style="font-weight:bold;font-size:16px;border-top:2px solid #1A1A5E;"><td style="padding:8px 0;">Total</td><td style="text-align:right;">€${data.total.toFixed(2)}</td></tr>`
-    : ''
+    : data.type === 'B'
+      ? `<tr style="font-weight:bold;font-size:16px;border-top:2px solid #1A1A5E;"><td style="padding:8px 0;">Total <span style="font-size:11px;font-weight:normal;color:#888;">(excl. shipping)</span></td><td style="text-align:right;">€${(data.subtotal + data.vat_amount).toFixed(2)}</td></tr>`
+      : ''
 
   return `
     <table width="100%" style="font-size:14px;border-collapse:collapse;">
@@ -303,15 +306,18 @@ export function orderCancelledEmail(orderId: string, data: {
   full_name: string
   items: OrderItem[]
   subtotal: number
+  shipping_cost?: number
   vat_rate: number
   vat_amount: number
+  total?: number
+  type?: string
 }) {
   const content = `
     <h2 style="color:#1A1A5E;margin-top:0;">Your order has been cancelled</h2>
     <p>Dear ${data.full_name},</p>
     <p>Your order <strong>#${shortId(orderId)}</strong> has been cancelled. If you have any questions, please contact us.</p>
     ${itemsTable(data.items, SITE_URL)}
-    ${pricingTable({ subtotal: data.subtotal, vat_rate: data.vat_rate, vat_amount: data.vat_amount, type: 'B' })}
+    ${pricingTable({ subtotal: data.subtotal, shipping_cost: data.shipping_cost, vat_rate: data.vat_rate, vat_amount: data.vat_amount, total: data.total, type: data.type ?? 'B' })}
     <p style="margin-top:24px;">
       <a href="${SITE_URL}" style="color:#6B3D8F;font-weight:bold;">Continue shopping →</a>
     </p>
