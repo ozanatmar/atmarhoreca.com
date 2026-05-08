@@ -21,12 +21,20 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   const activeStatus: OrderStatus = (tab as OrderStatus) ?? 'pending_approval'
 
   const supabase = await createClient()
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('id, type, status, total, currency, created_at, items, customer:customers(full_name, email)')
-    .eq('status', activeStatus)
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const [{ data: orders }, { data: countRows }] = await Promise.all([
+    supabase
+      .from('orders')
+      .select('id, type, status, total, currency, created_at, items, customer:customers(full_name, email)')
+      .eq('status', activeStatus)
+      .order('created_at', { ascending: false })
+      .limit(100),
+    supabase.from('orders').select('status'),
+  ])
+
+  const counts: Record<string, number> = {}
+  for (const row of countRows ?? []) {
+    counts[row.status] = (counts[row.status] ?? 0) + 1
+  }
 
   return (
     <div>
@@ -38,13 +46,20 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
           <Link
             key={t.status}
             href={`/admin?tab=${t.status}`}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
               activeStatus === t.status
                 ? 'bg-[#6B3D8F] text-white'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             {t.label}
+            {counts[t.status] > 0 && (
+              <span className={`text-xs font-bold rounded-full px-1.5 py-0.5 leading-none ${
+                activeStatus === t.status ? 'bg-white/25 text-white' : 'bg-[#6B3D8F] text-white'
+              }`}>
+                {counts[t.status]}
+              </span>
+            )}
           </Link>
         ))}
       </div>

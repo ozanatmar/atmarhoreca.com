@@ -89,9 +89,10 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notify admin on every order; send customer confirmation only for Type B
-  // (Type A customer email is handled by the payment webhook after payment completes)
-  {
+  // For Type B: notify admin immediately (approval needed) + send customer confirmation.
+  // For Type A: no notification at creation — the order isn't paid yet (customer may abandon
+  // the card form). The Stripe webhook handles admin Telegram + email after payment completes.
+  if (type === 'B') {
     const productIds = items.map((i: { product_id: string }) => i.product_id)
     const { data: products } = await supabase.from('products').select('id, slug, sku').in('id', productIds)
     const productMap = Object.fromEntries((products ?? []).map((p: { id: string; slug: string; sku: string | null }) => [p.id, p]))
@@ -108,13 +109,11 @@ export async function POST(request: NextRequest) {
       type,
     })
 
-    if (type === 'B') {
-      await sendEmail('order_received', order.id, {
-        full_name, email: user.email, items: enrichedItems,
-        subtotal, vat_rate, vat_amount, billing_address,
-        order_link: orderLink,
-      })
-    }
+    await sendEmail('order_received', order.id, {
+      full_name, email: user.email, items: enrichedItems,
+      subtotal, vat_rate, vat_amount, billing_address,
+      order_link: orderLink,
+    })
   }
 
   return NextResponse.json({ orderId: order.id })
