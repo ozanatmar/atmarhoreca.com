@@ -22,6 +22,7 @@ export async function POST(req: Request) {
 
   await Promise.all(
     products.map(async (p) => {
+      if (!p.martellato_url) return // skip non-Martellato products
       const status = await checkMartellatoStock(p.martellato_url, p.sku)
       results[p.id] = status
       if (status === 'out_of_stock') nowOos.push(p.id)
