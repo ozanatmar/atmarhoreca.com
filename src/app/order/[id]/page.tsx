@@ -153,7 +153,11 @@ export default async function OrderPage({ params }: Props) {
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
                 <span className="font-medium">
-                  {order.shipping_cost > 0 ? formatPrice(order.shipping_cost) : <span className="text-[#F0A500]">To be confirmed</span>}
+                  {order.shipping_cost > 0
+                    ? formatPrice(order.shipping_cost)
+                    : order.type === 'A'
+                      ? 'Free'
+                      : <span className="text-[#F0A500]">To be confirmed</span>}
                 </span>
               </div>
               {order.vat_rate > 0 && (
