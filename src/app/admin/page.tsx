@@ -21,18 +21,22 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   const activeStatus: OrderStatus = (tab as OrderStatus) ?? 'pending_approval'
 
   const supabase = await createClient()
+  const ordersQuery = supabase
+    .from('orders')
+    .select('id, type, status, total, currency, created_at, items, customer:customers(full_name, email)')
+    .eq('status', activeStatus)
+    .order('created_at', { ascending: false })
+    .limit(100)
+  if (activeStatus === 'awaiting_payment') ordersQuery.eq('type', 'B')
+
   const [{ data: orders }, { data: countRows }] = await Promise.all([
-    supabase
-      .from('orders')
-      .select('id, type, status, total, currency, created_at, items, customer:customers(full_name, email)')
-      .eq('status', activeStatus)
-      .order('created_at', { ascending: false })
-      .limit(100),
-    supabase.from('orders').select('status'),
+    ordersQuery,
+    supabase.from('orders').select('status, type'),
   ])
 
   const counts: Record<string, number> = {}
   for (const row of countRows ?? []) {
+    if (row.status === 'awaiting_payment' && row.type === 'A') continue
     counts[row.status] = (counts[row.status] ?? 0) + 1
   }
 
