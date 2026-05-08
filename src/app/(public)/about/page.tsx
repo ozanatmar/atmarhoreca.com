@@ -50,9 +50,8 @@ export default function AboutPage() {
           <h2 className="text-xl font-semibold text-[#1A1A5E] mb-3">B2B Invoicing</h2>
           <p className="leading-relaxed">
             All orders are issued with a proper VAT invoice. Prices on our site are displayed
-            excluding VAT, which is calculated and shown at checkout. For EU businesses with a
-            valid VAT number, reverse-charge rules may apply — please contact us if you have
-            specific invoicing requirements.
+            excluding VAT, which is calculated and shown at checkout. EU businesses with a valid,
+            VIES-verified VAT number are automatically charged 0% VAT at checkout.
           </p>
         </section>
 
