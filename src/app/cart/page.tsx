@@ -55,7 +55,8 @@ export default function CartPage() {
               {item.selected_options?.length ? (
                 <p className="text-xs text-gray-400 mt-0.5">{item.selected_options.map(o => `${o.group}: ${o.label}`).join(' · ')}</p>
               ) : null}
-              <p className="text-xs text-gray-500 mt-0.5">{formatPrice(item.price)} each</p>
+              {item.pack_size && <p className="text-xs text-[#6B3D8F] font-medium mt-0.5">Pack of {item.pack_size}</p>}
+              <p className="text-xs text-gray-500 mt-0.5">{formatPrice(item.price)} {item.pack_size ? 'per pack' : 'each'}</p>
             </div>
 
             {/* Qty controls */}
